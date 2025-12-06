@@ -1,0 +1,55 @@
+{
+    "output_folder": "Competition2024",
+    "competition_name": "Sample Orienteering Competition 2024",
+    "language": "en",
+
+    "lanes": {
+        "Lane 1": {
+            "start_time": "11:00",
+            "classes": ["M21A1"],
+            "start_number": 1100,
+            "interval": 1,
+            "affiliation_split": true
+        },
+        "Lane 2": {
+            "start_time": "11:00",
+            "classes": ["M21A2"],
+            "start_number": 1200,
+            "interval": 1,
+            "affiliation_split": true
+        },
+        "Lane 3": {
+            "start_time": "11:00",
+            "classes": ["W20A", "M18A", "MF", "W21A", "M35A", "M21AS", "M50A", "W35A", "M20A"],
+            "start_number": 1300,
+            "interval": 2,
+            "affiliation_split": true
+        },
+        "Lane 4": {
+            "start_time": "11:00",
+            "classes": ["W65A", "M75A", "W75A", "C", "W12", "B", "M15A", "W15A", "WF", "M65A", "W50A", "W21AS", "G", "N", "W10"],
+            "start_number": 1400,
+            "interval": 2,
+            "affiliation_split": false
+        }
+    },
+
+    "class_overrides": {
+        "M21AS": {
+            "start_time": "10:30",
+            "interval": 3
+        },
+        "W21AS": {
+            "start_time": "10:30",
+            "interval": 3
+        }
+    },
+
+    "splits": {
+        "M21A": {
+            "count": 2,
+            "suffix_format": "{}",
+            "use_ranking": true
+        }
+    }
+}
