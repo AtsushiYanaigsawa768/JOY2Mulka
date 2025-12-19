@@ -7,13 +7,77 @@ import {
   parseEntries,
   detectClasses,
 } from '../utils/csvParser';
-import { ClassInfo } from '../types';
+import { ClassInfo, Entry } from '../types';
+import ColumnMappingModal from './ColumnMappingModal';
+
+/**
+ * Parse CSV/XLSX file with single header row (for non-JOY entry lists)
+ */
+async function parseSimpleFile(file: File): Promise<{
+  data: string[][];
+  columnNames: string[];
+}> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      try {
+        let rows: string[][];
+
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+          const XLSX = await import('xlsx');
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+          rows = rows.map((row: unknown[]) => row.map((cell) => String(cell)));
+        } else {
+          const Papa = await import('papaparse');
+          const text = e.target?.result as string;
+          const result = Papa.default.parse<string[]>(text, {
+            header: false,
+            skipEmptyLines: false,
+          });
+          rows = result.data;
+        }
+
+        if (rows.length < 2) {
+          reject(new Error('ファイルには少なくとも2行（ヘッダー + データ）が必要です'));
+          return;
+        }
+
+        const columnNames = rows[0].map((cell) => String(cell).trim());
+        const data = rows.slice(1);
+
+        resolve({ data, columnNames });
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    reader.onerror = () => reject(new Error('ファイルの読み込みに失敗しました'));
+
+    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+      reader.readAsArrayBuffer(file);
+    } else {
+      reader.readAsText(file, 'UTF-8');
+    }
+  });
+}
 
 export default function Step0Upload() {
   const { state, dispatch, goToStep } = useApp();
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [preview, setPreview] = useState<string[][] | null>(null);
+
+  // Modal state for non-JOY column mapping
+  const [showMappingModal, setShowMappingModal] = useState(false);
+  const [pendingFileData, setPendingFileData] = useState<{
+    data: string[][];
+    columnNames: string[];
+  } | null>(null);
 
   const handleFile = useCallback(async (file: File) => {
     setIsLoading(true);
@@ -93,46 +157,139 @@ export default function Step0Upload() {
     }
   }, [handleFile]);
 
+  // Handler for non-JOY entry list (opens modal for column mapping)
+  const handleOtherFile = useCallback(async (file: File) => {
+    setIsLoading(true);
+    dispatch({ type: 'SET_ERROR', payload: null });
+
+    try {
+      const result = await parseSimpleFile(file);
+      setPendingFileData(result);
+      setShowMappingModal(true);
+    } catch (error) {
+      console.error('Error parsing file:', error);
+      dispatch({
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : 'ファイルの読み込みに失敗しました',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dispatch]);
+
+  const handleOtherFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleOtherFile(files[0]);
+    }
+    // Reset input to allow selecting the same file again
+    e.target.value = '';
+  }, [handleOtherFile]);
+
+  // Merge entries from modal with existing entries
+  const handleMappingConfirm = useCallback((newEntries: Entry[]) => {
+    const mergedEntries = [...state.entries, ...newEntries];
+    dispatch({ type: 'SET_ENTRIES', payload: mergedEntries });
+
+    // Update classes
+    const classInfos = detectClasses(mergedEntries);
+    const classes: ClassInfo[] = classInfos.map((c) => {
+      // Preserve existing class settings if any
+      const existing = state.classes.find((cls) => cls.name === c.name);
+      return {
+        ...c,
+        shouldSplit: existing?.shouldSplit ?? false,
+        splitCount: existing?.splitCount ?? 2,
+      };
+    });
+    dispatch({ type: 'SET_CLASSES', payload: classes });
+
+    setShowMappingModal(false);
+    setPendingFileData(null);
+  }, [dispatch, state.entries, state.classes]);
+
+  const handleMappingClose = useCallback(() => {
+    setShowMappingModal(false);
+    setPendingFileData(null);
+  }, []);
+
   const canProceed = state.entries.length > 0;
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-lg font-semibold mb-4">Step 0: エントリーリストのアップロード</h2>
 
-      {/* File Upload Area */}
-      <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        className={`
-          border-2 border-dashed rounded-lg p-8 text-center transition-colors
-          ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}
-          ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'}
-        `}
-      >
-        <input
-          type="file"
-          id="file-input"
-          accept=".csv,.xlsx,.xls"
-          onChange={handleFileInput}
-          className="hidden"
-          disabled={isLoading}
-        />
-        <label htmlFor="file-input" className="cursor-pointer">
-          <div className="flex flex-col items-center">
-            <span className="text-4xl mb-4">📁</span>
-            {isLoading ? (
-              <p className="text-gray-600">読み込み中...</p>
-            ) : (
-              <>
-                <p className="text-gray-600 mb-2">
-                  ファイルをドラッグ＆ドロップするか、クリックして選択
-                </p>
-                <p className="text-sm text-gray-400">対応形式: CSV, XLSX</p>
-              </>
-            )}
-          </div>
-        </label>
+      {/* File Upload Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {/* JOY Entry List Upload */}
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          className={`
+            border-2 border-dashed rounded-lg p-6 text-center transition-colors
+            ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}
+            ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'}
+          `}
+        >
+          <input
+            type="file"
+            id="file-input-joy"
+            accept=".csv,.xlsx,.xls"
+            onChange={handleFileInput}
+            className="hidden"
+            disabled={isLoading}
+          />
+          <label htmlFor="file-input-joy" className="cursor-pointer">
+            <div className="flex flex-col items-center">
+              <span className="text-3xl mb-3">📋</span>
+              {isLoading ? (
+                <p className="text-gray-600">読み込み中...</p>
+              ) : (
+                <>
+                  <p className="font-medium text-gray-700 mb-1">JOYエントリーリスト</p>
+                  <p className="text-sm text-gray-500 mb-2">
+                    JOY形式のCSV/XLSXをドラッグ＆ドロップ
+                  </p>
+                  <p className="text-xs text-gray-400">チーム(組)・1人目 形式を自動検出</p>
+                </>
+              )}
+            </div>
+          </label>
+        </div>
+
+        {/* Other Entry List Upload */}
+        <div
+          className={`
+            border-2 border-dashed rounded-lg p-6 text-center transition-colors border-gray-300
+            ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'}
+          `}
+        >
+          <input
+            type="file"
+            id="file-input-other"
+            accept=".csv,.xlsx,.xls"
+            onChange={handleOtherFileInput}
+            className="hidden"
+            disabled={isLoading}
+          />
+          <label htmlFor="file-input-other" className="cursor-pointer">
+            <div className="flex flex-col items-center">
+              <span className="text-3xl mb-3">📄</span>
+              {isLoading ? (
+                <p className="text-gray-600">読み込み中...</p>
+              ) : (
+                <>
+                  <p className="font-medium text-gray-700 mb-1">その他のエントリーリスト</p>
+                  <p className="text-sm text-gray-500 mb-2">
+                    JOY以外の形式をクリックして選択
+                  </p>
+                  <p className="text-xs text-gray-400">カラム対応を手動設定</p>
+                </>
+              )}
+            </div>
+          </label>
+        </div>
       </div>
 
       {/* Parsing Results */}
@@ -295,6 +452,18 @@ export default function Step0Upload() {
           次へ →
         </button>
       </div>
+
+      {/* Column Mapping Modal for non-JOY files */}
+      {pendingFileData && (
+        <ColumnMappingModal
+          isOpen={showMappingModal}
+          onClose={handleMappingClose}
+          onConfirm={handleMappingConfirm}
+          data={pendingFileData.data}
+          columnNames={pendingFileData.columnNames}
+          existingEntryCount={state.entries.length}
+        />
+      )}
     </div>
   );
 }

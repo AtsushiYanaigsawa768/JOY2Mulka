@@ -13,6 +13,7 @@ export interface Entry {
   gender: string;
   rowNumber: number;
   participantNumber: number;
+  ranking?: number;       // JOA ranking (fetched from JOA site)
 }
 
 export interface ClassInfo {
@@ -45,16 +46,20 @@ export interface Lane {
   name: string;
   startTime: string;
   startNumber: number;
-  interval: number;  // minutes
+  interval: number;  // minutes between entries
+  interCourseGap: number;  // minutes gap between courses
   affiliationSplit: boolean;
   courseIds: string[];
 }
+
+export type RaceType = 'forest' | 'sprint';
 
 export interface Constraints {
   isRankingEvent: boolean;
   avoidSameClubConsecutive: boolean;
   maxShuffleAttempts: number;
   useRankingForSplit: Record<string, boolean>;
+  raceType: RaceType;  // forest or sprint (affects ranking URL)
   allowSameTimeClubDuplicates: boolean;
   sameTimeClubScope: 'all' | 'selected';
   sameTimeClubSelectedAreas: string[];
@@ -153,6 +158,8 @@ export interface AppState {
   startList: StartListEntry[];
   outputFiles: OutputFiles | null;
   error: string | null;
+  rankings: Map<string, Map<string, number>>; // className -> (normalizedName -> rank)
+  rankingFetchStatus: 'idle' | 'loading' | 'success' | 'error';
 }
 
 export type AppAction =
@@ -180,4 +187,6 @@ export type AppAction =
   | { type: 'SET_START_AREAS'; payload: StartArea[] }
   | { type: 'SET_OUTPUT_FILES'; payload: OutputFiles }
   | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_RANKINGS'; payload: Map<string, Map<string, number>> }
+  | { type: 'SET_RANKING_FETCH_STATUS'; payload: 'idle' | 'loading' | 'success' | 'error' }
   | { type: 'RESET' };

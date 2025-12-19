@@ -118,14 +118,14 @@ export default function Step1ClassConfig() {
           onClick={() => {
             const updated = state.classes.map((cls) => ({
               ...cls,
-              shouldSplit: cls.count >= 20,
-              splitCount: cls.count >= 40 ? 3 : 2,
+              shouldSplit: cls.count >= 120,
+              splitCount: cls.count >= 240 ? 3 : 2,
             }));
             dispatch({ type: 'SET_CLASSES', payload: updated });
           }}
           className="text-sm text-blue-600 hover:text-blue-800"
         >
-          自動設定（20名以上を分割）
+          自動設定（120名以上を分割）
         </button>
         <span className="text-gray-300">|</span>
         <button

@@ -273,10 +273,15 @@ export function generateStartListForLane(
   let currentTimeMinutes = parseTimeToMinutes(lane.startTime);
   let currentNumber = lane.startNumber;
 
+  // Get inter-course gap (default to 0 if not set)
+  const interCourseGap = lane.interCourseGap ?? 0;
+
   // Sort courses by order
   const sortedCourses = [...courses].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-  for (const course of sortedCourses) {
+  for (let courseIdx = 0; courseIdx < sortedCourses.length; courseIdx++) {
+    const course = sortedCourses[courseIdx];
+
     // Order entries
     let orderedEntries: Entry[];
     if (affiliationSplit) {
@@ -317,6 +322,11 @@ export function generateStartListForLane(
     // Update current time and number for next course
     currentTimeMinutes += orderedEntries.length * lane.interval;
     currentNumber += orderedEntries.length;
+
+    // Add inter-course gap (except for the last course)
+    if (courseIdx < sortedCourses.length - 1 && interCourseGap > 0) {
+      currentTimeMinutes += interCourseGap;
+    }
   }
 
   return startList;
@@ -324,13 +334,21 @@ export function generateStartListForLane(
 
 /**
  * Generate complete start list
+ *
+ * @param courses - Course definitions
+ * @param startAreas - Start area configurations
+ * @param entries - All entries
+ * @param constraints - Constraints including useRankingForSplit
+ * @param seed - Random seed for reproducibility
+ * @param rankings - Rankings map (baseClass -> normalizedName -> rank)
  */
 export function generateStartList(
   courses: Course[],
   startAreas: StartArea[],
   entries: Entry[],
   constraints: Constraints,
-  seed: number
+  seed: number,
+  rankings: Map<string, Map<string, number>> = new Map()
 ): StartListEntry[] {
   const startList: StartListEntry[] = [];
 
@@ -353,10 +371,13 @@ export function generateStartList(
           const classEntries = entries.filter((e) => e.className === course.originalClass);
           const splitCount = courses.filter((c) => c.originalClass === course.originalClass).length;
 
-          // Use empty rankings for now (ranking fetch not implemented in web version)
-          const emptyRankings = new Map<string, number>();
-          const groups = splitClassByRanking(classEntries, splitCount, emptyRankings, seed);
+          // Use rankings if enabled for this class (from ranking_fetcher.py spec)
+          // Extract base class: "M21A" -> "M21"
+          const baseClass = course.originalClass.replace(/[AES].*$/i, '');
+          const useRanking = constraints.useRankingForSplit[course.originalClass] ?? false;
+          const classRankings = useRanking ? (rankings.get(baseClass) || new Map()) : new Map();
 
+          const groups = splitClassByRanking(classEntries, splitCount, classRankings, seed);
           courseEntries = groups[course.splitNumber - 1] || [];
         } else {
           courseEntries = entries.filter((e) => e.className === course.originalClass);
@@ -558,27 +579,38 @@ export function calculateEndTime(
 
 /**
  * Create courses from classes (with optional splitting)
+ *
+ * @param entries - All entries
+ * @param classes - Class definitions with split settings
+ * @param seed - Random seed for reproducibility
+ * @param rankings - Rankings map (baseClass -> normalizedName -> rank)
+ * @param useRankingForSplit - Map of className -> whether to use ranking
  */
 export function createCourses(
   entries: Entry[],
   classes: { name: string; shouldSplit: boolean; splitCount: number }[],
-  seed: number
+  seed: number,
+  rankings: Map<string, Map<string, number>> = new Map(),
+  useRankingForSplit: Record<string, boolean> = {}
 ): Course[] {
   const courses: Course[] = [];
   let courseId = 0;
-
-  // For now, use empty rankings (ranking fetch not implemented in web version)
-  const emptyRankings = new Map<string, number>();
 
   for (const classInfo of classes) {
     const classEntries = entries.filter((e) => e.className === classInfo.name);
 
     if (classInfo.shouldSplit && classInfo.splitCount > 1) {
+      // Use rankings if enabled for this class (from ranking_fetcher.py spec)
+      // Extract base class: "M21A" -> "M21"
+      const baseClass = classInfo.name.replace(/[AES].*$/i, '');
+      const useRanking = useRankingForSplit[classInfo.name] ?? false;
+      const classRankings = useRanking ? (rankings.get(baseClass) || new Map()) : new Map();
+
       // Split the class
       const groups = splitClassByRanking(
         classEntries,
         classInfo.splitCount,
-        emptyRankings,
+        classRankings,
         seed
       );
 

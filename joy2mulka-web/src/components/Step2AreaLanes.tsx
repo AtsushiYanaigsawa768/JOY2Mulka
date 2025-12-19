@@ -58,6 +58,7 @@ export default function Step2AreaLanes() {
             startTime: '10:00',
             startNumber: 1,
             interval: 2,
+            interCourseGap: 0,
             affiliationSplit: true,
             courseIds: [],
           },
@@ -132,6 +133,7 @@ export default function Step2AreaLanes() {
           startTime: '10:00',
           startNumber: 1,
           interval: 2,
+          interCourseGap: 0,
           affiliationSplit: true,
           courseIds: [],
         },
@@ -166,6 +168,7 @@ export default function Step2AreaLanes() {
       startTime: '10:00',
       startNumber: 1,
       interval: 2,
+      interCourseGap: 0,
       affiliationSplit: true,
       courseIds: [],
     };
@@ -245,6 +248,32 @@ export default function Step2AreaLanes() {
     dispatch({ type: 'SET_START_AREAS', payload: updatedAreas });
   };
 
+  const reorderCourseInLane = (areaId: string, laneId: string, courseId: string, direction: 'left' | 'right') => {
+    const updatedAreas = state.startAreas.map((area) => {
+      if (area.id !== areaId) return area;
+
+      return {
+        ...area,
+        lanes: area.lanes.map((lane) => {
+          if (lane.id !== laneId) return lane;
+
+          const courseIds = [...lane.courseIds];
+          const currentIndex = courseIds.indexOf(courseId);
+          if (currentIndex === -1) return lane;
+
+          const newIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1;
+          if (newIndex < 0 || newIndex >= courseIds.length) return lane;
+
+          // Swap
+          [courseIds[currentIndex], courseIds[newIndex]] = [courseIds[newIndex], courseIds[currentIndex]];
+          return { ...lane, courseIds };
+        }),
+      };
+    });
+
+    dispatch({ type: 'SET_START_AREAS', payload: updatedAreas });
+  };
+
   // Get unassigned courses
   const assignedCourseIds = new Set(
     state.startAreas.flatMap((a) => a.lanes.flatMap((l) => l.courseIds))
@@ -305,6 +334,9 @@ export default function Step2AreaLanes() {
                 onDropCourse={(laneId) => handleDropOnLane(area.id, laneId)}
                 onRemoveCourse={(laneId, courseId) =>
                   removeCourseFromLane(area.id, laneId, courseId)
+                }
+                onReorderCourse={(laneId, courseId, direction) =>
+                  reorderCourseInLane(area.id, laneId, courseId, direction)
                 }
                 isDragging={draggedCourse !== null}
               />
@@ -420,6 +452,7 @@ interface StartAreaCardProps {
   onUpdateLane: (laneId: string, updates: Partial<Lane>) => void;
   onDropCourse: (laneId: string) => void;
   onRemoveCourse: (laneId: string, courseId: string) => void;
+  onReorderCourse: (laneId: string, courseId: string, direction: 'left' | 'right') => void;
   isDragging: boolean;
 }
 
@@ -435,6 +468,7 @@ function StartAreaCard({
   onUpdateLane,
   onDropCourse,
   onRemoveCourse,
+  onReorderCourse,
   isDragging,
 }: StartAreaCardProps) {
   // Calculate total entries for this area
@@ -482,6 +516,7 @@ function StartAreaCard({
             onRemove={() => onRemoveLane(lane.id)}
             onDropCourse={() => onDropCourse(lane.id)}
             onRemoveCourse={(courseId) => onRemoveCourse(lane.id, courseId)}
+            onReorderCourse={(courseId, direction) => onReorderCourse(lane.id, courseId, direction)}
             isDragging={isDragging}
           />
         ))}
@@ -499,6 +534,7 @@ interface LaneRowProps {
   onRemove: () => void;
   onDropCourse: () => void;
   onRemoveCourse: (courseId: string) => void;
+  onReorderCourse: (courseId: string, direction: 'left' | 'right') => void;
   isDragging: boolean;
 }
 
@@ -511,6 +547,7 @@ function LaneRow({
   onRemove,
   onDropCourse,
   onRemoveCourse,
+  onReorderCourse,
   isDragging,
 }: LaneRowProps) {
   const [isDropTarget, setIsDropTarget] = useState(false);
@@ -530,7 +567,10 @@ function LaneRow({
     onDropCourse();
   };
 
-  const assignedCourses = courses.filter((c) => lane.courseIds.includes(c.id));
+  // Map from courseIds to maintain the correct order
+  const assignedCourses = lane.courseIds
+    .map((id) => courses.find((c) => c.id === id))
+    .filter((c): c is Course => c !== undefined);
 
   return (
     <div className="bg-gray-50 rounded p-3">
@@ -574,6 +614,17 @@ function LaneRow({
           />
           <span className="text-xs text-gray-500">分</span>
         </div>
+        <div className="flex items-center gap-1">
+          <label className="text-xs text-gray-500">コース間:</label>
+          <input
+            type="number"
+            value={lane.interCourseGap ?? 0}
+            onChange={(e) => onUpdate({ interCourseGap: parseInt(e.target.value) || 0 })}
+            className="w-12 text-sm border border-gray-300 rounded px-2 py-1"
+            min={0}
+          />
+          <span className="text-xs text-gray-500">分</span>
+        </div>
         <label className="flex items-center gap-1 text-xs">
           <input
             type="checkbox"
@@ -610,18 +661,45 @@ function LaneRow({
           </p>
         ) : (
           <div className="flex flex-wrap gap-1">
-            {assignedCourses.map((course) => (
+            {assignedCourses.map((course, index) => (
               <span
                 key={course.id}
                 className="inline-flex items-center bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
               >
+                {/* Left arrow - move earlier */}
+                <button
+                  onClick={() => onReorderCourse(course.id, 'left')}
+                  disabled={index === 0}
+                  className={`mr-1 ${
+                    index === 0
+                      ? 'text-blue-300 cursor-not-allowed'
+                      : 'text-blue-600 hover:text-blue-800'
+                  }`}
+                  title="前に移動"
+                >
+                  ◀
+                </button>
                 {course.name}
                 <span className="text-blue-500 ml-1">
                   ({courseEntryCounts.get(course.id) || 0})
                 </span>
+                {/* Right arrow - move later */}
+                <button
+                  onClick={() => onReorderCourse(course.id, 'right')}
+                  disabled={index === assignedCourses.length - 1}
+                  className={`ml-1 ${
+                    index === assignedCourses.length - 1
+                      ? 'text-blue-300 cursor-not-allowed'
+                      : 'text-blue-600 hover:text-blue-800'
+                  }`}
+                  title="後に移動"
+                >
+                  ▶
+                </button>
                 <button
                   onClick={() => onRemoveCourse(course.id)}
-                  className="ml-1 text-blue-500 hover:text-blue-700"
+                  className="ml-1 text-red-400 hover:text-red-600"
+                  title="削除"
                 >
                   ×
                 </button>

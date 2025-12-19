@@ -16,6 +16,7 @@ const initialState: AppState = {
     avoidSameClubConsecutive: true,
     maxShuffleAttempts: 1000,
     useRankingForSplit: {},
+    raceType: 'forest',
     allowSameTimeClubDuplicates: true,
     sameTimeClubScope: 'all',
     sameTimeClubSelectedAreas: [],
@@ -36,6 +37,8 @@ const initialState: AppState = {
   startList: [],
   outputFiles: null,
   error: null,
+  rankings: new Map(),
+  rankingFetchStatus: 'idle',
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -264,6 +267,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'SET_ERROR':
       return { ...state, error: action.payload };
+
+    case 'SET_RANKINGS':
+      return { ...state, rankings: action.payload };
+
+    case 'SET_RANKING_FETCH_STATUS':
+      return { ...state, rankingFetchStatus: action.payload };
 
     case 'RESET':
       return initialState;
