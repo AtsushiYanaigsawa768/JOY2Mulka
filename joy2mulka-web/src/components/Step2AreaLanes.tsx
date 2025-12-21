@@ -45,6 +45,9 @@ export default function Step2AreaLanes() {
     return counts;
   }, [state.startAreas, courseEntryCounts]);
 
+  // Extract settings values to use as stable dependencies
+  const { defaultStartTime, defaultInterval, interCourseGap } = state.globalSettings;
+
   // Initialize default start area if none exist
   useEffect(() => {
     if (state.startAreas.length === 0) {
@@ -55,10 +58,10 @@ export default function Step2AreaLanes() {
           {
             id: generateId(),
             name: 'Lane 1',
-            startTime: '10:00',
+            startTime: defaultStartTime,
             startNumber: 1,
-            interval: 2,
-            interCourseGap: 0,
+            interval: defaultInterval,
+            interCourseGap: interCourseGap,
             affiliationSplit: true,
             courseIds: [],
           },
@@ -66,7 +69,7 @@ export default function Step2AreaLanes() {
       };
       dispatch({ type: 'SET_START_AREAS', payload: [defaultArea] });
     }
-  }, [state.startAreas.length, dispatch]);
+  }, [state.startAreas.length, defaultStartTime, defaultInterval, interCourseGap, dispatch]);
 
   // Auto-assign courses to lanes
   const autoAssignCourses = () => {
@@ -130,10 +133,10 @@ export default function Step2AreaLanes() {
         {
           id: generateId(),
           name: 'Lane 1',
-          startTime: '10:00',
+          startTime: defaultStartTime,
           startNumber: 1,
-          interval: 2,
-          interCourseGap: 0,
+          interval: defaultInterval,
+          interCourseGap: interCourseGap,
           affiliationSplit: true,
           courseIds: [],
         },
@@ -165,10 +168,10 @@ export default function Step2AreaLanes() {
     const newLane: Lane = {
       id: generateId(),
       name: `Lane ${area.lanes.length + 1}`,
-      startTime: '10:00',
+      startTime: defaultStartTime,
       startNumber: 1,
-      interval: 2,
-      interCourseGap: 0,
+      interval: defaultInterval,
+      interCourseGap: interCourseGap,
       affiliationSplit: true,
       courseIds: [],
     };

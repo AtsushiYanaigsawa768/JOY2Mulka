@@ -5,9 +5,8 @@ import {
   parseXLSXFile,
   detectColumnMapping,
   parseEntries,
-  detectClasses,
 } from '../utils/csvParser';
-import { ClassInfo, Entry } from '../types';
+import { Entry } from '../types';
 import ColumnMappingModal from './ColumnMappingModal';
 
 /**
@@ -91,6 +90,42 @@ export default function Step0Upload() {
         result = await parseCSVFile(file);
       }
 
+      // Auto-detect column mapping
+      const mapping = detectColumnMapping(result.header, result.columnNames);
+
+      // Check if mapping has required columns (class and at least one participant name1)
+      const hasClassColumn = mapping.class !== null;
+      const hasParticipantName = Object.values(mapping.participants).some(p => p.name1 !== null);
+      const hasValidMapping = hasClassColumn && hasParticipantName;
+
+      if (!hasValidMapping) {
+        // Fall back to manual column mapping (show modal)
+        console.log('JOY format detection failed, falling back to manual mapping');
+        setPendingFileData({
+          data: result.data,
+          columnNames: result.columnNames,
+        });
+        setShowMappingModal(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Parse entries with detected mapping
+      const entries = parseEntries(result.data, mapping);
+
+      // If no entries parsed, also fall back to manual mapping
+      if (entries.length === 0) {
+        console.log('No entries parsed with JOY format, falling back to manual mapping');
+        setPendingFileData({
+          data: result.data,
+          columnNames: result.columnNames,
+        });
+        setShowMappingModal(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Success - store data and entries
       dispatch({
         type: 'SET_RAW_DATA',
         payload: {
@@ -99,23 +134,11 @@ export default function Step0Upload() {
           columnNames: result.columnNames,
         },
       });
-
-      // Auto-detect column mapping
-      const mapping = detectColumnMapping(result.header, result.columnNames);
       dispatch({ type: 'SET_COLUMN_MAPPING', payload: mapping });
 
-      // Parse entries
-      const entries = parseEntries(result.data, mapping);
-      dispatch({ type: 'SET_ENTRIES', payload: entries });
-
-      // Detect classes
-      const classInfos = detectClasses(entries);
-      const classes: ClassInfo[] = classInfos.map((c) => ({
-        ...c,
-        shouldSplit: false,
-        splitCount: 2,
-      }));
-      dispatch({ type: 'SET_CLASSES', payload: classes });
+      // Merge with existing entries using MERGE_ENTRIES action
+      // This ensures reducer uses latest state (avoids stale closure issue)
+      dispatch({ type: 'MERGE_ENTRIES', payload: entries });
 
       // Set preview
       setPreview(result.data.slice(0, 50));
@@ -186,27 +209,14 @@ export default function Step0Upload() {
     e.target.value = '';
   }, [handleOtherFile]);
 
-  // Merge entries from modal with existing entries
+  // Merge entries from modal with existing entries using MERGE_ENTRIES action
+  // This ensures reducer uses latest state (avoids stale closure issue)
   const handleMappingConfirm = useCallback((newEntries: Entry[]) => {
-    const mergedEntries = [...state.entries, ...newEntries];
-    dispatch({ type: 'SET_ENTRIES', payload: mergedEntries });
-
-    // Update classes
-    const classInfos = detectClasses(mergedEntries);
-    const classes: ClassInfo[] = classInfos.map((c) => {
-      // Preserve existing class settings if any
-      const existing = state.classes.find((cls) => cls.name === c.name);
-      return {
-        ...c,
-        shouldSplit: existing?.shouldSplit ?? false,
-        splitCount: existing?.splitCount ?? 2,
-      };
-    });
-    dispatch({ type: 'SET_CLASSES', payload: classes });
+    dispatch({ type: 'MERGE_ENTRIES', payload: newEntries });
 
     setShowMappingModal(false);
     setPendingFileData(null);
-  }, [dispatch, state.entries, state.classes]);
+  }, [dispatch]);
 
   const handleMappingClose = useCallback(() => {
     setShowMappingModal(false);

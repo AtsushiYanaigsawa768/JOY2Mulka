@@ -167,6 +167,7 @@ export type AppAction =
   | { type: 'SET_RAW_DATA'; payload: { data: string[][]; header: string[]; columnNames: string[] } }
   | { type: 'SET_COLUMN_MAPPING'; payload: ColumnMapping }
   | { type: 'SET_ENTRIES'; payload: Entry[] }
+  | { type: 'MERGE_ENTRIES'; payload: Entry[] }
   | { type: 'SET_CLASSES'; payload: ClassInfo[] }
   | { type: 'UPDATE_CLASS'; payload: { name: string; updates: Partial<ClassInfo> } }
   | { type: 'SET_COURSES'; payload: Course[] }

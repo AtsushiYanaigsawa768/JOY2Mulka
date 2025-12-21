@@ -379,6 +379,8 @@ ipcMain.handle('fetch-joa-numbers', async () => {
 // =============================================================================
 
 function createWindow() {
+  console.log('Creating window...');
+
   const mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -389,16 +391,28 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js'),
     },
-    icon: path.join(__dirname, '../public/icon.ico'),
     title: 'JOY2Mulka - スタートリスト生成ツール',
   });
 
   // Load the built app
   const indexPath = path.join(__dirname, '../dist/index.html');
-  mainWindow.loadFile(indexPath);
+  console.log('Loading:', indexPath);
+
+  mainWindow.loadFile(indexPath)
+    .then(() => {
+      console.log('File loaded successfully');
+    })
+    .catch((err) => {
+      console.error('Failed to load file:', err);
+    });
 
   // Remove menu bar
   mainWindow.setMenuBarVisibility(false);
+
+  // Open DevTools in development
+  if (process.argv.includes('--dev')) {
+    mainWindow.webContents.openDevTools();
+  }
 }
 
 app.whenReady().then(() => {

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { AppState, AppAction, Step } from '../types';
+import { AppState, AppAction, Step, ClassInfo } from '../types';
+import { detectClasses } from '../utils/csvParser';
 
 const initialState: AppState = {
   step: 'step0',
@@ -59,6 +60,28 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'SET_ENTRIES':
       return { ...state, entries: action.payload };
+
+    case 'MERGE_ENTRIES': {
+      // Merge new entries with existing entries (reducer has access to latest state)
+      console.log('[MERGE_ENTRIES] existing entries:', state.entries.length);
+      console.log('[MERGE_ENTRIES] new entries:', action.payload.length);
+      const mergedEntries = [...state.entries, ...action.payload];
+      console.log('[MERGE_ENTRIES] merged entries:', mergedEntries.length);
+
+      // Detect classes from merged entries
+      const classInfos = detectClasses(mergedEntries);
+      const classes: ClassInfo[] = classInfos.map((c) => {
+        // Preserve existing class settings if any
+        const existing = state.classes.find((cls) => cls.name === c.name);
+        return {
+          ...c,
+          shouldSplit: existing?.shouldSplit ?? false,
+          splitCount: existing?.splitCount ?? 2,
+        };
+      });
+
+      return { ...state, entries: mergedEntries, classes };
+    }
 
     case 'SET_CLASSES':
       return { ...state, classes: action.payload };

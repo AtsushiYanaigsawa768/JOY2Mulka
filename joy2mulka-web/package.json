@@ -9,9 +9,12 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "electron:dev": "vite build && electron .",
-    "electron:build": "vite build && electron-builder --win --dir",
-    "electron:dist": "vite build && electron-builder --win"
+    "electron:dev": "npm run build && npx electron .",
+    "electron:build": "npm run build && npx electron-builder --win --dir",
+    "electron:build:mac": "npm run build && npx electron-builder --mac --dir",
+    "electron:dist": "npm run build && npx electron-builder --win",
+    "electron:dist:mac": "npm run build && npx electron-builder --mac",
+    "electron:dist:all": "npm run build && npx electron-builder --win --mac"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -53,6 +56,24 @@
         }
       ],
       "signAndEditExecutable": false
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "category": "public.app-category.utilities",
+      "artifactName": "JOY2Mulka-${arch}.${ext}"
+    },
+    "dmg": {
+      "title": "JOY2Mulka",
+      "artifactName": "JOY2Mulka-${arch}.dmg"
     },
     "portable": {
       "artifactName": "JOY2Mulka-Portable.exe"
