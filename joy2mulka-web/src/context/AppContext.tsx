@@ -3,7 +3,8 @@ import { AppState, AppAction, Step, ClassInfo } from '../types';
 import { detectClasses } from '../utils/csvParser';
 
 const initialState: AppState = {
-  step: 'step0',
+  appMode: 'create',
+  step: 'menu',
   rawData: null,
   headerRow: [],
   columnNamesRow: [],
@@ -33,6 +34,8 @@ const initialState: AppState = {
     defaultInterval: 1,
     interCourseGap: 0,
     seed: 42,
+    personPositionConstraints: [],
+    texTemplate: 'default',
   },
   generationResult: null,
   startList: [],
@@ -44,6 +47,9 @@ const initialState: AppState = {
 
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
+    case 'SET_APP_MODE':
+      return { ...state, appMode: action.payload };
+
     case 'SET_STEP':
       return { ...state, step: action.payload };
 
@@ -334,6 +340,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
 
     switch (step) {
+      case 'menu':
+        return true;
       case 'step0':
         return true;
       case 'step1':

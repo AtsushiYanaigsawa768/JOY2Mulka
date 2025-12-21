@@ -114,7 +114,27 @@ export interface OutputFiles {
   classSummaryCsv: string;
 }
 
-export type Step = 'step0' | 'step1' | 'step2' | 'step3' | 'step4' | 'done';
+export type Step = 'menu' | 'step0' | 'step1' | 'step2' | 'step3' | 'step4' | 'done';
+
+// App mode for the main menu
+export type AppMode = 'create' | 'edit' | 'update';
+
+// Person position constraint for Step 2
+export interface PersonPositionConstraint {
+  id: string;
+  personName: string;  // Name of the person (matched by name1 or name2)
+  position: 'early' | 'late';  // Early = first 20%, Late = last 20%
+}
+
+// TeX template type
+export type TexTemplate = 'default' | 'modern' | 'elegant' | 'compact' | 'festival' | 'japanese' | 'sporty' | 'minimal';
+
+export interface TexTemplateInfo {
+  id: TexTemplate;
+  name: string;
+  description: string;
+  preview: string;  // Description of what it looks like
+}
 
 export interface ColumnMapping {
   class: number | null;
@@ -140,9 +160,12 @@ export interface GlobalSettings {
   defaultInterval: number;
   interCourseGap: number;
   seed: number;
+  personPositionConstraints: PersonPositionConstraint[];
+  texTemplate: TexTemplate;
 }
 
 export interface AppState {
+  appMode: AppMode;
   step: Step;
   rawData: string[][] | null;
   headerRow: string[];
@@ -163,6 +186,7 @@ export interface AppState {
 }
 
 export type AppAction =
+  | { type: 'SET_APP_MODE'; payload: AppMode }
   | { type: 'SET_STEP'; payload: Step }
   | { type: 'SET_RAW_DATA'; payload: { data: string[][]; header: string[]; columnNames: string[] } }
   | { type: 'SET_COLUMN_MAPPING'; payload: ColumnMapping }

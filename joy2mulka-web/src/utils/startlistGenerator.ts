@@ -1,4 +1,4 @@
-import { Entry, Course, StartArea, Lane, StartListEntry, Constraints, Conflict } from '../types';
+import { Entry, Course, StartArea, Lane, StartListEntry, Constraints, Conflict, PersonPositionConstraint } from '../types';
 
 /**
  * Create a seeded random number generator
@@ -243,6 +243,80 @@ export function shuffleAvoidingConsecutiveAffiliations(
 }
 
 /**
+ * Apply person position constraints to ordered entries
+ * - 'early' constraint: place in the first 20% of positions
+ * - 'late' constraint: place in the last 20% of positions
+ */
+export function applyPersonPositionConstraints(
+  entries: Entry[],
+  constraints: PersonPositionConstraint[]
+): Entry[] {
+  if (constraints.length === 0 || entries.length === 0) {
+    return entries;
+  }
+
+  const result = [...entries];
+  const totalEntries = result.length;
+
+  // Calculate position boundaries
+  const earlyBoundary = Math.floor(totalEntries * 0.2);
+  const lateBoundary = Math.floor(totalEntries * 0.8);
+
+  for (const constraint of constraints) {
+    // Find the entry by name
+    const entryIndex = result.findIndex(
+      (e) => e.name1 === constraint.personName || e.name2 === constraint.personName
+    );
+
+    if (entryIndex === -1) {
+      continue; // Entry not found in this course
+    }
+
+    const entry = result[entryIndex];
+
+    // Remove from current position
+    result.splice(entryIndex, 1);
+
+    if (constraint.position === 'early') {
+      // Place in the first 20%
+      const targetPos = Math.min(earlyBoundary, result.length);
+      // Find a valid position within the early range
+      let insertPos = 0;
+      for (let i = 0; i <= targetPos && i < result.length; i++) {
+        // Try to find a position that doesn't create consecutive conflicts
+        if (i === 0 || !hasAffiliationOverlapByEntry(result[i - 1], entry)) {
+          insertPos = i;
+          break;
+        }
+      }
+      result.splice(insertPos, 0, entry);
+    } else {
+      // Place in the last 20%
+      const targetStartPos = Math.max(lateBoundary - 1, 0);
+      // Find a valid position within the late range
+      let insertPos = result.length;
+      for (let i = result.length; i >= targetStartPos; i--) {
+        // Try to find a position that doesn't create consecutive conflicts
+        if (i === result.length || !hasAffiliationOverlapByEntry(entry, result[i])) {
+          insertPos = i;
+          break;
+        }
+      }
+      result.splice(insertPos, 0, entry);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Check if two entries have overlapping affiliations (helper for constraints)
+ */
+function hasAffiliationOverlapByEntry(entry1: Entry, entry2: Entry): boolean {
+  return hasAffiliationOverlap(entry1, entry2);
+}
+
+/**
  * Parse time string to minutes since midnight
  */
 function parseTimeToMinutes(timeStr: string): number {
@@ -260,18 +334,64 @@ function formatTime(minutes: number): string {
 }
 
 /**
+ * Convert time (minutes since midnight) to time_code
+ * Rule: time_code = hour * 100 + minute
+ * Example: 11:22 → 11 * 100 + 22 = 1122
+ */
+function timeToTimeCode(minutes: number): number {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h * 100 + m;
+}
+
+/**
+ * Calculate start number using formula:
+ * start_no = time_code + base * (1 + globalLaneNumber)
+ * where base = 10^(digits of time_code - 1)
+ *
+ * Example: 11:22, lane 1
+ * - time_code = 1122
+ * - digits = 4, base = 10^(4-1) = 1000
+ * - start_no = 1122 + 1000 * (1 + 1) = 1122 + 2000 = 3122
+ *
+ * @param minutes - Start time in minutes since midnight
+ * @param globalLaneNumber - Global lane number (1-indexed, across all start areas)
+ */
+function calculateStartNumber(minutes: number, globalLaneNumber: number): number {
+  const timeCode = timeToTimeCode(minutes);
+
+  // Calculate base: 10^(number of digits in timeCode - 1)
+  // timeCode ranges from 0 (00:00) to 2359 (23:59)
+  // For times like 00:05 (timeCode=5), we still use 4 digits for consistency
+  // Typical competition times: 0900-1500 → timeCode 900-1500 (3-4 digits)
+  const digits = timeCode === 0 ? 1 : Math.floor(Math.log10(timeCode)) + 1;
+  const base = Math.pow(10, digits - 1);
+
+  return timeCode + base * (1 + globalLaneNumber);
+}
+
+/**
  * Generate start list for a single lane
+ *
+ * @param courses - Courses assigned to this lane
+ * @param lane - Lane configuration
+ * @param startArea - Start area this lane belongs to
+ * @param affiliationSplit - Whether to avoid consecutive same-affiliation entries
+ * @param seed - Random seed for reproducibility
+ * @param personPositionConstraints - Person position constraints (early/late)
+ * @param globalLaneNumber - Global lane number (1-indexed, across all start areas)
  */
 export function generateStartListForLane(
   courses: Course[],
   lane: Lane,
   startArea: StartArea,
   affiliationSplit: boolean,
-  seed: number
+  seed: number,
+  personPositionConstraints: PersonPositionConstraint[] = [],
+  globalLaneNumber: number = 1
 ): StartListEntry[] {
   const startList: StartListEntry[] = [];
   let currentTimeMinutes = parseTimeToMinutes(lane.startTime);
-  let currentNumber = lane.startNumber;
 
   // Get inter-course gap (default to 0 if not set)
   const interCourseGap = lane.interCourseGap ?? 0;
@@ -291,11 +411,17 @@ export function generateStartListForLane(
       orderedEntries = shuffleArray(course.entries, rng);
     }
 
+    // Apply person position constraints
+    orderedEntries = applyPersonPositionConstraints(orderedEntries, personPositionConstraints);
+
     // Generate start list entries
     for (let i = 0; i < orderedEntries.length; i++) {
       const entry = orderedEntries[i];
-      const startTime = currentTimeMinutes + i * lane.interval;
-      const startNumber = currentNumber + i;
+      const startTimeMinutes = currentTimeMinutes + i * lane.interval;
+
+      // Calculate start number using new formula:
+      // start_no = time_code + base * (1 + globalLaneNumber)
+      const startNumber = calculateStartNumber(startTimeMinutes, globalLaneNumber);
 
       // Determine card note
       let cardNote = entry.cardNumber ? 'my card' : 'レンタル';
@@ -309,7 +435,7 @@ export function generateStartListForLane(
         name1: entry.name1,
         name2: entry.name2,
         affiliation: entry.affiliation || '-',
-        startTime: formatTime(startTime),
+        startTime: formatTime(startTimeMinutes),
         cardNumber: entry.cardNumber,
         cardNote,
         joaNumber: entry.joaNumber,
@@ -319,9 +445,8 @@ export function generateStartListForLane(
       });
     }
 
-    // Update current time and number for next course
+    // Update current time for next course
     currentTimeMinutes += orderedEntries.length * lane.interval;
-    currentNumber += orderedEntries.length;
 
     // Add inter-course gap (except for the last course)
     if (courseIdx < sortedCourses.length - 1 && interCourseGap > 0) {
@@ -341,6 +466,7 @@ export function generateStartListForLane(
  * @param constraints - Constraints including useRankingForSplit
  * @param seed - Random seed for reproducibility
  * @param rankings - Rankings map (baseClass -> normalizedName -> rank)
+ * @param personPositionConstraints - Person position constraints (early/late)
  */
 export function generateStartList(
   courses: Course[],
@@ -348,7 +474,8 @@ export function generateStartList(
   entries: Entry[],
   constraints: Constraints,
   seed: number,
-  rankings: Map<string, Map<string, number>> = new Map()
+  rankings: Map<string, Map<string, number>> = new Map(),
+  personPositionConstraints: PersonPositionConstraint[] = []
 ): StartListEntry[] {
   const startList: StartListEntry[] = [];
 
@@ -393,6 +520,18 @@ export function generateStartList(
     }
   }
 
+  // Calculate global lane numbers (1-indexed, across all start areas)
+  // Global lane number = (sum of lanes in previous areas) + (lane index within current area + 1)
+  let globalLaneCounter = 0;
+  const laneToGlobalNumber: Map<string, number> = new Map();
+
+  for (const area of startAreas) {
+    for (let laneIdx = 0; laneIdx < area.lanes.length; laneIdx++) {
+      globalLaneCounter++;
+      laneToGlobalNumber.set(area.lanes[laneIdx].id, globalLaneCounter);
+    }
+  }
+
   for (const area of startAreas) {
     for (const lane of area.lanes) {
       // Get courses assigned to this lane
@@ -402,12 +541,17 @@ export function generateStartList(
 
       if (laneCourses.length === 0) continue;
 
+      // Get global lane number for this lane
+      const globalLaneNumber = laneToGlobalNumber.get(lane.id) || 1;
+
       const laneStartList = generateStartListForLane(
         laneCourses,
         lane,
         area,
         lane.affiliationSplit && constraints.avoidSameClubConsecutive,
-        seed
+        seed,
+        personPositionConstraints,
+        globalLaneNumber
       );
 
       startList.push(...laneStartList);

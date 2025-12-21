@@ -1,9 +1,145 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { StartArea, Lane, Course, Entry } from '../types';
+import { StartArea, Lane, Course, Entry, PersonPositionConstraint } from '../types';
 
 function generateId(): string {
   return Math.random().toString(36).substr(2, 9);
+}
+
+// Person Position Constraint Editor Component
+function PersonPositionConstraintEditor() {
+  const { state, dispatch } = useApp();
+  const [selectedPerson, setSelectedPerson] = useState<string>('');
+  const [selectedPosition, setSelectedPosition] = useState<'early' | 'late'>('late');
+
+  // Get all unique person names from entries
+  const allPersonNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const entry of state.entries) {
+      if (entry.name1) names.add(entry.name1);
+    }
+    return Array.from(names).sort();
+  }, [state.entries]);
+
+  // Already constrained persons
+  const constrainedPersons = new Set(
+    state.globalSettings.personPositionConstraints.map(c => c.personName)
+  );
+
+  // Available persons (not yet constrained)
+  const availablePersons = allPersonNames.filter(name => !constrainedPersons.has(name));
+
+  const handleAddConstraint = () => {
+    if (!selectedPerson) return;
+
+    const newConstraint: PersonPositionConstraint = {
+      id: generateId(),
+      personName: selectedPerson,
+      position: selectedPosition,
+    };
+
+    dispatch({
+      type: 'SET_GLOBAL_SETTINGS',
+      payload: {
+        personPositionConstraints: [
+          ...state.globalSettings.personPositionConstraints,
+          newConstraint,
+        ],
+      },
+    });
+
+    setSelectedPerson('');
+  };
+
+  const handleRemoveConstraint = (id: string) => {
+    dispatch({
+      type: 'SET_GLOBAL_SETTINGS',
+      payload: {
+        personPositionConstraints: state.globalSettings.personPositionConstraints.filter(
+          c => c.id !== id
+        ),
+      },
+    });
+  };
+
+  return (
+    <div className="border rounded-lg p-4">
+      <h3 className="font-medium mb-3">人物位置制約</h3>
+      <p className="text-sm text-gray-600 mb-4">
+        特定の人物を早め（最初の20%）または遅め（最後の20%）の時間帯に配置できます。
+      </p>
+
+      {/* Add constraint form */}
+      <div className="flex gap-2 mb-4">
+        <select
+          value={selectedPerson}
+          onChange={(e) => setSelectedPerson(e.target.value)}
+          className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+        >
+          <option value="">人物を選択...</option>
+          {availablePersons.map(name => (
+            <option key={name} value={name}>{name}</option>
+          ))}
+        </select>
+        <select
+          value={selectedPosition}
+          onChange={(e) => setSelectedPosition(e.target.value as 'early' | 'late')}
+          className="w-24 border border-gray-300 rounded px-3 py-2 text-sm"
+        >
+          <option value="early">早め</option>
+          <option value="late">遅め</option>
+        </select>
+        <button
+          onClick={handleAddConstraint}
+          disabled={!selectedPerson}
+          className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+            selectedPerson
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          追加
+        </button>
+      </div>
+
+      {/* Constraint list */}
+      {state.globalSettings.personPositionConstraints.length > 0 ? (
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {state.globalSettings.personPositionConstraints.map(constraint => (
+            <div
+              key={constraint.id}
+              className={`flex items-center justify-between p-2 rounded ${
+                constraint.position === 'early'
+                  ? 'bg-green-50 border border-green-200'
+                  : 'bg-orange-50 border border-orange-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                  constraint.position === 'early'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-orange-100 text-orange-700'
+                }`}>
+                  {constraint.position === 'early' ? '早め (前20%)' : '遅め (後20%)'}
+                </span>
+                <span className="text-sm font-medium">{constraint.personName}</span>
+              </div>
+              <button
+                onClick={() => handleRemoveConstraint(constraint.id)}
+                className="text-red-500 hover:text-red-700 text-sm"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-gray-500 text-center py-4">
+          制約がありません
+        </p>
+      )}
+    </div>
+  );
 }
 
 // Calculate entry count for a course
@@ -416,6 +552,9 @@ export default function Step2AreaLanes() {
               </div>
             </div>
           </div>
+
+          {/* Person Position Constraints */}
+          <PersonPositionConstraintEditor />
         </div>
       </div>
 

@@ -1,5 +1,8 @@
 import { useApp } from './context/AppContext';
+import MenuScreen from './components/MenuScreen';
 import Step0Upload from './components/Step0Upload';
+import Step0Edit from './components/Step0Edit';
+import Step0Update from './components/Step0Update';
 import Step1ClassConfig from './components/Step1ClassConfig';
 import Step2AreaLanes from './components/Step2AreaLanes';
 import Step3Constraints from './components/Step3Constraints';
@@ -56,9 +59,22 @@ function App() {
   const { state, dispatch } = useApp();
 
   const renderStep = () => {
+    // Menu screen is shown first
+    if (state.step === 'menu') {
+      return <MenuScreen />;
+    }
+
+    // For edit and update modes, show different Step0 component
+    if (state.step === 'step0') {
+      if (state.appMode === 'edit') {
+        return <Step0Edit />;
+      } else if (state.appMode === 'update') {
+        return <Step0Update />;
+      }
+      return <Step0Upload />;
+    }
+
     switch (state.step) {
-      case 'step0':
-        return <Step0Upload />;
       case 'step1':
         return <Step1ClassConfig />;
       case 'step2':
@@ -70,7 +86,24 @@ function App() {
       case 'done':
         return <DoneScreen />;
       default:
-        return <Step0Upload />;
+        return <MenuScreen />;
+    }
+  };
+
+  // Determine if we should show the step indicator
+  const showStepIndicator = state.step !== 'menu';
+
+  // Get mode label for header
+  const getModeLabel = () => {
+    switch (state.appMode) {
+      case 'create':
+        return 'エントリーリスト作成';
+      case 'edit':
+        return 'エントリーリスト修正';
+      case 'update':
+        return 'エントリーリスト更新';
+      default:
+        return '';
     }
   };
 
@@ -84,27 +117,31 @@ function App() {
               <span className="text-2xl">🏃</span>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">JOY2Mulka</h1>
-                <p className="text-sm text-gray-500">スタートリスト生成ツール</p>
+                <p className="text-sm text-gray-500">
+                  {showStepIndicator ? getModeLabel() : 'スタートリスト生成ツール'}
+                </p>
               </div>
             </div>
             <button
               onClick={() => {
-                if (confirm('すべてのデータをリセットしますか？')) {
+                if (confirm('メニューに戻りますか？すべてのデータがリセットされます。')) {
                   dispatch({ type: 'RESET' });
                 }
               }}
               className="text-sm text-gray-500 hover:text-gray-700"
             >
-              リセット
+              {state.step === 'menu' ? '' : 'メニューに戻る'}
             </button>
           </div>
         </div>
       </header>
 
       {/* Step Indicator */}
-      <div className="max-w-7xl mx-auto px-4 pt-6 sm:px-6 lg:px-8">
-        <StepIndicator />
-      </div>
+      {showStepIndicator && (
+        <div className="max-w-7xl mx-auto px-4 pt-6 sm:px-6 lg:px-8">
+          <StepIndicator />
+        </div>
+      )}
 
       {/* Error Display */}
       {state.error && (

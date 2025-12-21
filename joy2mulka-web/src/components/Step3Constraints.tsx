@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   isElectronAvailable,
@@ -10,12 +10,74 @@ import {
   normalizeName,
   lookupEntryJoaNumber,
 } from '../utils/rankingUtils';
-import { Entry } from '../types';
+import { TEX_TEMPLATES } from '../utils/outputFormatter';
+import { Entry, TexTemplate, PersonPositionConstraint } from '../types';
 
 export default function Step3Constraints() {
   const { state, dispatch, goToStep } = useApp();
   const [joaFetchStatus, setJoaFetchStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [joaFetchStats, setJoaFetchStats] = useState<{ matched: number; total: number } | null>(null);
+
+  // Person position constraint search state
+  const [personSearchQuery, setPersonSearchQuery] = useState('');
+  const [showPersonSearchResults, setShowPersonSearchResults] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState<'early' | 'late'>('early');
+  const personSearchRef = useRef<HTMLDivElement>(null);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (personSearchRef.current && !personSearchRef.current.contains(event.target as Node)) {
+        setShowPersonSearchResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter entries based on search query
+  const personSearchResults = useMemo(() => {
+    if (!personSearchQuery.trim()) return [];
+    const query = personSearchQuery.toLowerCase();
+    return state.entries.filter((entry) => {
+      const name1Match = entry.name1?.toLowerCase().includes(query);
+      const name2Match = entry.name2?.toLowerCase().includes(query);
+      const affiliationMatch = entry.affiliation?.toLowerCase().includes(query);
+      return name1Match || name2Match || affiliationMatch;
+    }).slice(0, 10); // Limit to 10 results
+  }, [personSearchQuery, state.entries]);
+
+  // Add person position constraint
+  const addPersonConstraint = useCallback((entry: Entry) => {
+    const newConstraint: PersonPositionConstraint = {
+      id: `ppc-${Date.now()}`,
+      personName: entry.name1,
+      position: selectedPosition,
+    };
+    dispatch({
+      type: 'SET_GLOBAL_SETTINGS',
+      payload: {
+        personPositionConstraints: [
+          ...state.globalSettings.personPositionConstraints,
+          newConstraint,
+        ],
+      },
+    });
+    setPersonSearchQuery('');
+    setShowPersonSearchResults(false);
+  }, [selectedPosition, state.globalSettings.personPositionConstraints, dispatch]);
+
+  // Remove person position constraint
+  const removePersonConstraint = useCallback((constraintId: string) => {
+    dispatch({
+      type: 'SET_GLOBAL_SETTINGS',
+      payload: {
+        personPositionConstraints: state.globalSettings.personPositionConstraints.filter(
+          (c) => c.id !== constraintId
+        ),
+      },
+    });
+  }, [state.globalSettings.personPositionConstraints, dispatch]);
 
   const updateConstraints = (updates: Partial<typeof state.constraints>) => {
     dispatch({
@@ -523,6 +585,203 @@ export default function Step3Constraints() {
           )}
         </div>
 
+        {/* Person Position Constraints */}
+        <div className="border rounded-lg p-4">
+          <h3 className="font-medium mb-3">人物位置制約</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            特定の人物のスタート順序を「前半」または「後半」に配置します。
+            前半は先頭20%、後半は最後20%の位置に配置されます。
+          </p>
+
+          {/* Add new constraint */}
+          <div className="mb-4">
+            <div className="flex gap-2 items-start">
+              {/* Position selector */}
+              <div className="flex-shrink-0">
+                <select
+                  value={selectedPosition}
+                  onChange={(e) => setSelectedPosition(e.target.value as 'early' | 'late')}
+                  className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="early">前半（Early）</option>
+                  <option value="late">後半（Late）</option>
+                </select>
+              </div>
+
+              {/* Search input with dropdown */}
+              <div className="flex-1 relative" ref={personSearchRef}>
+                <input
+                  type="text"
+                  value={personSearchQuery}
+                  onChange={(e) => {
+                    setPersonSearchQuery(e.target.value);
+                    setShowPersonSearchResults(true);
+                  }}
+                  onFocus={() => setShowPersonSearchResults(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && personSearchResults.length > 0) {
+                      e.preventDefault();
+                      // Find first non-added entry
+                      const firstAvailable = personSearchResults.find(
+                        (entry) => !state.globalSettings.personPositionConstraints.some(
+                          (c) => c.personName === entry.name1
+                        )
+                      );
+                      if (firstAvailable) {
+                        addPersonConstraint(firstAvailable);
+                      }
+                    }
+                  }}
+                  placeholder="名前または所属で検索..."
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+
+                {/* Search results dropdown */}
+                {showPersonSearchResults && personSearchResults.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                    {personSearchResults.map((entry) => {
+                      // Check if already added
+                      const isAlreadyAdded = state.globalSettings.personPositionConstraints.some(
+                        (c) => c.personName === entry.name1
+                      );
+                      return (
+                        <button
+                          key={entry.id}
+                          onClick={() => !isAlreadyAdded && addPersonConstraint(entry)}
+                          disabled={isAlreadyAdded}
+                          className={`w-full text-left px-3 py-2 text-sm border-b border-gray-100 last:border-b-0
+                            ${isAlreadyAdded
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'hover:bg-blue-50 cursor-pointer'
+                            }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="font-medium">{entry.name1}</span>
+                              {entry.name2 && (
+                                <span className="text-gray-500 ml-2">({entry.name2})</span>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {entry.className} / {entry.affiliation || '-'}
+                            </div>
+                          </div>
+                          {isAlreadyAdded && (
+                            <span className="text-xs text-orange-500">追加済み</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* No results message */}
+                {showPersonSearchResults && personSearchQuery.trim() && personSearchResults.length === 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-sm text-gray-500">
+                    該当する人物が見つかりません
+                  </div>
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              名前（漢字/かな）または所属で検索できます。Enterキーで最初の候補を追加します。
+            </p>
+          </div>
+
+          {/* Current constraints list */}
+          {state.globalSettings.personPositionConstraints.length > 0 ? (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-gray-700">設定済みの制約:</h4>
+              <div className="space-y-1">
+                {state.globalSettings.personPositionConstraints.map((constraint) => {
+                  // Find the entry for additional info
+                  const entry = state.entries.find((e) => e.name1 === constraint.personName);
+                  return (
+                    <div
+                      key={constraint.id}
+                      className={`flex items-center justify-between p-2 rounded ${
+                        constraint.position === 'early'
+                          ? 'bg-green-50 border border-green-200'
+                          : 'bg-orange-50 border border-orange-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-2 py-0.5 rounded text-xs font-medium ${
+                            constraint.position === 'early'
+                              ? 'bg-green-200 text-green-800'
+                              : 'bg-orange-200 text-orange-800'
+                          }`}
+                        >
+                          {constraint.position === 'early' ? '前半' : '後半'}
+                        </span>
+                        <span className="font-medium">{constraint.personName}</span>
+                        {entry && (
+                          <span className="text-xs text-gray-500">
+                            ({entry.className} / {entry.affiliation || '-'})
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => removePersonConstraint(constraint.id)}
+                        className="text-red-500 hover:text-red-700 p-1"
+                        title="削除"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-gray-500 italic">
+              人物位置制約は設定されていません
+            </div>
+          )}
+        </div>
+
+        {/* TeX Template Selection */}
+        <div className="border rounded-lg p-4">
+          <h3 className="font-medium mb-3">LaTeXテンプレート選択</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            生成されるスタートリスト（.tex）のデザインを選択してください。
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {TEX_TEMPLATES.map((template) => (
+              <button
+                key={template.id}
+                onClick={() =>
+                  dispatch({
+                    type: 'SET_GLOBAL_SETTINGS',
+                    payload: { texTemplate: template.id as TexTemplate },
+                  })
+                }
+                className={`
+                  p-4 rounded-lg border-2 text-left transition-all
+                  ${
+                    state.globalSettings.texTemplate === template.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }
+                `}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-900">{template.name}</h4>
+                    <p className="text-sm text-gray-500 mt-1">{template.description}</p>
+                    <p className="text-xs text-gray-400 mt-2">{template.preview}</p>
+                  </div>
+                  {state.globalSettings.texTemplate === template.id && (
+                    <span className="text-blue-500 text-lg">✓</span>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Summary */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="font-medium text-blue-800 mb-2">設定サマリー</h3>
@@ -566,6 +825,24 @@ export default function Step3Constraints() {
                 <span className="text-orange-600">
                   {state.entries.length - entriesMissingJoaNumber.length}/{state.entries.length}名設定
                 </span>
+              )}
+            </li>
+            <li>
+              • TeXテンプレート:{' '}
+              <span className="text-blue-600">
+                {TEX_TEMPLATES.find(t => t.id === state.globalSettings.texTemplate)?.name || 'スタンダード'}
+              </span>
+            </li>
+            <li>
+              • 人物位置制約:{' '}
+              {state.globalSettings.personPositionConstraints.length > 0 ? (
+                <span className="text-green-600">
+                  {state.globalSettings.personPositionConstraints.length}件設定
+                  （前半: {state.globalSettings.personPositionConstraints.filter(c => c.position === 'early').length}名,
+                  後半: {state.globalSettings.personPositionConstraints.filter(c => c.position === 'late').length}名）
+                </span>
+              ) : (
+                <span className="text-gray-500">なし</span>
               )}
             </li>
           </ul>
