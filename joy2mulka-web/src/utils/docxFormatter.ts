@@ -10,8 +10,30 @@ import {
   AlignmentType,
   WidthType,
   BorderStyle,
+  PageOrientation,
+  TableLayoutType,
 } from 'docx';
 import { StartListEntry, GlobalSettings } from '../types';
+
+/**
+ * A4 page dimensions in DXA (twentieths of a point).
+ *   A4: 210mm x 297mm = 595.28pt x 841.89pt = 11906 dxa x 16838 dxa
+ *   Margins: 2cm each side = 1134 dxa
+ *   Content width: 11906 - 2*1134 = 9638 dxa
+ *
+ * Note: docx library's WidthType.PERCENTAGE uses units of 1/50 of a percent,
+ * so 100% = 5000. We also supply explicit column widths in DXA for reliable
+ * rendering across Word/LibreOffice.
+ */
+const A4_WIDTH_DXA = 11906;
+const A4_HEIGHT_DXA = 16838;
+const PAGE_MARGIN_DXA = 1134; // 2cm
+const CONTENT_WIDTH_DXA = A4_WIDTH_DXA - 2 * PAGE_MARGIN_DXA; // 9638
+
+// Column width distribution (sums to 100%) for the startlist table:
+// No. / Time / Name / Affiliation / Card
+const COL_WIDTH_PCT = [8, 12, 32, 36, 12]; // percent
+const COL_WIDTH_DXA = COL_WIDTH_PCT.map((p) => Math.round((CONTENT_WIDTH_DXA * p) / 100));
 
 /**
  * Language-specific labels (mirrors outputFormatter.ts LABELS)
@@ -47,12 +69,18 @@ interface DocxBuildOptions {
   isRole: boolean; // Role version shows name + furigana
 }
 
-function textCell(text: string, bold = false, width?: number): TableCell {
+/**
+ * Build a table cell with explicit DXA width (keeps column widths stable).
+ */
+function buildCell(children: TextRun[], widthDxa: number, bold = false): TableCell {
   return new TableCell({
-    width: width != null ? { size: width, type: WidthType.PERCENTAGE } : undefined,
+    width: { size: widthDxa, type: WidthType.DXA },
     children: [
       new Paragraph({
-        children: [new TextRun({ text, bold })],
+        children:
+          children.length > 0
+            ? children
+            : [new TextRun({ text: '', bold })],
       }),
     ],
   });
@@ -62,11 +90,11 @@ function buildHeaderRow(labels: typeof LABELS.ja): TableRow {
   return new TableRow({
     tableHeader: true,
     children: [
-      textCell(labels.no, true, 10),
-      textCell(labels.time, true, 15),
-      textCell(labels.name, true, 35),
-      textCell(labels.affiliation, true, 30),
-      textCell(labels.card, true, 10),
+      buildCell([new TextRun({ text: labels.no, bold: true })], COL_WIDTH_DXA[0], true),
+      buildCell([new TextRun({ text: labels.time, bold: true })], COL_WIDTH_DXA[1], true),
+      buildCell([new TextRun({ text: labels.name, bold: true })], COL_WIDTH_DXA[2], true),
+      buildCell([new TextRun({ text: labels.affiliation, bold: true })], COL_WIDTH_DXA[3], true),
+      buildCell([new TextRun({ text: labels.card, bold: true })], COL_WIDTH_DXA[4], true),
     ],
   });
 }
@@ -79,7 +107,7 @@ function buildDataRow(
   const cardDisplay =
     entry.isRental || !entry.cardNumber ? labels.rental : entry.cardNumber;
 
-  // For role version, include furigana (name2) under the name if available
+  // For role version, include furigana (name2) next to the name if available
   const nameChildren: TextRun[] = [];
   if (isRole && entry.name2 && entry.name1) {
     nameChildren.push(new TextRun({ text: entry.name1 }));
@@ -90,21 +118,11 @@ function buildDataRow(
 
   return new TableRow({
     children: [
-      new TableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: String(entry.startNumber) })] })],
-      }),
-      new TableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: entry.startTime })] })],
-      }),
-      new TableCell({
-        children: [new Paragraph({ children: nameChildren })],
-      }),
-      new TableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: entry.affiliation || '-' })] })],
-      }),
-      new TableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: cardDisplay })] })],
-      }),
+      buildCell([new TextRun({ text: String(entry.startNumber) })], COL_WIDTH_DXA[0]),
+      buildCell([new TextRun({ text: entry.startTime })], COL_WIDTH_DXA[1]),
+      buildCell(nameChildren, COL_WIDTH_DXA[2]),
+      buildCell([new TextRun({ text: entry.affiliation || '-' })], COL_WIDTH_DXA[3]),
+      buildCell([new TextRun({ text: cardDisplay })], COL_WIDTH_DXA[4]),
     ],
   });
 }
@@ -188,7 +206,12 @@ async function buildDocxBlob(
 
       const table = new Table({
         rows,
-        width: { size: 100, type: WidthType.PERCENTAGE },
+        // Explicit DXA width — guaranteed to span the full A4 content area
+        // (some Word/LibreOffice versions ignore PERCENTAGE on unbounded layouts).
+        width: { size: CONTENT_WIDTH_DXA, type: WidthType.DXA },
+        // Fixed layout so column widths are honoured exactly as specified.
+        layout: TableLayoutType.FIXED,
+        columnWidths: COL_WIDTH_DXA,
         borders: {
           top: { style: BorderStyle.SINGLE, size: 4, color: '888888' },
           bottom: { style: BorderStyle.SINGLE, size: 4, color: '888888' },
@@ -207,7 +230,21 @@ async function buildDocxBlob(
   const doc = new Document({
     sections: [
       {
-        properties: {},
+        properties: {
+          page: {
+            size: {
+              width: A4_WIDTH_DXA,
+              height: A4_HEIGHT_DXA,
+              orientation: PageOrientation.PORTRAIT,
+            },
+            margin: {
+              top: PAGE_MARGIN_DXA,
+              right: PAGE_MARGIN_DXA,
+              bottom: PAGE_MARGIN_DXA,
+              left: PAGE_MARGIN_DXA,
+            },
+          },
+        },
         children,
       },
     ],

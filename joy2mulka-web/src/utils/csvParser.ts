@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import Encoding from 'encoding-japanese';
 import { Entry, ColumnMapping } from '../types';
 
 /**
@@ -41,35 +42,246 @@ export function parseAffiliation(affiliation: string): string[] {
 }
 
 /**
+ * Check if a decoded string appears to be a plausible CSV/TSV file.
+ *
+ * This is a multi-signal heuristic used to reject incorrect encoding guesses:
+ *   1. Few/no replacement chars (U+FFFD)
+ *   2. Sufficient ASCII ratio — CSVs always contain delimiters (`,` / `\t`),
+ *      newlines and typically digits/punctuation, so ASCII should dominate.
+ *   3. Presence of CSV-ish structure (at least some `\n`, and either `,` or `\t`).
+ *   4. No runs of control characters (indicates binary misinterpretation).
+ *
+ * This rejects the common failure mode where legacy-encoded bytes get decoded
+ * as UTF-16 LE/BE producing "valid" but garbled CJK characters — those strings
+ * have very low ASCII ratio.
+ */
+function isDecodingClean(text: string): boolean {
+  if (!text) return true;
+  const len = text.length;
+
+  // 1. Replacement char check
+  let fffdCount = 0;
+  let asciiCount = 0;
+  let controlCount = 0;
+  let hasLF = false;
+  let hasCommaOrTab = false;
+
+  for (let i = 0; i < len; i++) {
+    const code = text.charCodeAt(i);
+    if (code === 0xFFFD) {
+      fffdCount++;
+      // More than 0.3% replacement chars → wrong encoding
+      if (fffdCount > Math.max(2, len * 0.003)) return false;
+    }
+    if (code < 0x80) asciiCount++;
+    if (code === 0x0A) hasLF = true;
+    if (code === 0x09 || code === 0x2C) hasCommaOrTab = true;
+    // Control chars other than TAB/LF/CR/FF are suspicious
+    if (code < 0x20 && code !== 0x09 && code !== 0x0A && code !== 0x0D && code !== 0x0C) {
+      controlCount++;
+    }
+  }
+
+  // 2. ASCII ratio — CSVs inevitably contain many ASCII chars (delimiters,
+  // digits, newlines, English fragments, punctuation). Even heavily-Japanese
+  // files are >30% ASCII. A ratio below ~15% almost certainly means wrong decoding.
+  if (len >= 100 && asciiCount / len < 0.15) return false;
+
+  // 3. Structure check for substantial files
+  if (len >= 200 && (!hasLF || !hasCommaOrTab)) return false;
+
+  // 4. Reject if too many control characters (binary misinterpretation)
+  if (controlCount > Math.max(3, len * 0.005)) return false;
+
+  return true;
+}
+
+/**
+ * Strip a leading U+FEFF BOM character from decoded text (defensive; most
+ * TextDecoder paths already strip the byte-level BOM).
+ */
+function stripLeadingBom(text: string): string {
+  return text.length > 0 && text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+}
+
+/**
+ * Map an encoding-japanese encoding name to a TextDecoder-compatible name
+ * per the WHATWG Encoding Standard.
+ */
+function toTextDecoderName(enc: string): string {
+  switch (enc) {
+    case 'UTF8': return 'utf-8';
+    case 'UTF16': return 'utf-16';
+    case 'UTF16BE': return 'utf-16be';
+    case 'UTF16LE': return 'utf-16le';
+    case 'SJIS': return 'shift_jis';
+    case 'EUCJP': return 'euc-jp';
+    case 'JIS': return 'iso-2022-jp';
+    default: return 'utf-8';
+  }
+}
+
+/**
+ * Heuristic endianness detection for UTF-16 without BOM.
+ * Japanese/ASCII text in UTF-16 has many zero bytes at predictable positions:
+ * UTF-16 LE → zero bytes at odd offsets; UTF-16 BE → at even offsets.
+ */
+function guessUtf16Endianness(uint8: Uint8Array): 'LE' | 'BE' | null {
+  // Must be even length and reasonably long for heuristic
+  if (uint8.length < 16 || uint8.length % 2 !== 0) return null;
+
+  const sampleLen = Math.min(uint8.length, 2048);
+  let nullsAtEven = 0;
+  let nullsAtOdd = 0;
+  for (let i = 0; i < sampleLen; i++) {
+    if (uint8[i] === 0) {
+      if (i % 2 === 0) nullsAtEven++;
+      else nullsAtOdd++;
+    }
+  }
+
+  const threshold = sampleLen / 16; // at least ~6% of sample
+  if (nullsAtOdd > threshold && nullsAtOdd > nullsAtEven * 3) return 'LE';
+  if (nullsAtEven > threshold && nullsAtEven > nullsAtOdd * 3) return 'BE';
+  return null;
+}
+
+/**
+ * Attempt to decode a byte buffer with a specific TextDecoder label.
+ * Returns null if TextDecoder construction fails or decoding yields too many
+ * replacement characters.
+ */
+function tryTextDecoder(uint8: Uint8Array, label: string): string | null {
+  try {
+    const decoder = new TextDecoder(label, { fatal: false });
+    const text = decoder.decode(uint8);
+    if (isDecodingClean(text)) return stripLeadingBom(text);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Attempt to decode via the encoding-japanese library (used as a robust
+ * fallback for legacy Japanese encodings).
+ */
+function tryEncodingJapanese(uint8: Uint8Array, from: Encoding.Encoding): string | null {
+  try {
+    const arr = Encoding.convert(uint8, {
+      to: 'UNICODE',
+      from,
+      type: 'array',
+    }) as number[];
+    const text = Encoding.codeToString(arr);
+    return isDecodingClean(text) ? stripLeadingBom(text) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Read a file as ArrayBuffer and decode with automatic encoding detection.
- * Tries UTF-8 first; if the result contains replacement characters (U+FFFD),
- * falls back to Shift_JIS (common for Japanese CSV exports from Windows apps like JOY).
+ *
+ * Detection order (from most to least reliable):
+ *   1. BOM-based: UTF-8, UTF-16 LE, UTF-16 BE, UTF-32 LE/BE
+ *   2. encoding-japanese `detect()` for UTF-8/SJIS/EUC-JP/JIS/UTF-16
+ *   3. Heuristic endianness detection for UTF-16 without BOM
+ *   4. Multi-encoding trial with cleanness check (no/few U+FFFD)
+ *   5. Fallback to UTF-8
+ *
+ * Supports: UTF-8 (±BOM), UTF-16 LE/BE (±BOM), Shift_JIS/CP932, EUC-JP,
+ * ISO-2022-JP (JIS), and by TextDecoder extension GBK, GB18030, Big5,
+ * EUC-KR, Windows-125x, ISO-8859-x and other WHATWG-listed encodings.
  */
 export async function readFileWithEncodingDetection(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
   const uint8 = new Uint8Array(buffer);
 
-  // Check for UTF-8 BOM (EF BB BF) — if present, it's definitely UTF-8
+  // -------- 1. BOM-based detection (highest confidence) --------
+
+  // UTF-8 BOM (EF BB BF)
   if (uint8.length >= 3 && uint8[0] === 0xEF && uint8[1] === 0xBB && uint8[2] === 0xBF) {
-    return new TextDecoder('utf-8').decode(buffer);
+    return new TextDecoder('utf-8').decode(uint8.subarray(3));
   }
 
-  // Try UTF-8 first
-  const utf8Text = new TextDecoder('utf-8').decode(buffer);
-
-  // If UTF-8 decoding produced replacement characters, the file is likely not UTF-8
-  if (!utf8Text.includes('\uFFFD')) {
-    return utf8Text;
+  // UTF-32 LE BOM (FF FE 00 00) — check BEFORE UTF-16 LE BOM since prefix overlaps
+  if (uint8.length >= 4 && uint8[0] === 0xFF && uint8[1] === 0xFE && uint8[2] === 0x00 && uint8[3] === 0x00) {
+    // UTF-32 is rarely supported natively; try TextDecoder (some browsers), else fall through
+    const decoded = tryTextDecoder(uint8.subarray(4), 'utf-32le');
+    if (decoded) return decoded;
   }
 
-  // Fall back to Shift_JIS (CP932), which is the most common non-UTF-8 encoding
-  // for Japanese CSV files exported from Windows applications
-  try {
-    return new TextDecoder('shift_jis').decode(buffer);
-  } catch {
-    // If Shift_JIS decoder is unavailable, return UTF-8 result as-is
-    return utf8Text;
+  // UTF-32 BE BOM (00 00 FE FF)
+  if (uint8.length >= 4 && uint8[0] === 0x00 && uint8[1] === 0x00 && uint8[2] === 0xFE && uint8[3] === 0xFF) {
+    const decoded = tryTextDecoder(uint8.subarray(4), 'utf-32be');
+    if (decoded) return decoded;
   }
+
+  // UTF-16 LE BOM (FF FE)
+  if (uint8.length >= 2 && uint8[0] === 0xFF && uint8[1] === 0xFE) {
+    return new TextDecoder('utf-16le').decode(uint8);
+  }
+
+  // UTF-16 BE BOM (FE FF)
+  if (uint8.length >= 2 && uint8[0] === 0xFE && uint8[1] === 0xFF) {
+    return new TextDecoder('utf-16be').decode(uint8);
+  }
+
+  // -------- 2. Library-based detection for Japanese encodings --------
+  const detectedRaw = Encoding.detect(uint8);
+
+  // Direct mappable encodings from encoding-japanese detect
+  if (detectedRaw === 'UTF8') {
+    return new TextDecoder('utf-8').decode(uint8);
+  }
+  if (detectedRaw === 'SJIS' || detectedRaw === 'EUCJP' || detectedRaw === 'JIS') {
+    const label = toTextDecoderName(detectedRaw);
+    const decoded = tryTextDecoder(uint8, label) ?? tryEncodingJapanese(uint8, detectedRaw);
+    if (decoded) return decoded;
+  }
+  if (detectedRaw === 'UTF16LE') {
+    const decoded = tryTextDecoder(uint8, 'utf-16le');
+    if (decoded) return decoded;
+  }
+  if (detectedRaw === 'UTF16BE') {
+    const decoded = tryTextDecoder(uint8, 'utf-16be');
+    if (decoded) return decoded;
+  }
+  // UTF16 without endianness: use byte pattern heuristic + try both
+  if (detectedRaw === 'UTF16') {
+    const endian = guessUtf16Endianness(uint8);
+    const first = endian === 'BE' ? 'utf-16be' : 'utf-16le';
+    const second = endian === 'BE' ? 'utf-16le' : 'utf-16be';
+    const decoded = tryTextDecoder(uint8, first) ?? tryTextDecoder(uint8, second);
+    if (decoded) return decoded;
+  }
+
+  // "UNICODE" is encoding-japanese's label when raw bytes don't cleanly match
+  // other categories. Do NOT blindly try UTF-16 — these bytes could be any
+  // legacy encoding. Fall through to the trial loop below.
+
+  // -------- 3. Trial decoding with cleanness check --------
+  // Try the most common encodings in order of likelihood.
+  const candidates = [
+    'utf-8',        // Default modern encoding
+    'shift_jis',    // Windows Japanese legacy
+    'euc-jp',       // Unix Japanese legacy
+    'iso-2022-jp',  // Email/old Japanese
+    'utf-16le',     // UTF-16 LE without BOM
+    'utf-16be',     // UTF-16 BE without BOM
+    'gbk',          // Simplified Chinese
+    'big5',         // Traditional Chinese
+    'euc-kr',       // Korean
+    'windows-1252', // Western European (Latin-1 superset)
+  ];
+  for (const label of candidates) {
+    const decoded = tryTextDecoder(uint8, label);
+    if (decoded) return decoded;
+  }
+
+  // -------- 4. Final fallback: UTF-8 (may include replacement chars) --------
+  return new TextDecoder('utf-8').decode(uint8);
 }
 
 /**
