@@ -3,13 +3,7 @@ import { useApp } from '../context/AppContext';
 import JSZip from 'jszip';
 import Papa from 'papaparse';
 import { StartListEntry } from '../types';
-import {
-  generateMulkaCsv,
-  generateRoleCsv,
-  generatePublicTex,
-  generateRoleTex,
-  generateClassSummaryCsv,
-} from '../utils/outputFormatter';
+import { generateOutputFiles } from '../utils/outputFormatter';
 
 interface ParsedZipData {
   startList: StartListEntry[];
@@ -179,22 +173,26 @@ export default function Step0Edit() {
     });
   };
 
-  const handleProceedToDownload = () => {
-    // Convert edited start list to the format expected by the app
-    dispatch({ type: 'SET_START_LIST', payload: editedStartList });
+  const handleProceedToDownload = async () => {
+    setIsLoading(true);
+    try {
+      // Convert edited start list to the format expected by the app
+      dispatch({ type: 'SET_START_LIST', payload: editedStartList });
 
-    // Generate output files
-    const outputFiles = {
-      mulkaCsv: generateMulkaCsv(editedStartList),
-      roleCsv: generateRoleCsv(editedStartList),
-      publicTex: generatePublicTex(editedStartList, state.globalSettings),
-      roleTex: generateRoleTex(editedStartList, state.globalSettings),
-      classSummaryCsv: generateClassSummaryCsv(editedStartList),
-    };
-    dispatch({ type: 'SET_OUTPUT_FILES', payload: outputFiles });
+      // Generate output files (TeX + DOCX)
+      const outputFiles = await generateOutputFiles(editedStartList, state.globalSettings);
+      dispatch({ type: 'SET_OUTPUT_FILES', payload: outputFiles });
 
-    // Directly dispatch step change (bypass canProceedToStep check since state update is async)
-    dispatch({ type: 'SET_STEP', payload: 'done' });
+      // Directly dispatch step change (bypass canProceedToStep check since state update is async)
+      dispatch({ type: 'SET_STEP', payload: 'done' });
+    } catch (error) {
+      dispatch({
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : '出力ファイル生成に失敗しました',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filteredEntries = editedStartList.filter(e => e.className === selectedClass);

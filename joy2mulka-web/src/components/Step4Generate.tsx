@@ -41,8 +41,8 @@ export default function Step4Generate() {
       setConflicts(detectedConflicts);
       setProgress(80);
 
-      // Generate output files
-      const outputFiles = generateOutputFiles(startList, state.globalSettings);
+      // Generate output files (includes async DOCX generation)
+      const outputFiles = await generateOutputFiles(startList, state.globalSettings);
       setProgress(90);
 
       // Store results

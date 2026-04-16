@@ -3,11 +3,7 @@ import { useApp } from '../context/AppContext';
 import Papa from 'papaparse';
 import { StartListEntry } from '../types';
 import {
-  generateMulkaCsv,
-  generateRoleCsv,
-  generatePublicTex,
-  generateRoleTex,
-  generateClassSummaryCsv,
+  generateOutputFiles,
 } from '../utils/outputFormatter';
 
 interface ParsedFileData {
@@ -189,24 +185,28 @@ export default function Step0Update() {
     }
   };
 
-  const handleProceedToDownload = () => {
+  const handleProceedToDownload = async () => {
     if (!parsedData) return;
 
-    // Set start list
-    dispatch({ type: 'SET_START_LIST', payload: parsedData.startList });
+    setIsLoading(true);
+    try {
+      // Set start list
+      dispatch({ type: 'SET_START_LIST', payload: parsedData.startList });
 
-    // Generate output files
-    const outputFiles = {
-      mulkaCsv: generateMulkaCsv(parsedData.startList),
-      roleCsv: generateRoleCsv(parsedData.startList),
-      publicTex: generatePublicTex(parsedData.startList, state.globalSettings),
-      roleTex: generateRoleTex(parsedData.startList, state.globalSettings),
-      classSummaryCsv: generateClassSummaryCsv(parsedData.startList),
-    };
-    dispatch({ type: 'SET_OUTPUT_FILES', payload: outputFiles });
+      // Generate output files (TeX + DOCX)
+      const outputFiles = await generateOutputFiles(parsedData.startList, state.globalSettings);
+      dispatch({ type: 'SET_OUTPUT_FILES', payload: outputFiles });
 
-    // Directly dispatch step change (bypass canProceedToStep check since state update is async)
-    dispatch({ type: 'SET_STEP', payload: 'done' });
+      // Directly dispatch step change (bypass canProceedToStep check since state update is async)
+      dispatch({ type: 'SET_STEP', payload: 'done' });
+    } catch (error) {
+      dispatch({
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : '出力ファイル生成に失敗しました',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

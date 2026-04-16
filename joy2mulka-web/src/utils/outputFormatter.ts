@@ -1,4 +1,5 @@
 import { StartListEntry, GlobalSettings, OutputFiles, TexTemplate, TexTemplateInfo } from '../types';
+import { generatePublicDocx, generateRoleDocx } from './docxFormatter';
 
 /**
  * Available TeX templates
@@ -1042,17 +1043,24 @@ export function generateRoleTex(
 }
 
 /**
- * Generate all output files
+ * Generate all output files (both TeX and DOCX for public + role startlists)
  */
-export function generateOutputFiles(
+export async function generateOutputFiles(
   startList: StartListEntry[],
   settings: GlobalSettings
-): OutputFiles {
+): Promise<OutputFiles> {
+  const [publicDocx, roleDocx] = await Promise.all([
+    generatePublicDocx(startList, settings),
+    generateRoleDocx(startList, settings),
+  ]);
+
   return {
     mulkaCsv: generateMulkaCsv(startList),
     roleCsv: generateRoleCsv(startList),
     publicTex: generatePublicTex(startList, settings),
     roleTex: generateRoleTex(startList, settings),
+    publicDocx,
+    roleDocx,
     classSummaryCsv: generateClassSummaryCsv(startList),
   };
 }

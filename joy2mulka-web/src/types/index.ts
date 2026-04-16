@@ -111,6 +111,8 @@ export interface OutputFiles {
   roleCsv: string;
   publicTex: string;
   roleTex: string;
+  publicDocx: Blob;
+  roleDocx: Blob;
   classSummaryCsv: string;
 }
 
