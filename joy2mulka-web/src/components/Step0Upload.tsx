@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import {
   parseCSVFile,
   parseXLSXFile,
+  readFileWithEncodingDetection,
   detectColumnMapping,
   parseEntries,
 } from '../utils/csvParser';
@@ -16,53 +17,35 @@ async function parseSimpleFile(file: File): Promise<{
   data: string[][];
   columnNames: string[];
 }> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+  let rows: string[][];
 
-    reader.onload = async (e) => {
-      try {
-        let rows: string[][];
+  if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+    const XLSX = await import('xlsx');
+    const buffer = await file.arrayBuffer();
+    const data = new Uint8Array(buffer);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+    rows = rows.map((row: unknown[]) => row.map((cell) => String(cell)));
+  } else {
+    const Papa = await import('papaparse');
+    const text = await readFileWithEncodingDetection(file);
+    const result = Papa.default.parse<string[]>(text, {
+      header: false,
+      skipEmptyLines: false,
+    });
+    rows = result.data;
+  }
 
-        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-          const XLSX = await import('xlsx');
-          const data = new Uint8Array(e.target?.result as ArrayBuffer);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const sheetName = workbook.SheetNames[0];
-          const sheet = workbook.Sheets[sheetName];
-          rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
-          rows = rows.map((row: unknown[]) => row.map((cell) => String(cell)));
-        } else {
-          const Papa = await import('papaparse');
-          const text = e.target?.result as string;
-          const result = Papa.default.parse<string[]>(text, {
-            header: false,
-            skipEmptyLines: false,
-          });
-          rows = result.data;
-        }
+  if (rows.length < 2) {
+    throw new Error('ファイルには少なくとも2行（ヘッダー + データ）が必要です');
+  }
 
-        if (rows.length < 2) {
-          reject(new Error('ファイルには少なくとも2行（ヘッダー + データ）が必要です'));
-          return;
-        }
+  const columnNames = rows[0].map((cell) => String(cell).trim());
+  const data = rows.slice(1);
 
-        const columnNames = rows[0].map((cell) => String(cell).trim());
-        const data = rows.slice(1);
-
-        resolve({ data, columnNames });
-      } catch (error) {
-        reject(error);
-      }
-    };
-
-    reader.onerror = () => reject(new Error('ファイルの読み込みに失敗しました'));
-
-    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-      reader.readAsArrayBuffer(file);
-    } else {
-      reader.readAsText(file, 'UTF-8');
-    }
-  });
+  return { data, columnNames };
 }
 
 export default function Step0Upload() {

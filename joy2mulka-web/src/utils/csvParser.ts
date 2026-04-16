@@ -41,6 +41,38 @@ export function parseAffiliation(affiliation: string): string[] {
 }
 
 /**
+ * Read a file as ArrayBuffer and decode with automatic encoding detection.
+ * Tries UTF-8 first; if the result contains replacement characters (U+FFFD),
+ * falls back to Shift_JIS (common for Japanese CSV exports from Windows apps like JOY).
+ */
+export async function readFileWithEncodingDetection(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer();
+  const uint8 = new Uint8Array(buffer);
+
+  // Check for UTF-8 BOM (EF BB BF) — if present, it's definitely UTF-8
+  if (uint8.length >= 3 && uint8[0] === 0xEF && uint8[1] === 0xBB && uint8[2] === 0xBF) {
+    return new TextDecoder('utf-8').decode(buffer);
+  }
+
+  // Try UTF-8 first
+  const utf8Text = new TextDecoder('utf-8').decode(buffer);
+
+  // If UTF-8 decoding produced replacement characters, the file is likely not UTF-8
+  if (!utf8Text.includes('\uFFFD')) {
+    return utf8Text;
+  }
+
+  // Fall back to Shift_JIS (CP932), which is the most common non-UTF-8 encoding
+  // for Japanese CSV files exported from Windows applications
+  try {
+    return new TextDecoder('shift_jis').decode(buffer);
+  } catch {
+    // If Shift_JIS decoder is unavailable, return UTF-8 result as-is
+    return utf8Text;
+  }
+}
+
+/**
  * Detect encoding and parse CSV file
  */
 export async function parseCSVFile(file: File): Promise<{
@@ -48,42 +80,30 @@ export async function parseCSVFile(file: File): Promise<{
   header: string[];
   columnNames: string[];
 }> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+  const text = await readFileWithEncodingDetection(file);
 
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-
-      // Use PapaParse
-      const result = Papa.parse<string[]>(text, {
-        header: false,
-        skipEmptyLines: false,
-      });
-
-      if (result.errors.length > 0) {
-        // Try to continue anyway
-        console.warn('CSV parse warnings:', result.errors);
-      }
-
-      const data = result.data;
-      if (data.length < 3) {
-        reject(new Error('Entry list must have at least 3 rows (2 header rows + data)'));
-        return;
-      }
-
-      // First row is group headers, second row is column names
-      const header = data[0].map(normalizeWhitespace);
-      const columnNames = data[1].map(normalizeWhitespace);
-      const rows = data.slice(2);
-
-      resolve({ data: rows, header, columnNames });
-    };
-
-    reader.onerror = () => reject(new Error('Failed to read file'));
-
-    // Try UTF-8 first (most common for modern exports)
-    reader.readAsText(file, 'UTF-8');
+  // Use PapaParse
+  const result = Papa.parse<string[]>(text, {
+    header: false,
+    skipEmptyLines: false,
   });
+
+  if (result.errors.length > 0) {
+    // Try to continue anyway
+    console.warn('CSV parse warnings:', result.errors);
+  }
+
+  const data = result.data;
+  if (data.length < 3) {
+    throw new Error('Entry list must have at least 3 rows (2 header rows + data)');
+  }
+
+  // First row is group headers, second row is column names
+  const header = data[0].map(normalizeWhitespace);
+  const columnNames = data[1].map(normalizeWhitespace);
+  const rows = data.slice(2);
+
+  return { data: rows, header, columnNames };
 }
 
 /**
