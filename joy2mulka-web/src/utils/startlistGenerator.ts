@@ -565,6 +565,55 @@ export function generateStartList(
 }
 
 /**
+ * Generate a start list for 練習会 (practice) mode.
+ *
+ * No start times are assigned: entries keep the order they appeared in the
+ * uploaded entry list, and are simply grouped class by class.
+ *
+ * @param courses - Course definitions (from Step 1; splits are honoured)
+ * @param entries - All entries, in input order
+ * @param generateStartNumbers - When false, no bib numbers are assigned
+ */
+export function generatePracticeStartList(
+  courses: Course[],
+  entries: Entry[],
+  generateStartNumbers: boolean
+): StartListEntry[] {
+  const startList: StartListEntry[] = [];
+
+  // Keep class order stable and predictable
+  const sortedCourses = [...courses].sort((a, b) => a.name.localeCompare(b.name));
+
+  let bib = 1;
+  for (const course of sortedCourses) {
+    // Entries in the order they were read from the entry list
+    const courseEntries =
+      course.entries.length > 0
+        ? entries.filter((e) => course.entries.some((ce) => ce.id === e.id))
+        : entries.filter((e) => e.className === course.originalClass);
+
+    for (const entry of courseEntries) {
+      startList.push({
+        className: course.name,
+        startNumber: generateStartNumbers ? bib++ : 0,
+        name1: entry.name1,
+        name2: entry.name2,
+        affiliation: entry.affiliation || '-',
+        startTime: '',
+        cardNumber: entry.cardNumber,
+        cardNote: entry.isRental || !entry.cardNumber ? 'レンタル' : 'my card',
+        joaNumber: entry.joaNumber,
+        isRental: entry.isRental || !entry.cardNumber,
+        lane: '',
+        startArea: '',
+      });
+    }
+  }
+
+  return startList;
+}
+
+/**
  * Check for conflicts in start list
  */
 export function checkConflicts(

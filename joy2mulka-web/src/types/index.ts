@@ -129,7 +129,7 @@ export interface PersonPositionConstraint {
 }
 
 // TeX template type
-export type TexTemplate = 'default' | 'modern' | 'elegant' | 'compact' | 'festival' | 'japanese' | 'sporty' | 'minimal';
+export type TexTemplate = 'standard' | 'compact' | 'japanese' | 'mono';
 
 export interface TexTemplateInfo {
   id: TexTemplate;
@@ -164,6 +164,10 @@ export interface GlobalSettings {
   seed: number;
   personPositionConstraints: PersonPositionConstraint[];
   texTemplate: TexTemplate;
+  /** 練習会モード: スタート時刻を設定せず、入力順にクラスごとに出力する */
+  practiceMode: boolean;
+  /** ゼッケン（スタートナンバー）を生成するか */
+  generateStartNumbers: boolean;
 }
 
 export interface AppState {

@@ -1,0 +1,1041 @@
+% !TEX program = lualatex
+% =====================================================================
+%  JOY2Mulka 利用マニュアル
+%  ビルド:  lualatex JOY2Mulka_Manual.tex   （2回実行して目次を確定）
+% =====================================================================
+\documentclass[a4paper,11pt]{ltjsarticle}
+
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{needspace}
+\usepackage[hidelinks]{hyperref}
+
+\tcbuselibrary{skins,breakable}
+
+\geometry{top=22mm,bottom=22mm,left=20mm,right=20mm,headsep=6mm,footskip=12mm}
+
+\definecolor{brand}{RGB}{37,99,235}      % アプリのプライマリ（青）
+\definecolor{brandink}{RGB}{23,42,79}
+\definecolor{soft}{RGB}{240,245,252}
+\definecolor{warn}{RGB}{180,120,0}
+\definecolor{warnbg}{RGB}{254,249,231}
+\definecolor{okgreen}{RGB}{22,124,80}
+\definecolor{okbg}{RGB}{236,250,242}
+\definecolor{grayrule}{gray}{0.75}
+\definecolor{band}{gray}{0.92}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{brandink}JOY2Mulka 利用マニュアル}
+\fancyhead[R]{\small\color{brandink}\leftmark}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{grayrule}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+% --- 見出しの体裁 -----------------------------------------------------
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{\z@}%
+  {2.2\baselineskip \@plus .3ex}{0.9\baselineskip}%
+  {\normalfont\Large\bfseries\color{brandink}}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}%
+  {1.5\baselineskip \@plus .2ex}{0.6\baselineskip}%
+  {\normalfont\large\bfseries\color{brandink}}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{\z@}%
+  {1.1\baselineskip \@plus .2ex}{0.4\baselineskip}%
+  {\normalfont\normalsize\bfseries\color{brandink}}}
+\makeatother
+
+% --- 便利マクロ -------------------------------------------------------
+% 画面上のボタン・項目名
+\newcommand{\ui}[1]{\textcolor{brand}{\textbf{［#1］}}}
+% ファイル名・コマンド
+\newcommand{\fn}[1]{\texttt{#1}}
+
+% 図（幅指定つき、枠線あり）
+\newcommand{\shot}[3][0.96]{%
+  \begin{center}
+  \fcolorbox{grayrule}{white}{\includegraphics[width=#1\textwidth]{img/#2}}\\[3pt]
+  {\small\color{brandink}\textbf{図}\quad #3}
+  \end{center}%
+}
+
+% 補足ボックス
+\newtcolorbox{tipbox}[1][ヒント]{
+  breakable, enhanced, colback=soft, colframe=brand,
+  boxrule=0pt, leftrule=3pt, arc=1mm, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries, title=#1, coltitle=brandink,
+  attach boxed title to top left={xshift=8pt, yshift=-3pt},
+  boxed title style={colback=soft, boxrule=0pt, sharp corners}
+}
+\newtcolorbox{warnbox}[1][注意]{
+  breakable, enhanced, colback=warnbg, colframe=warn,
+  boxrule=0pt, leftrule=3pt, arc=1mm, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries, title=#1, coltitle=warn,
+  attach boxed title to top left={xshift=8pt, yshift=-3pt},
+  boxed title style={colback=warnbg, boxrule=0pt, sharp corners}
+}
+\newtcolorbox{stepbox}[1][操作手順]{
+  breakable, enhanced, colback=okbg, colframe=okgreen,
+  boxrule=0pt, leftrule=3pt, arc=1mm, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries, title=#1, coltitle=okgreen,
+  attach boxed title to top left={xshift=8pt, yshift=-3pt},
+  boxed title style={colback=okbg, boxrule=0pt, sharp corners}
+}
+
+\setlist[enumerate]{itemsep=2pt, topsep=3pt, leftmargin=1.6em}
+\setlist[itemize]{itemsep=2pt, topsep=3pt, leftmargin=1.4em}
+
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{5pt}
+
+\begin{document}
+\gtfamily\sffamily
+
+% =====================================================================
+\begin{titlepage}
+\centering
+\vspace*{40mm}
+{\Huge\bfseries\color{brandink} JOY2Mulka}\\[6mm]
+{\LARGE 利用マニュアル}\\[4mm]
+{\large オリエンテーリング大会のスタートリスト生成ツール}\\[18mm]
+
+\begin{tcolorbox}[width=0.82\textwidth, colback=soft, colframe=brand,
+  boxrule=0pt, leftrule=4pt, arc=1mm, left=14pt, right=14pt, top=12pt, bottom=12pt]
+このマニュアルは、\textbf{初めて JOY2Mulka を使う人が、読むだけで一通りの操作ができるようになる}ことを
+目的に書かれています。画面のスクリーンショットを見ながら、上から順に読み進めてください。\\[4pt]
+急いでいる場合は、\textbf{第\ref{sec:quick}章「最短手順」}だけを読めば、
+エントリーリストからスタートリスト一式を生成できます。
+\end{tcolorbox}
+
+\vfill
+{\small 対象バージョン: JOY2Mulka Web / デスクトップ版\quad ｜\quad 本書の作成日: 2026年9月9日}
+\end{titlepage}
+
+% =====================================================================
+\tableofcontents
+\clearpage
+
+% =====================================================================
+\section{JOY2Mulka とは}
+
+JOY2Mulka は、オリエンテーリング大会の\textbf{エントリーリスト}（申込データ）を読み込んで、
+運営に必要な\textbf{スタートリスト}を一式まとめて作るツールです。
+
+手作業でやると半日かかる「クラスごとの並び替え」「同じクラブが連続しないような調整」
+「スタート時刻の割り当て」「掲示用の清書」を、数分で終わらせることができます。
+
+\subsection{何ができるのか（機能一覧）}
+
+\begin{center}
+\begin{tabular}{@{}>{\bfseries}p{42mm}p{105mm}@{}}
+\toprule
+\rowcolor{band}\textbf{機能} & \textbf{説明} \\
+\midrule
+エントリー読み込み & JOY（Japan-O-entrY）形式の CSV / XLSX を自動判別。
+それ以外の形式でも、列の対応を画面上で指定すれば読み込める。 \\
+クラス分割 & 人数の多いクラス（例: M21E 149名）を M21E1 / M21E2 のように複数コースへ均等分割。 \\
+ランキング順分割 & JOA ランキングを使い、強い選手が偏らないようにグループ分け。 \\
+複数スタート・レーン & スタートエリアとレーンをいくつでも作り、レーンごとに開始時刻・
+スタート間隔・コース間の空きを設定。 \\
+同一クラブ連続回避 & 同じ所属の選手が連続してスタートしないように並び替え。 \\
+同時刻クラブ重複検出 & 生成後に「同じ時刻に同じ所属」「同じレーンの近い時刻に同じ所属」を検出して警告。 \\
+人物位置制約 & 特定の人を「前半（先頭20\%）」「後半（最後20\%）」に寄せる。 \\
+JOA 競技者番号取得 & 番号が空欄の選手について、JOA 登録者リストから自動補完（デスクトップ版のみ）。 \\
+練習会モード & スタート時刻を割り当てず、入力順のままクラスごとに出力。 \\
+ゼッケン番号の省略 & スタートナンバー列を出力から丸ごと外す。 \\
+スタートリスト修正 & 生成済みのリストを読み込み、出走順・時刻の入れ替えなどを画面上で修正。 \\
+形式変換 & CSV / TeX のスタートリストを、他の全形式へ一括変換。 \\
+7種類の出力 & Mulka 用 CSV、役員用 CSV、公開用 / 役員用の LaTeX と Word、クラス別人数集計。 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{生成されるファイル}
+\label{sec:files}
+
+最後の画面で、以下の 7 ファイルを個別に、あるいは ZIP でまとめてダウンロードできます。
+
+\begin{center}
+\begin{tabular}{@{}>{\ttfamily}p{45mm}p{50mm}p{45mm}@{}}
+\toprule
+\rowcolor{band}\textbf{\rmfamily ファイル名} & \textbf{用途} & \textbf{渡す相手・使い方} \\
+\midrule
+Startlist.csv & Mulka へのインポート用 & 計時担当。Mulka でそのまま読み込む \\
+Role\_Startlist.csv & 役員用（チェックイン欄つき） & スタート地区の係員。印刷して受付に使う \\
+Public\_Startlist.tex & 公開用スタートリスト & LuaLaTeX で PDF 化して掲示・Web 公開 \\
+Role\_Startlist.tex & 役員用（ふりがな付き） & 呼び出し担当。読み仮名つきで名前を間違えない \\
+Public\_Startlist.docx & 公開用（Word 形式） & LaTeX を使わない場合はこちら \\
+Role\_Startlist.docx & 役員用（Word 形式） & 同上 \\
+Class\_Summary.csv & クラス別人数の集計 & 地図の必要枚数、賞品数の確認 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{3つのモード}
+
+起動すると、まず「何をしますか？」という画面が出ます。ここで作業内容を選びます。
+
+\shot[0.94]{01_menu.png}{最初に表示されるメニュー画面。3つのモードから選ぶ}
+
+\begin{center}
+\begin{tabular}{@{}>{\bfseries}p{38mm}p{110mm}@{}}
+\toprule
+\rowcolor{band}\textbf{モード} & \textbf{こんなときに使う} \\
+\midrule
+エントリーリストの作成 & \textbf{通常はこれ}。申込データから、スタートリスト一式を新しく作る。
+第\ref{sec:create}章。 \\
+エントリーリストの修正 & 一度作ったスタートリストを直したいとき。
+「A さんを同じクラスのもっと早い時間に動かしたい」「欠場者を消したい」など。第\ref{sec:edit}章。 \\
+エントリーリストの更新 & 手元にある CSV や TeX を、別の形式に一括変換したいとき。第\ref{sec:update}章。 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+\section{起動のしかた}
+
+\subsection{デスクトップ版（推奨）}
+
+配布されている \fn{JOY2Mulka.app}（macOS）または \fn{JOY2Mulka-Portable.exe}（Windows）を
+ダブルクリックするだけです。インストール作業は要りません。
+
+\begin{tipbox}[デスクトップ版だけの機能]
+JOA ランキングの取得と JOA 競技者番号の自動補完は、外部サイトへの通信が必要なため
+\textbf{デスクトップ版でしか動きません}。ブラウザ版では「Electron アプリ版が必要です」と表示されます。
+\end{tipbox}
+
+\subsection{ブラウザ版}
+
+配布された URL を開くだけです。データはすべて手元のブラウザの中だけで処理され、
+サーバーへは送信されません。
+
+\subsection{開発者向け: ソースから動かす}
+
+\begin{verbatim}
+cd joy2mulka-web
+npm install
+npm run dev          # ブラウザ版を http://localhost:5173 で起動
+npm run electron:dev # デスクトップ版を起動
+\end{verbatim}
+
+% =====================================================================
+\section{最短手順（まずはこれだけ）}
+\label{sec:quick}
+
+いつもの大会なら、次の 6 ステップで終わります。
+
+\begin{stepbox}[最短ルート]
+\begin{enumerate}
+  \item メニューで \ui{エントリーリストの作成} を選ぶ。
+  \item \textbf{Step 0}：エントリーリストの CSV を左側の枠にドラッグ＆ドロップし、
+        \textbf{大会名}と\textbf{出力フォルダ名}を入力して \ui{次へ}。
+  \item \textbf{Step 1}：人数の多いクラスの\textbf{分割}にチェックを入れて \ui{次へ}。
+        （分割しないならそのまま \ui{次へ}）
+  \item \textbf{Step 2}：\ui{自動配置} を押す。全コースがレーンに入ったら、
+        レーンの\textbf{開始}時刻と\textbf{間隔}を確認して \ui{次へ}。
+  \item \textbf{Step 3}：使う\textbf{テンプレート}を選んで \ui{次へ}。
+  \item \textbf{Step 4}：\ui{スタートリストを生成} を押し、\ui{ダウンロードへ}
+        → \ui{すべてをZIPでダウンロード}。
+\end{enumerate}
+\end{stepbox}
+
+以降の章では、それぞれの画面で何を設定できるのかを詳しく説明します。
+
+% =====================================================================
+\section{エントリーリストの作成}
+\label{sec:create}
+
+画面の上部には、いま自分がどこにいるかを示す\textbf{ステップ表示}が出ています。
+緑は完了済み、青は現在地です。緑のステップをクリックすれば、いつでも戻れます。
+
+\subsection{Step 0：エントリーリストのアップロード}
+
+\shot{02_step0_upload.png}{Step 0。左の枠に JOY 形式、右の枠にそれ以外の形式を読み込ませる}
+
+\subsubsection{読み込み枠は2つある}
+
+\begin{itemize}
+  \item \textbf{左：JOY エントリーリスト} \\
+        Japan-O-entrY からダウンロードした CSV / XLSX を、\textbf{ドラッグ＆ドロップ}するか
+        クリックして選びます。「チーム（組）・1人目」形式（1行に複数人が入っている形）も
+        自動的に判別して、1人ずつに展開します。
+  \item \textbf{右：その他のエントリーリスト} \\
+        部内エントリーの Excel など、JOY 以外の形式のときに使います。
+        クリックすると\textbf{カラム対応設定}の画面が開くので、
+        「クラス」「氏名1」「氏名2」「所属」「カード」などが CSV の何列目にあるかを指定します。
+        元データの先頭 10 行が表示されるので、それを見ながら選べば間違えません。
+\end{itemize}
+
+\begin{tipbox}[複数のファイルを合わせて読み込める]
+ファイルを続けて読み込ませると、\textbf{エントリーは追加されていきます}。
+「JOY の申込」＋「当日エントリーの Excel」のように、分かれているデータを合流させられます。
+\end{tipbox}
+
+読み込みに成功すると、件数とクラス数、検出された列、先頭 50 行のプレビュー、
+クラス別人数が表示されます。ここで件数が想定と合っているか必ず確認してください。
+
+\shot[0.94]{03_step0_loaded.png}{読み込み結果の表示。件数・クラス数・検出された列を確認する}
+
+\subsubsection{大会設定}
+
+\begin{center}
+\begin{tabular}{@{}>{\bfseries}p{34mm}p{112mm}@{}}
+\toprule
+\rowcolor{band}\textbf{項目} & \textbf{意味} \\
+\midrule
+大会名 & 生成される PDF / Word のページ上部（ヘッダー）に入ります。例: 第30回○○大会 \\
+出力フォルダ名 & ZIP ファイル名と、スタートリストの表紙タイトルになります。例: Competition2026 \\
+言語 & 日本語 / English。表の見出し（時刻・氏名・所属など）が切り替わります。 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{出力モード}
+
+\shot[0.94]{04_step0_outputmode.png}{出力モード。練習会モードとゼッケン番号の有無をここで決める}
+
+\begin{itemize}
+  \item \textbf{練習会モード（スタート時刻を割り当てない）} \\
+        詳しくは第\ref{sec:practice}章。スタート時刻を一切決めず、
+        エントリーの入力順のままクラスごとに出力します。
+  \item \textbf{ゼッケン番号（スタートナンバー）を生成する} \\
+        チェックを外すと、\textbf{すべての出力からスタートナンバーの列が消えます}。
+        ゼッケンを使わない大会や、番号を別で管理している場合に外してください。
+\end{itemize}
+
+\begin{tipbox}
+練習会モードにチェックを入れると、ゼッケン番号は自動的にオフになります。
+練習会でも番号を振りたい場合は、あとからチェックを入れ直せます。
+\end{tipbox}
+
+\subsection{Step 1：クラス設定（クラスの分割）}
+
+読み込んだクラスの一覧が出ます。人数の多いクラスは、複数のコースに分けることができます。
+
+\shot{05_step1_split.png}{Step 1。M21E（149名）に分割のチェックを入れ、分割数を2にした状態}
+
+\begin{center}
+\begin{tabular}{@{}>{\bfseries}p{26mm}p{120mm}@{}}
+\toprule
+\rowcolor{band}\textbf{列} & \textbf{意味} \\
+\midrule
+クラス名 & 検出されたクラス \\
+人数 & そのクラスのエントリー数 \\
+分割 & チェックを入れると分割する \\
+分割数 & 2〜6 から選ぶ \\
+結果 & 分割後のコース名のプレビュー（例: M21E1, M21E2）と、1コースあたりの人数 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+表の下には一括操作があります。
+
+\begin{itemize}
+  \item \ui{自動設定（120名以上を分割）}：120 名以上のクラスに分割を設定します
+        （240 名以上は 3 分割）。まずこれを押して、必要なら個別に直すのが早いです。
+  \item \ui{すべてリセット}：分割設定を全部外します。
+\end{itemize}
+
+\begin{tipbox}[分割すると何が変わるか]
+M21E を 2 分割すると、\textbf{M21E1} と \textbf{M21E2} という 2 つのコースになります。
+この 2 つは別々のレーンに置けるので、スタート渋滞を避けられます。
+どちらのグループに誰が入るかは、Step 3 の「ランキング順分割」の設定で決まります。
+\end{tipbox}
+
+\subsection{Step 2：スタート設定（エリア・レーン・コース配置）}
+
+ここが一番大事な画面です。\textbf{スタートエリア}の中に\textbf{レーン}を作り、
+そこへ\textbf{コース}を並べていきます。
+
+\shot{06_step2.png}{Step 2。\ui{自動配置} を押して全コースを 1 レーンに入れた直後}
+
+\subsubsection{画面の構成}
+
+\begin{itemize}
+  \item \textbf{左（スタートエリア・レーン）}：レーンの設定と、そこに置かれたコース。
+  \item \textbf{右上（未配置コース）}：まだどのレーンにも入っていないコース。
+        ここから左のレーンへ\textbf{ドラッグ＆ドロップ}して配置します。
+  \item \textbf{右中（生成設定）}：乱数シード。
+  \item \textbf{右下（配置状況・人物位置制約）}：進捗の確認と、人ごとの前後指定。
+\end{itemize}
+
+\subsubsection{レーンの設定項目}
+
+各レーンの行には、次の入力欄が並んでいます。
+
+\begin{center}
+\begin{tabular}{@{}>{\bfseries}p{26mm}p{120mm}@{}}
+\toprule
+\rowcolor{band}\textbf{項目} & \textbf{意味} \\
+\midrule
+レーン名 & 出力の見出しに使われます（例: Lane 1）。自由に変更できます。 \\
+開始 & そのレーンの最初のスタート時刻。\fn{11:00} のように入力します。 \\
+番号 & 開始ナンバー（互換のために残っている項目です。実際のスタートナンバーは
+第\ref{sec:bib}節の式で自動計算されます）。 \\
+間隔 & 1人ごとのスタート間隔（分）。1 なら 1 分間隔。 \\
+コース間 & 1つのコースが終わってから次のコースが始まるまでに空ける分数。
+0 なら間を空けずに続けます。 \\
+所属分散 & チェックを入れると、そのレーン内で同じ所属が連続しないように並べ替えます。 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{コースの配置}
+
+\begin{stepbox}[配置のやり方]
+\begin{enumerate}
+  \item \ui{自動配置} を押すと、全コースが自動的にレーンへ振り分けられます。まずはこれで十分です。
+  \item 手で調整したいときは、右の「未配置コース」からコース名を\textbf{ドラッグ}して、
+        レーンの点線の枠に\textbf{ドロップ}します。
+  \item レーン内のコースは、コース名の左右にある \ui{◀} \ui{▶} で\textbf{順番を入れ替え}られます。
+        左にあるコースほど早くスタートします。
+  \item コース名の \ui{×} を押すと、そのコースを未配置に戻します。
+  \item \ui{＋ エリア追加} で 2つ目以降のスタートエリアを、
+        \ui{＋ レーン} でレーンを追加できます。
+\end{enumerate}
+\end{stepbox}
+
+\shot{07_step2_lanes.png}{3レーンにコースを分けた例。各レーンの人数がほぼ揃っている}
+
+右下の\textbf{配置状況}に「未配置: 0」と表示され、
+\textbf{未配置コース}が「すべてのコースが配置されました」になれば完了です。
+
+\begin{warnbox}
+コースが 1つでも未配置のままだと、\ui{次へ} を押しても Step 3 に進めません。
+\end{warnbox}
+
+\subsubsection{乱数シード}
+
+並び替えには乱数を使います。\textbf{同じシード（初期値 42）なら、何度実行しても同じ結果}になります。
+「昨日と同じリストをもう一度作りたい」ときはシードを変えないでください。
+逆に「並びが気に入らないのでやり直したい」ときは、42 を 43 などに変えて生成し直します。
+
+\subsubsection{人物位置制約（Step 2 側）}
+
+特定の人を早めの時間帯／遅めの時間帯に寄せる設定です。
+Step 3 にも同じ機能があり、そちらのほうが検索しやすいので、
+詳しくは第\ref{sec:ppc}節で説明します。
+
+\subsection{Step 3：制約設定}
+
+生成の細かい条件と、出力デザインを決める画面です。
+
+\shot{08_step3_global.png}{Step 3 の上部。全体設定とレーン別所属分散設定}
+
+\subsubsection{全体設定 — 同一クラブ連続回避}
+
+チェックを入れると、\textbf{同じクラブ・所属の選手が連続してスタートしないように}並べ替えます。
+完全に回避できない場合（同じ所属の人が多すぎる場合など）は、
+競合が最も少ない並びを採用します。
+
+\textbf{シャッフル最大試行回数}は、その並べ替えを何回試すかです。初期値 1000。
+大きくすると結果は良くなりますが、生成に時間がかかります。
+1000 で不満がなければ変える必要はありません。
+
+\begin{tipbox}[所属の判定ルール]
+所属は「/」「,」「、」で区切って\textbf{複数所属}として扱われます。
+また末尾の数字は無視されるので、\fn{ClubA1} と \fn{ClubA2} は同じ所属とみなされます。
+\end{tipbox}
+
+\subsubsection{ランキング順分割}
+
+Step 1 で分割したクラスがある場合だけ表示されます。
+チェックを入れたクラスは、JOA ランキング順にグループへ振り分けられます。
+
+\begin{quote}
+1位 → グループ1、2位 → グループ2、3位 → グループ1 … （順番に配っていく）\\
+ランキングのない選手は、グループの人数が揃うようにランダムに配分。
+\end{quote}
+
+チェックを外した場合は、エントリー順で均等に振り分けます。
+
+\ui{すべて有効} \ui{すべて無効} で一括切り替えができます。
+また\textbf{大会種別}（フォレスト／スプリント）でランキングの取得先が変わります。
+
+\subsubsection{レーン別所属分散設定}
+
+Step 2 でレーンごとに設定した「所属分散」を、ここでまとめて確認・変更できます。
+レーン名の横に、そのレーンに入っているコースが並んでいるので、確認しながら切り替えられます。
+
+\subsubsection{JOA 競技者番号取得}
+
+\shot[0.94]{09_step3_lane_joa.png}{レーン別所属分散設定・JOA競技者番号取得・人物位置制約}
+
+エントリーリストに JOA 競技者番号が入っていない場合、
+\ui{JOA番号を取得} を押すと \fn{japan-o-entry.com} の登録者リストから氏名で照合して補完します。
+補完できた人数が表示されます。
+
+\begin{warnbox}[デスクトップ版のみ]
+この機能はブラウザ版では使えません（外部サイトへの通信が必要なため）。
+ブラウザ版では「Electron アプリ版が必要です」と表示されます。
+\end{warnbox}
+
+\subsubsection{人物位置制約}
+\label{sec:ppc}
+
+「役員をやるので早めに出走したい」「遠方から来るので遅めにしたい」といった要望に応える機能です。
+
+\begin{stepbox}
+\begin{enumerate}
+  \item 左のプルダウンで \textbf{前半（Early）} か \textbf{後半（Late）} を選ぶ。
+  \item 検索欄に\textbf{名前（漢字でもかなでも可）または所属}を入力する。
+  \item 候補が出るのでクリックして追加する（\textbf{Enter キー}で先頭の候補を追加）。
+\end{enumerate}
+\end{stepbox}
+
+\textbf{前半}はそのコースの先頭 20\%、\textbf{後半}は最後 20\% の位置に配置されます。
+追加した制約は一覧に表示され、\ui{×} で削除できます。
+
+\begin{tipbox}
+同じ所属が連続しないよう調整しながら配置するので、
+指定した位置ちょうどではなく、その付近の空いている位置に入ります。
+\end{tipbox}
+
+\subsubsection{LaTeX テンプレート選択}
+
+公開用・役員用のスタートリスト（\fn{.tex} と \fn{.docx}）のデザインを 4 種類から選びます。
+どれを選んでも、出力される\textbf{内容は同じ}です。見た目だけが変わります。
+
+\shot[0.94]{10_step3_templates.png}{4種類のテンプレート。カードをクリックして選ぶ}
+
+各テンプレートの実際の仕上がりは、第\ref{sec:templates}章で見比べられます。
+
+\subsubsection{設定サマリー}
+
+画面の一番下に、ここまでの設定が箇条書きでまとまっています。
+\ui{次へ} を押す前に、ここを一読して確認してください。
+
+\subsection{Step 4：スタートリスト生成}
+
+\ui{スタートリストを生成} を押すだけです。数秒で完了します。
+
+\shot{11_step4_result.png}{生成完了。レーンごとのプレビューとクラス別統計が表示される}
+
+\subsubsection{生成後に表示されるもの}
+
+\begin{itemize}
+  \item \textbf{生成件数}：「○○件のスタートリストを生成しました」
+  \item \textbf{競合の警告}（あれば）：黄色い枠で表示されます。次項参照。
+  \item \textbf{プレビュー}：レーンごとの折りたたみ。クリックすると中身の表が開きます。
+  \item \textbf{クラス別統計}：クラスごとの人数。
+\end{itemize}
+
+\subsubsection{競合の警告}
+
+次の 2 種類を自動で検出します。
+
+\begin{center}
+\begin{tabular}{@{}>{\bfseries}p{40mm}p{106mm}@{}}
+\toprule
+\rowcolor{band}\textbf{種類} & \textbf{内容} \\
+\midrule
+同じ時刻に同じ所属 & 別のレーンでも、同じ時刻に同じクラブの選手がいる場合。 \\
+同じレーンの近接時刻に同じ所属 & 同じレーン内で、設定した分数以内に同じクラブの選手がいる場合。 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+警告が出ても生成自体は完了しています。気になる場合は、
+
+\begin{enumerate}
+  \item Step 2 に戻って\textbf{乱数シードを変えて}生成し直す、または
+  \item 生成後に「エントリーリストの修正」（第\ref{sec:edit}章）で個別に入れ替える
+\end{enumerate}
+
+のどちらかで調整してください。
+
+\subsection{Done：ダウンロード}
+
+\shot{12_done_files.png}{ダウンロード画面。ZIP 一括と個別ダウンロードが選べる}
+
+\begin{itemize}
+  \item \ui{すべてをZIPでダウンロード}：7ファイルをまとめて
+        \fn{（出力フォルダ名）.zip} として保存します。\textbf{通常はこれで十分です。}
+  \item \textbf{個別ダウンロード}：必要なファイルだけを選んで保存します。
+        ファイル名には出力フォルダ名が接頭辞として付きます。
+  \item \textbf{出力プレビュー}：\fn{Startlist.csv} と \fn{Class\_Summary.csv} の中身を
+        その場で確認できます。
+\end{itemize}
+
+\shot[0.94]{13_done_latex.png}{LaTeX / Word ファイルの扱いについての案内}
+
+\begin{warnbox}[ZIP は必ず保存しておく]
+「エントリーリストの修正」モードは、この ZIP（または中の \fn{Startlist.csv}）を読み込んで動きます。
+あとで直す可能性があるなら、ZIP は必ず手元に残してください。
+\end{warnbox}
+
+% =====================================================================
+\section{練習会モード（スタート時刻なし）}
+\label{sec:practice}
+
+練習会や記録会では、スタート時刻を細かく決めず、「クラスごとに名簿があればよい」
+ことがあります。そのための専用モードです。
+
+\subsection{何が変わるのか}
+
+\begin{center}
+\begin{tabular}{@{}>{\bfseries}p{34mm}p{55mm}p{55mm}@{}}
+\toprule
+\rowcolor{band}\textbf{項目} & \textbf{通常} & \textbf{練習会モード} \\
+\midrule
+スタート時刻 & レーン設定から自動計算 & \textbf{割り当てない}（列ごと消える） \\
+並び順 & 所属分散などで並べ替え & \textbf{エントリーの入力順のまま} \\
+まとめ方 & スタートエリア／レーン単位 & \textbf{クラス単位} \\
+Step 2（スタート設定） & 必要 & \textbf{省略される} \\
+ゼッケン番号 & 時刻から自動計算 & 1 から連番、または出力しない \\
+競合チェック & 実行される & 時刻が無いので行われない \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{使い方}
+
+\begin{stepbox}
+\begin{enumerate}
+  \item メニューで \ui{エントリーリストの作成} を選ぶ。
+  \item Step 0 でエントリーリストを読み込み、一番下の\textbf{出力モード}で
+        \ui{練習会モード（スタート時刻を割り当てない）} にチェックを入れる。
+  \item ゼッケン番号も出したい場合は \ui{ゼッケン番号（スタートナンバー）を生成する}
+        にもチェックを入れる（練習会モードにすると自動的に外れます）。
+  \item \ui{次へ} → Step 1 でクラスの分割を設定 → \ui{次へ}。
+  \item \textbf{Step 2 は飛ばされ}、そのまま Step 3 に進みます。
+        テンプレートを選んで \ui{次へ}。
+  \item Step 4 で \ui{スタートリストを生成} → \ui{ダウンロードへ}。
+\end{enumerate}
+\end{stepbox}
+
+ステップ表示からも Step 2 が消え、\fbox{Step 0}→\fbox{Step 1}→\fbox{Step 3}→\fbox{Step 4}→\fbox{Done}
+という並びになります。
+Step 3 でも、並び替えやレーンに関する設定（同一クラブ連続回避・レーン別所属分散・人物位置制約）は
+意味を持たないため表示されません。
+
+\subsection{出力の違い}
+
+スタート時刻の列が\textbf{丸ごと削除}されます。ゼッケン番号を生成しない場合は、
+スタートナンバーの列も削除されます。たとえば \fn{Startlist.csv} は次のようになります。
+
+\begin{center}
+\begin{tabular}{@{}>{\bfseries}p{22mm}>{\ttfamily\small}p{120mm}@{}}
+\toprule
+\rowcolor{band}\textbf{\rmfamily 設定} & \textbf{\rmfamily ヘッダー行} \\
+\midrule
+通常 & クラス,スタートナンバー,氏名１,氏名2,所属,スタート時刻,カード番号,カード備考,競技者登録番号 \\
+練習会 & クラス,氏名１,氏名2,所属,カード番号,カード備考,競技者登録番号 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+PDF / Word でも同様に、時刻とナンバーの列が消え、レーンの見出しも付きません。
+
+\begin{warnbox}
+スタート時刻の列がないため、練習会モードで作った \fn{Startlist.csv} は
+\textbf{Mulka にそのままインポートできません}。
+Mulka を使う場合は練習会モードを使わないでください。
+\end{warnbox}
+
+% =====================================================================
+\section{エントリーリストの修正}
+\label{sec:edit}
+
+一度作ったスタートリストを、あとから直すためのモードです。
+「A さんを同じクラスのもっと前の方に動かしたい」「B さんと C さんの時刻を入れ替えたい」
+「欠場者を消したい」といった、\textbf{当日までに必ず発生する調整}をここで行います。
+
+\subsection{読み込み}
+
+\shot{14_edit_top.png}{修正画面の上部。検索欄・クラス選択・操作の説明・「元に戻す」}
+
+読み込めるファイルは次の3種類です。
+
+\begin{itemize}
+  \item 生成時にダウンロードした \fn{（出力フォルダ名）.zip}
+  \item \fn{Startlist.csv}（Mulka 用）
+  \item \fn{Role\_Startlist.csv}（役員用）
+\end{itemize}
+
+列はヘッダーの名前で対応づけるので、Mulka 用と役員用のどちらを読ませても正しく解釈されます。
+
+読み込むと、画面上部に\textbf{ファイル名・総人数・クラス数}が表示されます。
+編集を始めると、その右に\textbf{変更 ○件}というカウンタが出ます。
+
+\subsection{もっとも大事な考え方：時刻は「枠」に固定されている}
+
+この画面では、\textbf{スタート時刻と No. は「枠」に属していて、人には属していません}。
+
+\begin{center}
+\begin{tcolorbox}[width=0.9\textwidth, colback=soft, colframe=brand,
+  boxrule=0pt, leftrule=4pt, arc=1mm, left=12pt, right=12pt, top=10pt, bottom=10pt]
+1番目の枠 = 11:28:00 / No.1414\\
+2番目の枠 = 11:30:00 / No.1415\\
+3番目の枠 = 11:32:00 / No.1416\\[6pt]
+\textbf{この枠は動きません。動くのは「誰がどの枠に入るか」だけです。}
+\end{tcolorbox}
+\end{center}
+
+だから、4番目にいた人を「先頭へ」動かすと、その人が 11:28:00 になり、
+それまで 1〜3 番目にいた人が 1つずつ後ろの枠（11:30、11:32、11:34）へずれます。
+\textbf{クラス全体のスタート時刻の並びは崩れません。}
+
+\subsection{一覧表と操作ボタン}
+
+\shot{15_edit_table.png}{クラス内の一覧。右端の操作ボタンで出走順を入れ替える}
+
+表の各列は直接書き換えられます（No.・時刻・氏名・ふりがな・所属・カード・レンタル）。
+右端の\textbf{操作}列には、次のボタンが並んでいます。
+
+\begin{center}
+\begin{tabular}{@{}>{\bfseries}c>{\bfseries}p{30mm}p{86mm}@{}}
+\toprule
+\rowcolor{band}\textbf{\rmfamily ボタン} & \textbf{名前} & \textbf{動作} \\
+\midrule
+▲ & 1つ前へ & すぐ前の人と入れ替わる。1つ早い時刻になる。 \\
+▼ & 1つ後へ & すぐ後ろの人と入れ替わる。1つ遅い時刻になる。 \\
+先頭 & クラスの先頭へ & そのクラスの一番早い時刻に移動。間の人は1つずつ後ろへずれる。 \\
+最後 & クラスの最後へ & そのクラスの一番遅い時刻に移動。間の人は1つずつ前へずれる。 \\
+順 & 指定位置へ & 数字を入力して \textbf{Enter}。その順番へ一気に移動する。 \\
+⇄ & 時刻を入れ替え & 2人を選んで、その2人だけスタート時刻を交換する。 \\
+× & 削除 & その出走者を消す。以降の人が1つずつ繰り上がる。 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{2人の時刻を入れ替える}
+
+\begin{stepbox}
+\begin{enumerate}
+  \item 片方の人の \ui{⇄} を押す。ボタンがオレンジになり、画面上部に
+        「○○（11:30:00）と入れ替える相手の ⇄ を押してください」と表示されます。
+  \item もう片方の人の \ui{⇄} を押す。2人のスタート時刻と No. が交換されます。
+  \item やめたいときは、同じ \ui{⇄} をもう一度押すか、
+        メッセージ右の \ui{取り消し} を押します。
+\end{enumerate}
+\end{stepbox}
+
+\begin{tipbox}[「前後に動かす」と「入れ替える」の違い]
+\ui{先頭}\ui{最後}\ui{順} は\textbf{間の人が1つずつずれます}（列に割り込むイメージ）。\\
+\ui{⇄} は\textbf{その2人だけが交換され、他の人は動きません}。\\
+「A さんを B さんの時間にしたい」なら \ui{⇄}、
+「A さんをとにかく早い時間にしたい」なら \ui{先頭} を使ってください。
+\end{tipbox}
+
+\subsection{人を探す}
+
+一番上の検索欄に\textbf{名前・ふりがな・所属・カード番号}のどれかを入力すると、
+\textbf{全クラスを横断して}候補が表示されます。
+候補にはクラス・氏名・所属・スタート時刻が並ぶので、同姓同名でも見分けられます。
+
+候補をクリックすると、\textbf{そのクラスの表に自動的に切り替わり、
+該当の行までスクロールして黄色く光ります}。
+556 人のリストから 1 人を探すのに、クラスを順番に開いていく必要はありません。
+
+\subsection{その他の操作}
+
+\begin{itemize}
+  \item \ui{元に戻す}：直前の操作を取り消します。
+        並べ替え・入れ替え・削除・セルの編集、すべてが対象で、\textbf{50 手前まで}戻れます。
+        括弧内の数字が、あと何回戻れるかです。
+  \item \ui{＋ このクラスの最後に1行追加}：表の下にあります。
+        当日エントリーの追加などに使います。時刻は直前の間隔から自動で計算されます。
+  \item \textbf{変更のマーク}：編集された行は薄いオレンジ色になり、
+        行番号の横に \textbf{•} が付きます。どこを触ったかが一目で分かります。
+\end{itemize}
+
+\subsection{出力}
+
+\ui{ダウンロード画面へ} を押すと、修正後の内容で 7 ファイルすべてを作り直します。
+ダウンロード画面の使い方は第\ref{sec:files}節と同じです。
+
+\begin{warnbox}
+\ui{← 別のファイルを選択} を押すと編集内容は破棄されます（確認ダイアログが出ます）。
+このモードには自動保存がないので、修正が終わったら必ずダウンロードしてください。
+\end{warnbox}
+
+% =====================================================================
+\section{エントリーリストの更新（形式変換）}
+\label{sec:update}
+
+手元にあるスタートリストを、\textbf{他の形式に一括変換}するモードです。
+「CSV しか残っていないが公開用 PDF を作り直したい」「テンプレートを変えて出力し直したい」
+といったときに使います。
+
+\subsection{読み込めるファイル}
+
+\begin{itemize}
+  \item \fn{Startlist.csv} / \fn{Role\_Startlist.csv}（CSV 形式）
+  \item \fn{Public\_Startlist.tex} / \fn{Role\_Startlist.tex}（LaTeX 形式）
+\end{itemize}
+
+TeX ファイルからは、表の行とクラス見出しを解析してエントリーを取り出します。
+
+\subsection{使い方}
+
+\begin{stepbox}
+\begin{enumerate}
+  \item メニューで \ui{エントリーリストの更新} を選ぶ。
+  \item \fn{.csv} または \fn{.tex} をドラッグ＆ドロップする。
+  \item 読み込み結果（クラス・氏名・所属・時刻）を確認する。
+  \item \ui{ダウンロード画面へ} を押すと、7ファイルすべてが生成されます。
+\end{enumerate}
+\end{stepbox}
+
+\begin{warnbox}
+スタート時刻とスタートナンバーを手がかりに解析するため、
+\textbf{練習会モードで作ったファイル（時刻なし）はこのモードでは読み込めません}。
+練習会のリストを直したいときは「エントリーリストの修正」を使ってください。
+\end{warnbox}
+
+% =====================================================================
+\section{出力テンプレート（4種類）}
+\label{sec:templates}
+
+Step 3 で選ぶテンプレートは 4 種類です。掲載される情報は同じで、組版だけが変わります。
+下の図は、同じデータを 4 種類のテンプレートで出力した 1 ページ目です。
+
+\newcommand{\tplcard}[2]{%
+  \begin{minipage}[t]{0.46\textwidth}
+  \centering
+  \fcolorbox{grayrule}{white}{\includegraphics[width=\textwidth]{img/#1}}\\[3pt]
+  {\small\color{brandink}#2}
+  \end{minipage}%
+}
+
+\begin{center}
+\tplcard{tpl_standard.png}{\textbf{標準}\quad ゴシック体・水平罫のみ}\hfill
+\tplcard{tpl_compact.png}{\textbf{コンパクト}\quad 8pt・2段組}\\[6mm]
+\tplcard{tpl_japanese.png}{\textbf{和}\quad 明朝体・藍色の細罫}\hfill
+\tplcard{tpl_mono.png}{\textbf{モノクロ}\quad 完全白黒・1行おきの淡いグレー}
+\end{center}
+
+\vspace{4mm}
+
+\begin{center}
+\begin{tabular}{@{}>{\bfseries}p{24mm}p{56mm}p{56mm}@{}}
+\toprule
+\rowcolor{band}\textbf{名前} & \textbf{特徴} & \textbf{向いている場面} \\
+\midrule
+標準 & ゴシック体、横罫のみ。10pt、余白18mm。 & 迷ったらこれ。掲示・配布どちらにも使える。 \\
+コンパクト & 8pt・2段組。同じ内容がおよそ半分のページ数に収まる。 & 参加者が多い大会。印刷枚数を減らしたいとき。 \\
+和 & 明朝体、藍色の細い罫、広い余白。 & 記念大会など、落ち着いた印象にしたいとき。 \\
+モノクロ & 完全な白黒。太い上下罫と1行おきの薄いグレー。 & 白黒コピー・FAX を前提とするとき。行を目で追いやすい。 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{tipbox}[すべてのテンプレートに共通する工夫]
+\begin{itemize}
+  \item 表がページをまたぐとき、次のページの先頭に\textbf{見出し行と「続き」の表示}が繰り返されます。
+  \item 氏名・所属の列は\textbf{幅が決まっていて自動的に折り返す}ので、
+        長い所属名でも紙からはみ出しません。
+  \item カード列は折り返さないので、「レンタル」が2行に割れることはありません。
+  \item クラス見出しがページの一番下に取り残されないよう、自動的に改ページします。
+\end{itemize}
+\end{tipbox}
+
+\subsection{Word 版（.docx）}
+
+\fn{.docx} も同じテンプレート設定に従い、余白・文字サイズ・罫線の太さ・
+見出しの色がそれぞれ対応した見た目になります。
+LaTeX 環境がない場合は、こちらを Word や LibreOffice で開いて印刷してください。
+
+% =====================================================================
+\section{LaTeX ファイルの PDF 化}
+
+\fn{.tex} ファイルは \textbf{LuaLaTeX} でコンパイルします（pdfLaTeX では通りません）。
+
+\subsection{Overleaf を使う場合}
+
+\begin{stepbox}
+\begin{enumerate}
+  \item Overleaf で新規プロジェクトを作り、\fn{.tex} ファイルをアップロードする。
+  \item \textbf{Menu} → \textbf{Settings} → \textbf{Compiler} を \textbf{LuaLaTeX} に変更する。
+  \item \textbf{Recompile} を押す。
+\end{enumerate}
+\end{stepbox}
+
+\subsection{手元の環境で行う場合}
+
+\begin{verbatim}
+lualatex Public_Startlist.tex
+lualatex Role_Startlist.tex
+\end{verbatim}
+
+必要なパッケージは以下です。TeX Live のフルインストールであればすべて入っています。
+
+\begin{center}
+\begin{tabular}{@{}>{\ttfamily}p{34mm}p{112mm}@{}}
+\toprule
+\rowcolor{band}\textbf{\rmfamily パッケージ} & \textbf{役割} \\
+\midrule
+ltjsarticle & 日本語ドキュメントクラス（LuaTeX-ja） \\
+luatexja-ruby & ふりがな（ルビ）。役員用リストで使用 \\
+geometry & 余白の設定 \\
+longtable / array & ページをまたぐ表 \\
+booktabs & 罫線 \\
+xcolor / colortbl & 色・表の背景色 \\
+fancyhdr & ヘッダー・フッター \\
+needspace & クラス見出しの孤立防止 \\
+multicol & 2段組（コンパクトのみ） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+\section{仕様の詳細}
+
+\subsection{スタートナンバーの決まり方}
+\label{sec:bib}
+
+スタートナンバーは、スタート時刻とレーン番号から自動的に計算されます。
+
+\begin{center}
+\begin{tcolorbox}[width=0.86\textwidth, colback=soft, colframe=brand,
+  boxrule=0pt, leftrule=4pt, arc=1mm, left=12pt, right=12pt, top=10pt, bottom=10pt]
+\texttt{時刻コード = 時 × 100 + 分}\\
+\texttt{base = 10\^{}(時刻コードの桁数 - 1)}\\
+\texttt{スタートナンバー = 時刻コード + base × (1 + レーン番号)}
+\end{tcolorbox}
+\end{center}
+
+\textbf{例}：11時22分・レーン1 の場合
+\begin{itemize}
+  \item 時刻コード $= 11 \times 100 + 22 = 1122$
+  \item 桁数は 4 なので $base = 10^{3} = 1000$
+  \item スタートナンバー $= 1122 + 1000 \times (1 + 1) = \mathbf{3122}$
+\end{itemize}
+
+レーン番号は\textbf{全スタートエリアを通しての連番}です
+（エリア1のレーン1が 1、エリア1のレーン2が 2、エリア2のレーン1が 3 …）。
+この方式だと、ゼッケンを見るだけでスタート時刻とレーンが分かります。
+
+練習会モードではこの計算を使わず、\textbf{1 からの連番}になります。
+
+\subsection{クラス分割のアルゴリズム}
+
+\begin{verbatim}
+ランキングのある選手:
+  1位 → グループ1
+  2位 → グループ2
+  3位 → グループ1
+  ...（グループ数で割った余りで配分）
+
+ランキングのない選手:
+  各グループの人数が揃うようにランダムに配分
+\end{verbatim}
+
+\subsection{同一クラブ連続回避のアルゴリズム}
+
+\begin{enumerate}
+  \item 選手をランダムにシャッフルする。
+  \item 先頭から順に、\textbf{直前の人と所属が重ならない人}を選んで並べていく（貪欲法）。
+  \item 連続してしまった箇所の数を数える。
+  \item 1〜3 を「シャッフル最大試行回数」だけ繰り返し、\textbf{最も連続が少ない並び}を採用する。
+        途中で 0 になれば、その時点で終了する。
+\end{enumerate}
+
+\subsection{扱えるファイル形式}
+
+\begin{itemize}
+  \item 文字コード: UTF-8（BOM 付き含む）、Shift-JIS、EUC-JP
+  \item 区切り文字: カンマ区切り、タブ区切り
+  \item 拡張子: \fn{.csv}、\fn{.xlsx}、\fn{.xls}、\fn{.zip}、\fn{.tex}
+  \item 氏名の全角・半角スペースは自動的に正規化されます。
+\end{itemize}
+
+% =====================================================================
+\section{困ったときは}
+
+\begin{center}
+\begin{longtable}{@{}>{\bfseries}p{58mm}p{86mm}@{}}
+\toprule
+\rowcolor{band}\textbf{症状} & \textbf{対処} \\
+\midrule
+\endfirsthead
+\rowcolor{band}\textbf{症状} & \textbf{対処} \\
+\midrule
+\endhead
+Step 3 に進めない（\ui{次へ} が押せない） &
+コースが未配置のまま残っています。Step 2 の右側「配置状況」で\textbf{未配置: 0}
+になっているか確認してください。\ui{自動配置} を押すのが簡単です。 \\
+
+読み込んだ人数が想定より少ない &
+「チーム（組）・1人目」形式の検出に失敗している可能性があります。
+右側の \ui{その他のエントリーリスト} から読み込んで、
+カラム対応を手動で指定してください。 \\
+
+クラス名が変な形で検出される &
+エントリーリストのクラス列に余計な文字（空白・記号）が入っていないか確認してください。 \\
+
+JOA番号が取得できない &
+この機能はデスクトップ版専用です。ブラウザ版では使えません。 \\
+
+ランキングが取得できない &
+同じくデスクトップ版専用です。また Step 3 の\textbf{大会種別}
+（フォレスト／スプリント）が正しいか確認してください。 \\
+
+同じクラブが連続してしまう &
+そのクラブの人数がクラスの人数に対して多すぎる場合、
+数学的に回避できません。シャッフル最大試行回数を増やすか、
+「エントリーリストの修正」で個別に入れ替えてください。 \\
+
+毎回違う並びになる &
+Step 2 の\textbf{乱数シード}が変わっていないか確認してください。
+同じシードなら必ず同じ結果になります。 \\
+
+\fn{.tex} がコンパイルできない &
+LuaLaTeX を使っているか確認してください。
+pdfLaTeX / upLaTeX では通りません。 \\
+
+修正モードで時刻がずれてしまった &
+\ui{元に戻す} で 50 手前まで戻せます。 \\
+
+Mulka にインポートできない &
+練習会モードで生成していないか確認してください。
+練習会モードではスタート時刻の列が出力されません。 \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+% =====================================================================
+\section{付録：コマンドライン版}
+
+同じ処理は Python 版のコマンドラインからも実行できます。
+毎年同じ設定で回すような場合は、こちらのほうが早いことがあります。
+
+\begin{verbatim}
+pip install pandas
+python joy2mulka.py <エントリーリスト.csv> <設定.json> --output-dir output
+\end{verbatim}
+
+\begin{center}
+\begin{tabular}{@{}>{\ttfamily}p{34mm}p{112mm}@{}}
+\toprule
+\rowcolor{band}\textbf{\rmfamily オプション} & \textbf{説明} \\
+\midrule
+-{}-no-ranking & JOA ランキングの取得を行わない（オフライン環境向け） \\
+-{}-output-dir & 出力先ディレクトリ \\
+-{}-seed & 乱数シード（結果を再現したいとき） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+設定ファイル（JSON）の書き方はリポジトリの \fn{README.md} を参照してください。
+
+\vspace{12mm}
+\begin{center}
+\color{grayrule}\rule{0.4\textwidth}{0.4pt}\\[6pt]
+{\small\color{brandink}JOY2Mulka — Made for Orienteering Competition Management}
+\end{center}
+
+\end{document}

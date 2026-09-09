@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
-import { generateStartList, checkConflicts } from '../utils/startlistGenerator';
+import { generateStartList, generatePracticeStartList, checkConflicts } from '../utils/startlistGenerator';
 import { generateOutputFiles } from '../utils/outputFormatter';
 import { Conflict, StartListEntry } from '../types';
 
@@ -23,21 +23,30 @@ export default function Step4Generate() {
 
       // Generate start list
       setProgress(30);
-      const startList = generateStartList(
-        state.courses,
-        state.startAreas,
-        state.entries,
-        state.constraints,
-        state.globalSettings.seed,
-        state.rankings,
-        state.globalSettings.personPositionConstraints
-      );
+      const practiceMode = state.globalSettings.practiceMode;
+      const startList = practiceMode
+        ? generatePracticeStartList(
+            state.courses,
+            state.entries,
+            state.globalSettings.generateStartNumbers
+          )
+        : generateStartList(
+            state.courses,
+            state.startAreas,
+            state.entries,
+            state.constraints,
+            state.globalSettings.seed,
+            state.rankings,
+            state.globalSettings.personPositionConstraints
+          );
       setProgress(60);
       await new Promise((r) => setTimeout(r, 100));
 
-      // Check for conflicts
+      // Check for conflicts (練習会モードは時刻が無いので競合検出の対象外)
       setProgress(70);
-      const detectedConflicts = checkConflicts(startList, state.constraints);
+      const detectedConflicts = practiceMode
+        ? []
+        : checkConflicts(startList, state.constraints);
       setConflicts(detectedConflicts);
       setProgress(80);
 
@@ -63,9 +72,15 @@ export default function Step4Generate() {
 
   const canProceed = state.startList.length > 0;
 
+  // 練習会モード／ゼッケンなしのときはプレビューでも該当列を出さない
+  const showTime = !state.globalSettings.practiceMode;
+  const showNumber = state.globalSettings.generateStartNumbers;
+
   // Group preview by lane
   const previewByLane = previewData.reduce((acc, entry) => {
-    const key = `${entry.startArea} - ${entry.lane}`;
+    const key = state.globalSettings.practiceMode
+      ? entry.className
+      : `${entry.startArea} - ${entry.lane}`;
     if (!acc[key]) acc[key] = [];
     acc[key].push(entry);
     return acc;
@@ -91,16 +106,33 @@ export default function Step4Generate() {
             <span className="text-gray-500">コース数:</span>{' '}
             <span className="font-medium">{state.courses.length}</span>
           </div>
-          <div>
-            <span className="text-gray-500">レーン数:</span>{' '}
-            <span className="font-medium">
-              {state.startAreas.reduce((sum, a) => sum + a.lanes.length, 0)}
-            </span>
-          </div>
-          <div>
-            <span className="text-gray-500">乱数シード:</span>{' '}
-            <span className="font-medium">{state.globalSettings.seed}</span>
-          </div>
+          {state.globalSettings.practiceMode ? (
+            <>
+              <div>
+                <span className="text-gray-500">出力モード:</span>{' '}
+                <span className="font-medium">練習会（時刻なし・入力順）</span>
+              </div>
+              <div>
+                <span className="text-gray-500">ゼッケン番号:</span>{' '}
+                <span className="font-medium">
+                  {state.globalSettings.generateStartNumbers ? '生成する' : '生成しない'}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <span className="text-gray-500">レーン数:</span>{' '}
+                <span className="font-medium">
+                  {state.startAreas.reduce((sum, a) => sum + a.lanes.length, 0)}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">乱数シード:</span>{' '}
+                <span className="font-medium">{state.globalSettings.seed}</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -187,8 +219,8 @@ export default function Step4Generate() {
                   <table className="min-w-full text-sm">
                     <thead className="bg-gray-50 sticky top-0">
                       <tr>
-                        <th className="px-3 py-2 text-left">No.</th>
-                        <th className="px-3 py-2 text-left">時刻</th>
+                        {showNumber && <th className="px-3 py-2 text-left">No.</th>}
+                        {showTime && <th className="px-3 py-2 text-left">時刻</th>}
                         <th className="px-3 py-2 text-left">クラス</th>
                         <th className="px-3 py-2 text-left">氏名</th>
                         <th className="px-3 py-2 text-left">所属</th>
@@ -198,8 +230,8 @@ export default function Step4Generate() {
                     <tbody className="divide-y divide-gray-200">
                       {entries.slice(0, 50).map((entry, i) => (
                         <tr key={i} className="hover:bg-gray-50">
-                          <td className="px-3 py-1">{entry.startNumber}</td>
-                          <td className="px-3 py-1">{entry.startTime}</td>
+                          {showNumber && <td className="px-3 py-1">{entry.startNumber}</td>}
+                          {showTime && <td className="px-3 py-1">{entry.startTime}</td>}
                           <td className="px-3 py-1">{entry.className}</td>
                           <td className="px-3 py-1">{entry.name1}</td>
                           <td className="px-3 py-1">{entry.affiliation || '-'}</td>
@@ -214,7 +246,7 @@ export default function Step4Generate() {
                       ))}
                       {entries.length > 50 && (
                         <tr>
-                          <td colSpan={6} className="px-3 py-2 text-center text-gray-500">
+                          <td colSpan={4 + (showNumber ? 1 : 0) + (showTime ? 1 : 0)} className="px-3 py-2 text-center text-gray-500">
                             他 {entries.length - 50} 件...
                           </td>
                         </tr>

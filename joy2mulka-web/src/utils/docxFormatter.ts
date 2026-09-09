@@ -12,14 +12,13 @@ import {
   BorderStyle,
   PageOrientation,
   TableLayoutType,
+  ShadingType,
 } from 'docx';
-import { StartListEntry, GlobalSettings } from '../types';
+import { StartListEntry, GlobalSettings, TexTemplate } from '../types';
 
 /**
  * A4 page dimensions in DXA (twentieths of a point).
  *   A4: 210mm x 297mm = 595.28pt x 841.89pt = 11906 dxa x 16838 dxa
- *   Margins: 2cm each side = 1134 dxa
- *   Content width: 11906 - 2*1134 = 9638 dxa
  *
  * Note: docx library's WidthType.PERCENTAGE uses units of 1/50 of a percent,
  * so 100% = 5000. We also supply explicit column widths in DXA for reliable
@@ -27,13 +26,88 @@ import { StartListEntry, GlobalSettings } from '../types';
  */
 const A4_WIDTH_DXA = 11906;
 const A4_HEIGHT_DXA = 16838;
-const PAGE_MARGIN_DXA = 1134; // 2cm
-const CONTENT_WIDTH_DXA = A4_WIDTH_DXA - 2 * PAGE_MARGIN_DXA; // 9638
 
-// Column width distribution (sums to 100%) for the startlist table:
-// No. / Time / Name / Affiliation / Card
-const COL_WIDTH_PCT = [8, 12, 32, 36, 12]; // percent
-const COL_WIDTH_DXA = COL_WIDTH_PCT.map((p) => Math.round((CONTENT_WIDTH_DXA * p) / 100));
+/**
+ * Per-template DOCX styling, kept deliberately parallel to the LaTeX
+ * templates in outputFormatter.ts so that a .docx and a .tex generated with
+ * the same setting look like the same document.
+ */
+interface DocxStyle {
+  /** page margin, dxa (1134 = 2cm) */
+  margin: number;
+  /** body font size in half-points (20 = 10pt) */
+  fontSize: number;
+  /** table header background, hex without '#' */
+  headerShade: string;
+  /** outer rule colour */
+  ruleColor: string;
+  /** outer rule weight (docx eighths of a point) */
+  ruleSize: number;
+  /** inner horizontal rule colour */
+  innerColor: string;
+  /** draw vertical rules between columns */
+  verticalRules: boolean;
+  /** heading accent colour, hex without '#' */
+  accent: string;
+}
+
+const DOCX_STYLES: Record<TexTemplate, DocxStyle> = {
+  standard: {
+    margin: 1021, // 18mm
+    fontSize: 20,
+    headerShade: 'EDEDED',
+    ruleColor: '595959',
+    ruleSize: 8,
+    innerColor: 'D9D9D9',
+    verticalRules: false,
+    accent: '595959',
+  },
+  compact: {
+    margin: 567, // 10mm
+    fontSize: 16,
+    headerShade: 'EBEBEB',
+    ruleColor: '666666',
+    ruleSize: 6,
+    innerColor: 'DDDDDD',
+    verticalRules: false,
+    accent: '666666',
+  },
+  japanese: {
+    margin: 1418, // 25mm
+    fontSize: 21,
+    headerShade: 'ECF0F6',
+    ruleColor: '26416B',
+    ruleSize: 6,
+    innerColor: 'C6D0E0',
+    verticalRules: false,
+    accent: '26416B',
+  },
+  mono: {
+    margin: 907, // 16mm
+    fontSize: 20,
+    headerShade: 'E0E0E0',
+    ruleColor: '000000',
+    ruleSize: 12,
+    innerColor: '000000',
+    verticalRules: true,
+    accent: '000000',
+  },
+};
+
+const TEMPLATE_ALIASES: Record<string, TexTemplate> = {
+  default: 'standard',
+  modern: 'standard',
+  elegant: 'japanese',
+  festival: 'standard',
+  sporty: 'standard',
+  minimal: 'mono',
+};
+
+function resolveStyle(template: string | undefined): DocxStyle {
+  if (template && template in DOCX_STYLES) return DOCX_STYLES[template as TexTemplate];
+  const alias = template ? TEMPLATE_ALIASES[template] : undefined;
+  return DOCX_STYLES[alias ?? 'standard'];
+}
 
 /**
  * Language-specific labels (mirrors outputFormatter.ts LABELS)
@@ -63,6 +137,8 @@ const LABELS = {
   },
 };
 
+type Labels = typeof LABELS.ja;
+
 interface DocxBuildOptions {
   title: string;
   subtitle: string;
@@ -70,39 +146,90 @@ interface DocxBuildOptions {
 }
 
 /**
+ * Column set for the start list table.
+ *
+ * 練習会モードでは時刻列を、ゼッケン番号を生成しない設定では No. 列を落とす。
+ * Remaining width is redistributed so the table always fills the page.
+ */
+interface ColumnPlan {
+  headers: string[];
+  widths: number[];
+  hasNumber: boolean;
+  hasTime: boolean;
+}
+
+function buildColumnPlan(
+  labels: Labels,
+  settings: GlobalSettings,
+  contentWidth: number
+): ColumnPlan {
+  const hasNumber = settings.generateStartNumbers !== false;
+  const hasTime = settings.practiceMode !== true;
+
+  const headers: string[] = [];
+  const shares: number[] = [];
+
+  if (hasNumber) {
+    headers.push(labels.no);
+    shares.push(8);
+  }
+  if (hasTime) {
+    headers.push(labels.time);
+    shares.push(12);
+  }
+  headers.push(labels.name);
+  shares.push(32);
+  headers.push(labels.affiliation);
+  shares.push(36);
+  headers.push(labels.card);
+  shares.push(12);
+
+  const total = shares.reduce((a, b) => a + b, 0);
+  const widths = shares.map((s) => Math.round((contentWidth * s) / total));
+
+  return { headers, widths, hasNumber, hasTime };
+}
+
+/**
  * Build a table cell with explicit DXA width (keeps column widths stable).
  */
-function buildCell(children: TextRun[], widthDxa: number, bold = false): TableCell {
+function buildCell(
+  children: TextRun[],
+  widthDxa: number,
+  shade?: string
+): TableCell {
   return new TableCell({
     width: { size: widthDxa, type: WidthType.DXA },
+    ...(shade
+      ? { shading: { type: ShadingType.CLEAR, color: 'auto', fill: shade } }
+      : {}),
     children: [
       new Paragraph({
-        children:
-          children.length > 0
-            ? children
-            : [new TextRun({ text: '', bold })],
+        children: children.length > 0 ? children : [new TextRun({ text: '' })],
       }),
     ],
   });
 }
 
-function buildHeaderRow(labels: typeof LABELS.ja): TableRow {
+function buildHeaderRow(plan: ColumnPlan, style: DocxStyle, fontSize: number): TableRow {
   return new TableRow({
     tableHeader: true,
-    children: [
-      buildCell([new TextRun({ text: labels.no, bold: true })], COL_WIDTH_DXA[0], true),
-      buildCell([new TextRun({ text: labels.time, bold: true })], COL_WIDTH_DXA[1], true),
-      buildCell([new TextRun({ text: labels.name, bold: true })], COL_WIDTH_DXA[2], true),
-      buildCell([new TextRun({ text: labels.affiliation, bold: true })], COL_WIDTH_DXA[3], true),
-      buildCell([new TextRun({ text: labels.card, bold: true })], COL_WIDTH_DXA[4], true),
-    ],
+    children: plan.headers.map((h, i) =>
+      buildCell(
+        [new TextRun({ text: h, bold: true, size: fontSize })],
+        plan.widths[i],
+        style.headerShade
+      )
+    ),
   });
 }
 
 function buildDataRow(
   entry: StartListEntry,
-  labels: typeof LABELS.ja,
-  isRole: boolean
+  plan: ColumnPlan,
+  labels: Labels,
+  isRole: boolean,
+  fontSize: number
 ): TableRow {
   const cardDisplay =
     entry.isRental || !entry.cardNumber ? labels.rental : entry.cardNumber;
@@ -110,20 +237,23 @@ function buildDataRow(
   // For role version, include furigana (name2) next to the name if available
   const nameChildren: TextRun[] = [];
   if (isRole && entry.name2 && entry.name1) {
-    nameChildren.push(new TextRun({ text: entry.name1 }));
-    nameChildren.push(new TextRun({ text: ` (${entry.name2})`, size: 16 }));
+    nameChildren.push(new TextRun({ text: entry.name1, size: fontSize }));
+    nameChildren.push(
+      new TextRun({ text: ` (${entry.name2})`, size: Math.max(12, fontSize - 4) })
+    );
   } else {
-    nameChildren.push(new TextRun({ text: entry.name1 }));
+    nameChildren.push(new TextRun({ text: entry.name1, size: fontSize }));
   }
 
+  const cells: TextRun[][] = [];
+  if (plan.hasNumber) cells.push([new TextRun({ text: String(entry.startNumber), size: fontSize })]);
+  if (plan.hasTime) cells.push([new TextRun({ text: entry.startTime, size: fontSize })]);
+  cells.push(nameChildren);
+  cells.push([new TextRun({ text: entry.affiliation || '-', size: fontSize })]);
+  cells.push([new TextRun({ text: cardDisplay, size: fontSize })]);
+
   return new TableRow({
-    children: [
-      buildCell([new TextRun({ text: String(entry.startNumber) })], COL_WIDTH_DXA[0]),
-      buildCell([new TextRun({ text: entry.startTime })], COL_WIDTH_DXA[1]),
-      buildCell(nameChildren, COL_WIDTH_DXA[2]),
-      buildCell([new TextRun({ text: entry.affiliation || '-' })], COL_WIDTH_DXA[3]),
-      buildCell([new TextRun({ text: cardDisplay })], COL_WIDTH_DXA[4]),
-    ],
+    children: cells.map((c, i) => buildCell(c, plan.widths[i])),
   });
 }
 
@@ -133,11 +263,17 @@ async function buildDocxBlob(
   options: DocxBuildOptions
 ): Promise<Blob> {
   const labels = LABELS[settings.language] || LABELS.en;
+  const style = resolveStyle(settings.texTemplate);
+  const practiceMode = settings.practiceMode === true;
 
-  // Group entries by lane, then by class
+  const contentWidth = A4_WIDTH_DXA - 2 * style.margin;
+  const plan = buildColumnPlan(labels, settings, contentWidth);
+
+  // Group entries by lane, then by class.
+  // 練習会モードにはレーンが無いので、すべて一つのグループに入る。
   const byLane: Map<string, Map<string, StartListEntry[]>> = new Map();
   for (const entry of startList) {
-    const laneKey = `${entry.startArea} - ${entry.lane}`;
+    const laneKey = practiceMode ? '' : `${entry.startArea} - ${entry.lane}`;
     if (!byLane.has(laneKey)) {
       byLane.set(laneKey, new Map());
     }
@@ -174,20 +310,27 @@ async function buildDocxBlob(
 
   for (const laneKey of sortedLanes) {
     const classesInLane = byLane.get(laneKey)!;
-    const laneName = laneKey.includes(' - ') ? laneKey.split(' - ')[1] : laneKey;
 
-    children.push(
-      new Paragraph({
-        heading: HeadingLevel.HEADING_1,
-        children: [new TextRun({ text: laneName, bold: true })],
-      })
-    );
+    if (laneKey) {
+      const laneName = laneKey.includes(' - ') ? laneKey.split(' - ')[1] : laneKey;
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_1,
+          children: [new TextRun({ text: laneName, bold: true, color: style.accent })],
+        })
+      );
+    }
 
     const sortedClasses = Array.from(classesInLane.keys()).sort();
 
     for (const className of sortedClasses) {
       const entries = classesInLane.get(className)!;
-      entries.sort((a, b) => a.startNumber - b.startNumber);
+      // 練習会モードは入力順のまま。通常はスタート時刻順に並べる。
+      if (!practiceMode) {
+        entries.sort(
+          (a, b) => a.startTime.localeCompare(b.startTime) || a.startNumber - b.startNumber
+        );
+      }
 
       children.push(
         new Paragraph({
@@ -199,26 +342,30 @@ async function buildDocxBlob(
         })
       );
 
-      const rows: TableRow[] = [buildHeaderRow(labels)];
+      const rows: TableRow[] = [buildHeaderRow(plan, style, style.fontSize)];
       for (const entry of entries) {
-        rows.push(buildDataRow(entry, labels, options.isRole));
+        rows.push(buildDataRow(entry, plan, labels, options.isRole, style.fontSize));
       }
 
+      const noRule = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
       const table = new Table({
         rows,
         // Explicit DXA width — guaranteed to span the full A4 content area
         // (some Word/LibreOffice versions ignore PERCENTAGE on unbounded layouts).
-        width: { size: CONTENT_WIDTH_DXA, type: WidthType.DXA },
+        width: { size: contentWidth, type: WidthType.DXA },
         // Fixed layout so column widths are honoured exactly as specified.
         layout: TableLayoutType.FIXED,
-        columnWidths: COL_WIDTH_DXA,
+        columnWidths: plan.widths,
         borders: {
-          top: { style: BorderStyle.SINGLE, size: 4, color: '888888' },
-          bottom: { style: BorderStyle.SINGLE, size: 4, color: '888888' },
-          left: { style: BorderStyle.SINGLE, size: 4, color: '888888' },
-          right: { style: BorderStyle.SINGLE, size: 4, color: '888888' },
-          insideHorizontal: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC' },
-          insideVertical: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC' },
+          top: { style: BorderStyle.SINGLE, size: style.ruleSize, color: style.ruleColor },
+          bottom: { style: BorderStyle.SINGLE, size: style.ruleSize, color: style.ruleColor },
+          // Horizontal rules only, matching the booktabs look of the .tex output
+          left: noRule,
+          right: noRule,
+          insideHorizontal: { style: BorderStyle.SINGLE, size: 2, color: style.innerColor },
+          insideVertical: style.verticalRules
+            ? { style: BorderStyle.SINGLE, size: 2, color: style.innerColor }
+            : noRule,
         },
       });
 
@@ -238,10 +385,10 @@ async function buildDocxBlob(
               orientation: PageOrientation.PORTRAIT,
             },
             margin: {
-              top: PAGE_MARGIN_DXA,
-              right: PAGE_MARGIN_DXA,
-              bottom: PAGE_MARGIN_DXA,
-              left: PAGE_MARGIN_DXA,
+              top: style.margin,
+              right: style.margin,
+              bottom: style.margin,
+              left: style.margin,
             },
           },
         },

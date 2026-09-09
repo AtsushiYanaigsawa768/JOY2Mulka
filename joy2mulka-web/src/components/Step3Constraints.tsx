@@ -79,6 +79,9 @@ export default function Step3Constraints() {
     });
   }, [state.globalSettings.personPositionConstraints, dispatch]);
 
+  // 練習会モードでは並び替え・レーンに関する制約は意味を持たないので隠す
+  const practiceMode = state.globalSettings.practiceMode;
+
   const updateConstraints = (updates: Partial<typeof state.constraints>) => {
     dispatch({
       type: 'SET_CONSTRAINTS',
@@ -240,6 +243,7 @@ export default function Step3Constraints() {
 
       <div className="space-y-6">
         {/* Global Constraints */}
+        {!practiceMode && (
         <div className="border rounded-lg p-4">
           <h3 className="font-medium mb-3">全体設定</h3>
           <div className="space-y-4">
@@ -281,6 +285,7 @@ export default function Step3Constraints() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Ranking-based Split */}
         {splitClassCount > 0 && (
@@ -457,6 +462,7 @@ export default function Step3Constraints() {
         )}
 
         {/* Affiliation Split Per Lane */}
+        {!practiceMode && (
         <div className="border rounded-lg p-4">
           <h3 className="font-medium mb-3">レーン別所属分散設定</h3>
           <p className="text-sm text-gray-600 mb-4">
@@ -512,6 +518,7 @@ export default function Step3Constraints() {
             ))}
           </div>
         </div>
+        )}
 
         {/* JOA Number Fetch Section */}
         <div className="border rounded-lg p-4">
@@ -586,6 +593,7 @@ export default function Step3Constraints() {
         </div>
 
         {/* Person Position Constraints */}
+        {!practiceMode && (
         <div className="border rounded-lg p-4">
           <h3 className="font-medium mb-3">人物位置制約</h3>
           <p className="text-sm text-gray-600 mb-4">
@@ -740,6 +748,7 @@ export default function Step3Constraints() {
             </div>
           )}
         </div>
+        )}
 
         {/* TeX Template Selection */}
         <div className="border rounded-lg p-4">
@@ -786,14 +795,21 @@ export default function Step3Constraints() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="font-medium text-blue-800 mb-2">設定サマリー</h3>
           <ul className="text-sm text-blue-700 space-y-1">
-            <li>
-              • 同一クラブ連続回避:{' '}
-              {state.constraints.avoidSameClubConsecutive ? (
-                <span className="text-green-600">有効</span>
-              ) : (
-                <span className="text-gray-500">無効</span>
-              )}
-            </li>
+            {practiceMode ? (
+              <li>
+                • 出力モード:{' '}
+                <span className="text-green-600">練習会（スタート時刻なし・入力順）</span>
+              </li>
+            ) : (
+              <li>
+                • 同一クラブ連続回避:{' '}
+                {state.constraints.avoidSameClubConsecutive ? (
+                  <span className="text-green-600">有効</span>
+                ) : (
+                  <span className="text-gray-500">無効</span>
+                )}
+              </li>
+            )}
             {splitClassCount > 0 && (
               <>
                 <li>
@@ -809,14 +825,21 @@ export default function Step3Constraints() {
                 )}
               </>
             )}
-            <li>
-              • 所属分散レーン:{' '}
-              {state.startAreas.reduce(
-                (sum, a) => sum + a.lanes.filter((l) => l.affiliationSplit).length,
-                0
-              )}
-              /{state.startAreas.reduce((sum, a) => sum + a.lanes.length, 0)} レーン
-            </li>
+            {practiceMode ? (
+              <li>
+                • ゼッケン番号:{' '}
+                {state.globalSettings.generateStartNumbers ? '生成する' : '生成しない'}
+              </li>
+            ) : (
+              <li>
+                • 所属分散レーン:{' '}
+                {state.startAreas.reduce(
+                  (sum, a) => sum + a.lanes.filter((l) => l.affiliationSplit).length,
+                  0
+                )}
+                /{state.startAreas.reduce((sum, a) => sum + a.lanes.length, 0)} レーン
+              </li>
+            )}
             <li>
               • JOA番号:{' '}
               {entriesMissingJoaNumber.length === 0 ? (
@@ -830,9 +853,10 @@ export default function Step3Constraints() {
             <li>
               • TeXテンプレート:{' '}
               <span className="text-blue-600">
-                {TEX_TEMPLATES.find(t => t.id === state.globalSettings.texTemplate)?.name || 'スタンダード'}
+                {TEX_TEMPLATES.find(t => t.id === state.globalSettings.texTemplate)?.name || '標準'}
               </span>
             </li>
+            {!practiceMode && (
             <li>
               • 人物位置制約:{' '}
               {state.globalSettings.personPositionConstraints.length > 0 ? (
@@ -845,6 +869,7 @@ export default function Step3Constraints() {
                 <span className="text-gray-500">なし</span>
               )}
             </li>
+            )}
           </ul>
         </div>
       </div>
@@ -852,7 +877,7 @@ export default function Step3Constraints() {
       {/* Navigation */}
       <div className="mt-6 flex justify-between">
         <button
-          onClick={() => goToStep('step2')}
+          onClick={() => goToStep(state.globalSettings.practiceMode ? 'step1' : 'step2')}
           className="px-6 py-2 rounded-md font-medium text-gray-600 hover:text-gray-800"
         >
           ← 戻る

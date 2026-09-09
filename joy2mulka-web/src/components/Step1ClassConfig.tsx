@@ -54,7 +54,12 @@ export default function Step1ClassConfig() {
 
   const handleNext = () => {
     generateCourses();
-    goToStep('step2');
+    // SET_COURSES はまだ state に反映されていないため goToStep のガードを通らない。
+    // 練習会モードでは Step 2（スタート設定）を飛ばす。
+    dispatch({
+      type: 'SET_STEP',
+      payload: state.globalSettings.practiceMode ? 'step3' : 'step2',
+    });
   };
 
   // Sort classes by name

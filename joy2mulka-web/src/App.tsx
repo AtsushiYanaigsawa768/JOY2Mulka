@@ -9,7 +9,7 @@ import Step3Constraints from './components/Step3Constraints';
 import Step4Generate from './components/Step4Generate';
 import DoneScreen from './components/DoneScreen';
 
-const steps = [
+const allSteps = [
   { id: 'step0', label: 'アップロード', shortLabel: 'Step 0' },
   { id: 'step1', label: 'クラス設定', shortLabel: 'Step 1' },
   { id: 'step2', label: 'スタート設定', shortLabel: 'Step 2' },
@@ -20,6 +20,11 @@ const steps = [
 
 function StepIndicator() {
   const { state, goToStep, canProceedToStep } = useApp();
+
+  // 練習会モードではスタート時刻を扱わないため Step 2 を通らない
+  const steps = state.globalSettings.practiceMode
+    ? allSteps.filter((s) => s.id !== 'step2')
+    : allSteps;
 
   return (
     <div className="flex items-center justify-center space-x-2 mb-8">

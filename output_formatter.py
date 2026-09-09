@@ -26,6 +26,7 @@ LABELS = {
         'card': 'Card',
         'rental': '(rental)',
         'lane': 'Lane',
+        'continued': 'continued',
     },
     'ja': {
         'startlist': 'スタートリスト',
@@ -37,8 +38,122 @@ LABELS = {
         'card': 'カード',
         'rental': 'レンタル',
         'lane': 'レーン',
+        'continued': '続き',
     }
 }
+
+
+# ---------------------------------------------------------------------------
+# LaTeX テンプレート（Web版の「標準」テンプレートと同じ体裁）
+# ---------------------------------------------------------------------------
+
+#: 氏名／所属列の幅（\textwidth に対する比）。公開用と役員用（ルビ付き）で配分を変える。
+_NAME_SHARE_PUBLIC = 0.42
+_NAME_SHARE_ROLE = 0.46
+
+
+def _tex_preamble(competition_name: str, running_title: str, with_ruby: bool) -> str:
+    """Standard テンプレートのプリアンブル（Web版 outputFormatter.ts と同一の体裁）."""
+    ruby = '\\usepackage{luatexja-ruby}\n' if with_ruby else ''
+    return (
+        '% !TEX program = lualatex\n'
+        '\\documentclass[a4paper,10pt]{ltjsarticle}\n'
+        '\\usepackage{geometry}\n'
+        '\\usepackage{array}\n'
+        '\\usepackage{longtable}\n'
+        '\\usepackage{booktabs}\n'
+        '\\usepackage{needspace}\n'
+        '\\usepackage{fancyhdr}\n'
+        '\\usepackage{xcolor}\n'
+        '\\usepackage{colortbl}\n'
+        + ruby +
+        '\\definecolor{rule}{gray}{0.35}\n'
+        '\\definecolor{band}{gray}{0.90}\n'
+        '\n'
+        '\\geometry{top=20mm,bottom=20mm,left=18mm,right=18mm,headsep=6mm}\n'
+        '\n'
+        '\\pagestyle{fancy}\n'
+        '\\fancyhf{}\n'
+        f'\\fancyhead[L]{{\\small {escape_latex(competition_name)}}}\n'
+        f'\\fancyhead[R]{{\\small {running_title}}}\n'
+        '\\fancyfoot[C]{\\small \\thepage}\n'
+        '\\setlength{\\headheight}{14pt}\n'
+        '\\renewcommand{\\headrulewidth}{0.4pt}\n'
+        '\\renewcommand{\\footrulewidth}{0pt}\n'
+        '\n'
+        '\\setlength{\\tabcolsep}{5pt}\n'
+        '\\renewcommand{\\arraystretch}{1.25}\n'
+        '\\setlength{\\LTpre}{2pt}\n'
+        '\\setlength{\\LTpost}{10pt}\n'
+        '\n'
+        '% クラス見出し\n'
+        '\\newcommand{\\classheading}[2]{%\n'
+        '  \\Needspace*{6\\baselineskip}%\n'
+        '  \\par\\vspace{3pt}%\n'
+        '  \\noindent{\\large\\bfseries #1}\\hspace{0.6em}{\\small #2}%\n'
+        '  \\par\\vspace{1pt}%\n'
+        '  \\noindent\\textcolor{rule}{\\rule{\\textwidth}{0.4pt}}%\n'
+        '  \\par\\vspace{2pt}%\n'
+        '}\n'
+        '% レーン見出し\n'
+        '\\newcommand{\\laneheading}[1]{%\n'
+        '  \\par\\vspace{10pt}%\n'
+        '  \\noindent\\textcolor{rule}{\\rule{2.5mm}{3.4mm}}\\hspace{0.5em}{\\LARGE\\bfseries #1}%\n'
+        '  \\par\\vspace{4pt}%\n'
+        '}\n'
+    )
+
+
+def _tex_title(output_folder: str, doc_title: str) -> str:
+    return (
+        '\\begin{document}\n'
+        '\\gtfamily\\sffamily\n'
+        '\n'
+        '\\begin{center}\n'
+        f'{{\\LARGE\\bfseries {escape_latex(output_folder)}}}\\\\[4pt]\n'
+        f'{{\\large {doc_title}}}\n'
+        '\\end{center}\n'
+        '\\vspace{4mm}\n'
+        '\n'
+    )
+
+
+def _tex_table_head(labels: Dict[str, str], name_share: float) -> str:
+    """
+    列指定とヘッダー行。氏名・所属は幅を固定して折り返させ、カード列は折り返さない
+    （素の `l` 指定だと長い所属名が紙からはみ出す）。
+    """
+    remaining = 0.95 - 0.09 - 0.12 - 0.13   # No. / 時刻 / カード の取り分を引く
+    w_name = remaining * name_share
+    w_aff = remaining * (1 - name_share)
+    spec = (
+        'rl'
+        f'>{{\\raggedright\\arraybackslash}}p{{{w_name:.3f}\\textwidth}}'
+        f'>{{\\raggedright\\arraybackslash}}p{{{w_aff:.3f}\\textwidth}}'
+        'l'
+    )
+    header = (
+        f'\\textbf{{{labels["no"]}}} & \\textbf{{{labels["time"]}}} & '
+        f'\\textbf{{{labels["name"]}}} & \\textbf{{{labels["affiliation"]}}} & '
+        f'\\textbf{{{labels["card"]}}} \\\\'
+    )
+    cont = labels.get('continued', '続き')
+    return (
+        f'\\begin{{longtable}}{{{spec}}}\n'
+        '\\specialrule{0.8pt}{0pt}{0pt}\n'
+        f'\\rowcolor{{band}} {header}\n'
+        '\\midrule\n'
+        '\\endfirsthead\n'
+        f'\\multicolumn{{5}}{{@{{}}l}}{{\\small\\itshape {cont}}}\\\\\n'
+        '\\specialrule{0.8pt}{0pt}{0pt}\n'
+        f'\\rowcolor{{band}} {header}\n'
+        '\\midrule\n'
+        '\\endhead\n'
+        '\\specialrule{0.8pt}{0pt}{0pt}\n'
+        '\\endfoot\n'
+        '\\specialrule{0.8pt}{0pt}{0pt}\n'
+        '\\endlastfoot\n'
+    )
 
 
 def write_startlist_csv(startlist: List[Dict[str, Any]], output_path: str) -> None:
@@ -196,27 +311,8 @@ def write_public_startlist_tex(
         by_lane[lane_name][class_name].append(entry)
 
     with open(output_path, 'w', encoding='utf-8') as f:
-        # Write LaTeX preamble with ltjsarticle for LuaLaTeX
-        f.write(r'''\documentclass[a4paper,10pt]{ltjsarticle}
-\usepackage{geometry}
-\usepackage{longtable}
-\usepackage{booktabs}
-\usepackage{fancyhdr}
-
-\geometry{margin=2cm}
-\pagestyle{fancy}
-\fancyhf{}
-''')
-        f.write(f'\\fancyhead[C]{{{escape_latex(competition_name)} - {labels["startlist"]}}}\n')
-        f.write(r'\fancyfoot[C]{\thepage}')
-        f.write('\n')
-        f.write(r'\setlength{\headheight}{15pt}')
-        f.write('\n')
-        f.write(r'\begin{document}')
-        f.write('\n\n')
-
-        # Title
-        f.write(f'\\section*{{{escape_latex(output_folder)} {labels["startlist"]}}}\n\n')
+        f.write(_tex_preamble(competition_name, labels['startlist'], with_ruby=False))
+        f.write(_tex_title(output_folder, labels['startlist']))
 
         # Sort lanes naturally (Lane 1, Lane 2, ...)
         sorted_lanes = sorted(by_lane.keys(), key=lambda x: (
@@ -229,7 +325,7 @@ def write_public_startlist_tex(
             classes_in_lane = by_lane[lane_name]
 
             # Lane header
-            f.write(f'\\section*{{{escape_latex(lane_name)}}}\n\n')
+            f.write(f'\\laneheading{{{escape_latex(lane_name)}}}\n\n')
 
             # Write each class within this lane
             for class_name in sorted(classes_in_lane.keys()):
@@ -237,17 +333,8 @@ def write_public_startlist_tex(
                 entries.sort(key=lambda x: x.get('start_number', 0))
 
                 entry_count_label = f'{len(entries)} {labels["entries"]}'
-                f.write(f'\\subsection*{{{escape_latex(class_name)} ({entry_count_label})}}\n\n')
-
-                f.write(r'\begin{longtable}{rllll}')
-                f.write('\n')
-                f.write(r'\toprule')
-                f.write('\n')
-                f.write(f'{labels["no"]} & {labels["time"]} & {labels["name"]} & {labels["affiliation"]} & {labels["card"]} \\\\\n')
-                f.write(r'\midrule')
-                f.write('\n')
-                f.write(r'\endhead')
-                f.write('\n')
+                f.write(f'\\classheading{{{escape_latex(class_name)}}}{{{entry_count_label}}}\n')
+                f.write(_tex_table_head(labels, _NAME_SHARE_PUBLIC))
 
                 for entry in entries:
                     start_num = entry.get('start_number', '')
@@ -260,8 +347,6 @@ def write_public_startlist_tex(
 
                     f.write(f'{start_num} & {start_time} & {name} & {affiliation} & {card} \\\\\n')
 
-                f.write(r'\bottomrule')
-                f.write('\n')
                 f.write(r'\end{longtable}')
                 f.write('\n\n')
 
@@ -295,29 +380,11 @@ def write_role_startlist_tex(
             lane_name = 'Other'
         by_lane[lane_name][class_name].append(entry)
 
+    role_labels = dict(LABELS['ja'])
+
     with open(output_path, 'w', encoding='utf-8') as f:
-        # Write LaTeX preamble with ltjsarticle for LuaLaTeX
-        f.write(r'''\documentclass[a4paper,10pt]{ltjsarticle}
-\usepackage{geometry}
-\usepackage{longtable}
-\usepackage{booktabs}
-\usepackage{fancyhdr}
-\usepackage{luatexja-ruby}
-
-\geometry{margin=2cm}
-\pagestyle{fancy}
-\fancyhf{}
-''')
-        f.write(f'\\fancyhead[C]{{{escape_latex(competition_name)} - 役員用スタートリスト}}\n')
-        f.write(r'\fancyfoot[C]{\thepage}')
-        f.write('\n')
-        f.write(r'\setlength{\headheight}{15pt}')
-        f.write('\n')
-        f.write(r'\begin{document}')
-        f.write('\n\n')
-
-        # Title
-        f.write(f'\\section*{{{escape_latex(output_folder)} 役員用スタートリスト}}\n\n')
+        f.write(_tex_preamble(competition_name, '役員用スタートリスト', with_ruby=True))
+        f.write(_tex_title(output_folder, '役員用スタートリスト'))
 
         # Sort lanes naturally (Lane 1, Lane 2, ...)
         sorted_lanes = sorted(by_lane.keys(), key=lambda x: (
@@ -330,25 +397,15 @@ def write_role_startlist_tex(
             classes_in_lane = by_lane[lane_name]
 
             # Lane header
-            f.write(f'\\section*{{{escape_latex(lane_name)}}}\n\n')
+            f.write(f'\\laneheading{{{escape_latex(lane_name)}}}\n\n')
 
             # Write each class within this lane
             for class_name in sorted(classes_in_lane.keys()):
                 entries = classes_in_lane[class_name]
                 entries.sort(key=lambda x: x.get('start_number', 0))
 
-                f.write(f'\\subsection*{{{escape_latex(class_name)} ({len(entries)}名)}}\n\n')
-
-                f.write(r'\begin{longtable}{rlp{6cm}ll}')
-                f.write('\n')
-                f.write(r'\toprule')
-                f.write('\n')
-                f.write(r'No. & 時刻 & 氏名 & 所属 & カード \\')
-                f.write('\n')
-                f.write(r'\midrule')
-                f.write('\n')
-                f.write(r'\endhead')
-                f.write('\n')
+                f.write(f'\\classheading{{{escape_latex(class_name)}}}{{{len(entries)}名}}\n')
+                f.write(_tex_table_head(role_labels, _NAME_SHARE_ROLE))
 
                 for entry in entries:
                     start_num = entry.get('start_number', '')
@@ -368,8 +425,6 @@ def write_role_startlist_tex(
 
                     f.write(f'{start_num} & {start_time} & {name_display} & {affiliation} & {card} \\\\\n')
 
-                f.write(r'\bottomrule')
-                f.write('\n')
                 f.write(r'\end{longtable}')
                 f.write('\n\n')
 

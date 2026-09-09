@@ -427,6 +427,62 @@ export default function Step0Upload() {
             </select>
           </div>
         </div>
+
+        {/* 出力モード */}
+        <div className="mt-4 border rounded-lg p-4 bg-gray-50">
+          <h4 className="font-medium text-sm text-gray-800 mb-3">出力モード</h4>
+
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={state.globalSettings.practiceMode}
+              onChange={(e) =>
+                dispatch({
+                  type: 'SET_GLOBAL_SETTINGS',
+                  payload: {
+                    practiceMode: e.target.checked,
+                    // 練習会では既定でゼッケンも振らない
+                    generateStartNumbers: e.target.checked
+                      ? false
+                      : state.globalSettings.generateStartNumbers,
+                  },
+                })
+              }
+              className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span>
+              <span className="text-sm font-medium text-gray-800">
+                練習会モード（スタート時刻を割り当てない）
+              </span>
+              <span className="block text-xs text-gray-500 mt-0.5">
+                スタート時刻を設定せず、エントリーの入力順のままクラスごとに出力します。
+                スタートエリア・レーンの設定（Step 2）は省略されます。
+              </span>
+            </span>
+          </label>
+
+          <label className="flex items-start gap-3 cursor-pointer mt-3">
+            <input
+              type="checkbox"
+              checked={state.globalSettings.generateStartNumbers}
+              onChange={(e) =>
+                dispatch({
+                  type: 'SET_GLOBAL_SETTINGS',
+                  payload: { generateStartNumbers: e.target.checked },
+                })
+              }
+              className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span>
+              <span className="text-sm font-medium text-gray-800">
+                ゼッケン番号（スタートナンバー）を生成する
+              </span>
+              <span className="block text-xs text-gray-500 mt-0.5">
+                外すと、すべての出力からスタートナンバーの列が取り除かれます。
+              </span>
+            </span>
+          </label>
+        </div>
       </div>
 
       {/* Navigation */}

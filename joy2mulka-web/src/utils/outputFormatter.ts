@@ -2,58 +2,57 @@ import { StartListEntry, GlobalSettings, OutputFiles, TexTemplate, TexTemplateIn
 import { generatePublicDocx, generateRoleDocx } from './docxFormatter';
 
 /**
- * Available TeX templates
+ * Available TeX templates.
+ *
+ * The four templates differ in typography and page economy — not merely in
+ * colour. Each one is a complete layout decision:
+ *   standard  … 一般的な A4 掲示・配布用。ゴシック、booktabs の水平罫のみ。
+ *   compact   … 2段組。人数が多い大会で紙を節約する。
+ *   japanese  … 明朝。余白を広くとった落ち着いた組版。
+ *   mono      … 白黒コピー前提。太い罫と縞模様で行を追いやすくする。
  */
 export const TEX_TEMPLATES: TexTemplateInfo[] = [
   {
-    id: 'default',
-    name: 'スタンダード',
-    description: '標準的なシンプルなレイアウト',
-    preview: 'シンプルなテーブル形式、見やすさ重視',
-  },
-  {
-    id: 'modern',
-    name: 'モダン',
-    description: 'カラフルでおしゃれなデザイン',
-    preview: '色付きヘッダー、丸みを帯びたデザイン',
-  },
-  {
-    id: 'elegant',
-    name: 'エレガント',
-    description: '落ち着いた高級感のあるデザイン',
-    preview: 'セリフフォント、装飾的なヘッダー',
+    id: 'standard',
+    name: '標準',
+    description: 'A4片面・掲示および配布用の基本レイアウト',
+    preview: 'ゴシック体／水平罫のみ／クラス見出しに細い下線',
   },
   {
     id: 'compact',
     name: 'コンパクト',
-    description: '省スペースで多くの情報を表示',
-    preview: '小さいフォント、密なレイアウト',
-  },
-  {
-    id: 'festival',
-    name: 'フェスティバル',
-    description: '明るく華やかなお祭り風デザイン',
-    preview: '赤・黄・オレンジの賑やかな色使い',
+    description: '2段組で紙面を節約する（大規模大会向け）',
+    preview: '8pt・2段組／余白10mm／1ページあたりの行数が約2倍',
   },
   {
     id: 'japanese',
-    name: '和風',
-    description: '日本の伝統色を使った上品なデザイン',
-    preview: '藍色・抹茶色など落ち着いた和の雰囲気',
+    name: '和',
+    description: '明朝体・広い余白の落ち着いた組版',
+    preview: '明朝体／藍色の細罫／余白25mm',
   },
   {
-    id: 'sporty',
-    name: 'スポーティ',
-    description: 'アクティブで躍動感のあるデザイン',
-    preview: 'ダイナミックな色使いとレイアウト',
-  },
-  {
-    id: 'minimal',
-    name: 'ミニマル',
-    description: '余白を活かしたシンプルなデザイン',
-    preview: '白黒基調で読みやすさ重視',
+    id: 'mono',
+    name: 'モノクロ',
+    description: '白黒コピー・FAX前提。行を追いやすい縞模様',
+    preview: '完全白黒／太い上下罫／1行おきの淡いグレー',
   },
 ];
+
+/** Legacy template ids (旧8種) → 新4種 への読み替え */
+const TEMPLATE_ALIASES: Record<string, TexTemplate> = {
+  default: 'standard',
+  modern: 'standard',
+  elegant: 'japanese',
+  festival: 'standard',
+  sporty: 'standard',
+  minimal: 'mono',
+};
+
+function resolveTemplate(template: string | undefined): TexTemplate {
+  if (!template) return 'standard';
+  if (TEX_TEMPLATES.some((t) => t.id === template)) return template as TexTemplate;
+  return TEMPLATE_ALIASES[template] ?? 'standard';
+}
 
 /**
  * Escape special LaTeX characters
@@ -83,6 +82,19 @@ function escapeLatex(text: string): string {
 }
 
 /**
+ * Which optional columns are present, derived from the global settings.
+ *
+ * 練習会モードではスタート時刻を割り当てないため時刻列を出さない。
+ * ゼッケン番号を生成しない設定のときはスタートナンバー列を出さない。
+ */
+function columnFlags(settings: GlobalSettings) {
+  return {
+    startTime: !settings.practiceMode,
+    startNumber: settings.generateStartNumbers !== false,
+  };
+}
+
+/**
  * Generate Mulka CSV (Startlist.csv)
  * Matches Python: write_startlist_csv function
  *
@@ -91,16 +103,20 @@ function escapeLatex(text: string): string {
  * - Trailing newline: Yes
  * - Quoting: No quotes on data rows (only quote if field contains comma, newline, or quote)
  */
-export function generateMulkaCsv(startList: StartListEntry[]): string {
+export function generateMulkaCsv(
+  startList: StartListEntry[],
+  settings: GlobalSettings
+): string {
   const CRLF = '\r\n';
+  const cols = columnFlags(settings);
 
   const header = [
     'クラス',
-    'スタートナンバー',
+    ...(cols.startNumber ? ['スタートナンバー'] : []),
     '氏名１',
     '氏名2',
     '所属',
-    'スタート時刻',
+    ...(cols.startTime ? ['スタート時刻'] : []),
     'カード番号',
     'カード備考',
     '競技者登録番号',
@@ -110,11 +126,11 @@ export function generateMulkaCsv(startList: StartListEntry[]): string {
     const cardNote = entry.isRental || !entry.cardNumber ? 'レンタル' : 'my card';
     return [
       entry.className,
-      entry.startNumber,
+      ...(cols.startNumber ? [entry.startNumber] : []),
       entry.name1,
       entry.name2,
       entry.affiliation || '-',
-      entry.startTime,
+      ...(cols.startTime ? [entry.startTime] : []),
       entry.cardNumber,
       cardNote,
       entry.joaNumber,
@@ -138,13 +154,18 @@ export function generateMulkaCsv(startList: StartListEntry[]): string {
  * Generate Role CSV (Role_Startlist.csv)
  * Matches Python: write_role_startlist_csv function
  */
-export function generateRoleCsv(startList: StartListEntry[]): string {
+export function generateRoleCsv(
+  startList: StartListEntry[],
+  settings: GlobalSettings
+): string {
+  const cols = columnFlags(settings);
+
   const header = [
     'クラス',
-    'スタートナンバー',
+    ...(cols.startNumber ? ['スタートナンバー'] : []),
     '氏名',
     '所属',
-    'スタート時刻',
+    ...(cols.startTime ? ['スタート時刻'] : []),
     'カード番号',
     'チェックイン',
     '備考',
@@ -154,10 +175,10 @@ export function generateRoleCsv(startList: StartListEntry[]): string {
     const note = entry.isRental ? 'レンタル' : '';
     return [
       entry.className,
-      entry.startNumber,
+      ...(cols.startNumber ? [entry.startNumber] : []),
       entry.name1,
       entry.affiliation || '-',
-      entry.startTime,
+      ...(cols.startTime ? [entry.startTime] : []),
       entry.cardNumber,
       '', // Check-in column (empty)
       note,
@@ -202,16 +223,19 @@ export function generateClassSummaryCsv(startList: StartListEntry[]): string {
 const LABELS = {
   en: {
     startlist: 'Startlist',
+    role: 'Official Startlist',
     entries: 'entries',
     no: 'No.',
     time: 'Time',
     name: 'Name',
     affiliation: 'Affiliation',
     card: 'Card',
-    rental: '(rental)',
+    rental: 'rental',
+    continued: 'continued',
   },
   ja: {
     startlist: 'スタートリスト',
+    role: '役員用スタートリスト',
     entries: '名',
     no: 'No.',
     time: '時刻',
@@ -219,827 +243,431 @@ const LABELS = {
     affiliation: '所属',
     card: 'カード',
     rental: 'レンタル',
+    continued: '続き',
   },
 };
 
+type Labels = typeof LABELS.ja;
+
 /**
- * Get template-specific preamble
+ * Per-template layout parameters.
+ *
+ * Everything that distinguishes the four templates lives here, so that the
+ * document body below can be written once.
  */
-function getTemplatePreamble(template: TexTemplate, settings: GlobalSettings): string {
-  const labels = LABELS[settings.language] || LABELS.en;
+interface TemplateSpec {
+  /** documentclass options */
+  classOptions: string;
+  /** \geometry{...} argument */
+  geometry: string;
+  /** Extra preamble lines (colour definitions, font family, table options) */
+  extraPreamble: string;
+  /** Font family switch applied to the whole document body */
+  bodyFont: string;
+  /** Colour name used for rules and headings ('' = plain black) */
+  accent: string;
+  /** Two-column body via multicol. longtable cannot break across multicol
+   *  columns, so these templates use supertabular instead. */
+  twoColumn: boolean;
+  /** \arraystretch inside tables */
+  arrayStretch: string;
+  /** \tabcolsep inside tables */
+  tabColSep: string;
+  /** Alternating row shading (mono only) */
+  zebra: boolean;
+  /** Rule weights, in the order top / mid / bottom */
+  rules: { top: string; bottom: string };
+}
 
-  switch (template) {
-    case 'modern':
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
+const TEMPLATE_SPECS: Record<TexTemplate, TemplateSpec> = {
+  standard: {
+    classOptions: 'a4paper,10pt',
+    geometry: 'top=20mm,bottom=20mm,left=18mm,right=18mm,headsep=6mm',
+    extraPreamble: `\\definecolor{rule}{gray}{0.35}
+\\definecolor{band}{gray}{0.90}`,
+    bodyFont: '\\gtfamily\\sffamily',
+    accent: 'rule',
+    twoColumn: false,
+    arrayStretch: '1.25',
+    tabColSep: '5pt',
+    zebra: false,
+    rules: { top: '0.8pt', bottom: '0.8pt' },
+  },
+  compact: {
+    classOptions: 'a4paper,8pt',
+    geometry: 'top=12mm,bottom=12mm,left=10mm,right=10mm,headsep=4mm',
+    extraPreamble: `\\definecolor{rule}{gray}{0.4}
+\\definecolor{band}{gray}{0.92}
+\\setlength{\\columnsep}{7mm}
+\\setlength{\\columnseprule}{0.2pt}`,
+    bodyFont: '\\gtfamily\\sffamily',
+    accent: 'rule',
+    twoColumn: true,
+    arrayStretch: '1.08',
+    tabColSep: '3pt',
+    zebra: false,
+    rules: { top: '0.6pt', bottom: '0.6pt' },
+  },
+  japanese: {
+    classOptions: 'a4paper,11pt',
+    geometry: 'top=25mm,bottom=25mm,left=25mm,right=25mm,headsep=8mm',
+    extraPreamble: `\\definecolor{rule}{RGB}{38,65,107}
+\\definecolor{band}{RGB}{236,240,246}`,
+    bodyFont: '\\mcfamily\\rmfamily',
+    accent: 'rule',
+    twoColumn: false,
+    arrayStretch: '1.35',
+    tabColSep: '6pt',
+    zebra: false,
+    rules: { top: '0.6pt', bottom: '0.6pt' },
+  },
+  mono: {
+    classOptions: 'a4paper,10pt',
+    geometry: 'top=18mm,bottom=18mm,left=16mm,right=16mm,headsep=5mm',
+    extraPreamble: `\\definecolor{rule}{gray}{0}
+\\definecolor{band}{gray}{0.80}
+\\definecolor{zebra}{gray}{0.94}`,
+    bodyFont: '\\gtfamily\\sffamily',
+    accent: '',
+    twoColumn: false,
+    arrayStretch: '1.3',
+    tabColSep: '5pt',
+    zebra: true,
+    rules: { top: '1.2pt', bottom: '1.2pt' },
+  },
+};
+
+/** Wrap text in the template accent colour (no-op for the mono template) */
+function accented(spec: TemplateSpec, text: string): string {
+  return spec.accent ? `\\textcolor{${spec.accent}}{${text}}` : text;
+}
+
+/**
+ * Column layout for the start list table.
+ *
+ * Widths are fractions of \textwidth so long affiliation names wrap instead of
+ * running off the page — the single biggest readability problem in the old
+ * templates, which used bare `l` columns.
+ */
+interface ColumnLayout {
+  spec: string;
+  headers: string[];
+  count: number;
+}
+
+function buildColumnLayout(
+  labels: Labels,
+  cols: { startTime: boolean; startNumber: boolean },
+  isRole: boolean,
+  twoColumn: boolean
+): ColumnLayout {
+  // In two-column mode every width refers to the (narrow) column, so the
+  // fractions are the same but of \columnwidth.
+  const W = twoColumn ? '\\columnwidth' : '\\textwidth';
+  const parts: string[] = [];
+  const headers: string[] = [];
+
+  // Fixed-width leading columns
+  let used = 0;
+  if (cols.startNumber) {
+    parts.push('r');
+    headers.push(labels.no);
+    used += 0.09;
+  }
+  if (cols.startTime) {
+    parts.push('l');
+    headers.push(labels.time);
+    used += 0.12;
+  }
+
+  // Remaining space split between name and affiliation. The card column is a
+  // plain `l` — its content is short ("レンタル" / a card number) and must not
+  // be broken over two lines, which is what the old templates did.
+  const remaining = 0.95 - used - 0.13;
+  const nameShare = isRole ? 0.46 : 0.42;
+  const affShare = 1 - nameShare;
+
+  const w = (share: number) => (remaining * share).toFixed(3);
+
+  parts.push(`>{\\raggedright\\arraybackslash}p{${w(nameShare)}${W}}`);
+  headers.push(labels.name);
+  parts.push(`>{\\raggedright\\arraybackslash}p{${w(affShare)}${W}}`);
+  headers.push(labels.affiliation);
+  parts.push('l');
+  headers.push(labels.card);
+
+  return { spec: parts.join(''), headers, count: parts.length };
+}
+
+/**
+ * Shared preamble for both the public and the role start list.
+ */
+function buildPreamble(
+  spec: TemplateSpec,
+  settings: GlobalSettings,
+  runningTitle: string,
+  withRuby: boolean
+): string {
+  const zebraOption = spec.zebra ? '[table]' : '';
+
+  return `% !TEX program = lualatex
+\\documentclass[${spec.classOptions}]{ltjsarticle}
 \\usepackage{geometry}
+\\usepackage{array}
 \\usepackage{longtable}
 \\usepackage{booktabs}
+\\usepackage{needspace}
 \\usepackage{fancyhdr}
-\\usepackage{xcolor}
+\\usepackage${zebraOption}{xcolor}
 \\usepackage{colortbl}
-\\usepackage{tcolorbox}
+${spec.twoColumn ? '\\usepackage{multicol}\n\\raggedcolumns\n' : ''}${withRuby ? '\\usepackage{luatexja-ruby}\n' : ''}${spec.extraPreamble}
 
-\\definecolor{headerblue}{RGB}{41,128,185}
-\\definecolor{lightgray}{RGB}{245,245,245}
-\\definecolor{accentgreen}{RGB}{46,204,113}
+\\geometry{${spec.geometry}}
 
-\\geometry{margin=1.5cm}
 \\pagestyle{fancy}
 \\fancyhf{}
-\\fancyhead[C]{\\textcolor{headerblue}{\\textbf{${escapeLatex(settings.competitionName)}}} - ${labels.startlist}}
-\\fancyfoot[C]{\\thepage}
-\\setlength{\\headheight}{15pt}
-\\renewcommand{\\headrulewidth}{2pt}
-\\renewcommand{\\headrule}{\\hbox to\\headwidth{\\color{headerblue}\\leaders\\hrule height \\headrulewidth\\hfill}}
-`;
-
-    case 'elegant':
-      return `\\documentclass[a4paper,11pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{xcolor}
-\\usepackage{graphicx}
-
-\\definecolor{darkgold}{RGB}{139,119,42}
-\\definecolor{elegantgray}{RGB}{70,70,70}
-
-\\geometry{margin=2.5cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\rule{\\textwidth}{0.4pt}\\\\[2pt]\\textsc{${escapeLatex(settings.competitionName)}}\\\\[-8pt]\\rule{\\textwidth}{0.4pt}}
-\\fancyfoot[C]{\\textcolor{elegantgray}{--- \\thepage\\ ---}}
-\\setlength{\\headheight}{30pt}
-`;
-
-    case 'compact':
-      return `\\documentclass[a4paper,8pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{multicol}
-
-\\geometry{margin=1cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\small ${escapeLatex(settings.competitionName)} - ${labels.startlist}}
+\\fancyhead[L]{\\small ${escapeLatex(settings.competitionName)}}
+\\fancyhead[R]{\\small ${runningTitle}}
 \\fancyfoot[C]{\\small \\thepage}
-\\setlength{\\headheight}{12pt}
-\\setlength{\\columnsep}{0.5cm}
+\\setlength{\\headheight}{14pt}
+\\renewcommand{\\headrulewidth}{0.4pt}
+\\renewcommand{\\footrulewidth}{0pt}
+
+\\setlength{\\tabcolsep}{${spec.tabColSep}}
+\\renewcommand{\\arraystretch}{${spec.arrayStretch}}
+\\setlength{\\LTpre}{2pt}
+\\setlength{\\LTpost}{10pt}
+
+% クラス見出し
+\\newcommand{\\classheading}[2]{%
+  \\Needspace*{6\\baselineskip}%
+  \\par\\vspace{3pt}%
+  \\noindent{\\large\\bfseries #1}\\hspace{0.6em}{\\small #2}%
+  \\par\\vspace{1pt}%
+  \\noindent${accented(spec, `\\rule{${spec.twoColumn ? '\\columnwidth' : '\\textwidth'}}{0.4pt}`)}%
+  \\par\\vspace{2pt}%
+}
+% レーン見出し
+\\newcommand{\\laneheading}[1]{%
+  \\par\\vspace{10pt}%
+  \\noindent${accented(spec, '\\rule{2.5mm}{3.4mm}')}\\hspace{0.5em}{\\LARGE\\bfseries #1}%
+  \\par\\vspace{4pt}%
+}
 `;
-
-    case 'festival':
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{xcolor}
-\\usepackage{colortbl}
-\\usepackage{tcolorbox}
-
-\\definecolor{festivalred}{RGB}{220,50,50}
-\\definecolor{festivalyellow}{RGB}{255,200,0}
-\\definecolor{festivalorange}{RGB}{255,120,0}
-
-\\geometry{margin=1.5cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\textcolor{festivalred}{\\textbf{${escapeLatex(settings.competitionName)}}} - ${labels.startlist}}
-\\fancyfoot[C]{\\textcolor{festivalorange}{\\thepage}}
-\\setlength{\\headheight}{15pt}
-\\renewcommand{\\headrulewidth}{3pt}
-\\renewcommand{\\headrule}{\\hbox to\\headwidth{\\color{festivalyellow}\\leaders\\hrule height \\headrulewidth\\hfill}}
-`;
-
-    case 'japanese':
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{xcolor}
-
-\\definecolor{aiiro}{RGB}{38,65,107}
-\\definecolor{matcha}{RGB}{104,142,105}
-\\definecolor{kiniro}{RGB}{196,175,112}
-
-\\geometry{margin=2.5cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\textcolor{aiiro}{\\rule{1cm}{0.5pt}\\hspace{0.5cm}${escapeLatex(settings.competitionName)}\\hspace{0.5cm}\\rule{1cm}{0.5pt}}}
-\\fancyfoot[C]{\\textcolor{matcha}{--- \\thepage\\ ---}}
-\\setlength{\\headheight}{20pt}
-`;
-
-    case 'sporty':
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{xcolor}
-\\usepackage{colortbl}
-\\usepackage{tcolorbox}
-
-\\definecolor{sportyorange}{RGB}{255,102,0}
-\\definecolor{sportygreen}{RGB}{0,180,120}
-\\definecolor{sportyblue}{RGB}{0,120,210}
-
-\\geometry{margin=1.5cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\textcolor{sportyblue}{\\textbf{${escapeLatex(settings.competitionName)}}} \\textcolor{sportyorange}{//} ${labels.startlist}}
-\\fancyfoot[C]{\\textcolor{sportygreen}{\\thepage}}
-\\setlength{\\headheight}{15pt}
-\\renewcommand{\\headrulewidth}{2pt}
-\\renewcommand{\\headrule}{\\hbox to\\headwidth{\\color{sportyorange}\\leaders\\hrule height \\headrulewidth\\hfill}}
-`;
-
-    case 'minimal':
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{xcolor}
-
-\\definecolor{minimalaccent}{RGB}{80,80,80}
-\\definecolor{minimalgray}{RGB}{150,150,150}
-
-\\geometry{margin=3cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\textcolor{minimalgray}{${escapeLatex(settings.competitionName)}}}
-\\fancyfoot[C]{\\textcolor{minimalgray}{\\thepage}}
-\\setlength{\\headheight}{15pt}
-\\renewcommand{\\headrulewidth}{0.5pt}
-\\renewcommand{\\headrule}{\\hbox to\\headwidth{\\color{minimalgray}\\leaders\\hrule height \\headrulewidth\\hfill}}
-`;
-
-    default: // 'default'
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-
-\\geometry{margin=2cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{${escapeLatex(settings.competitionName)} - ${labels.startlist}}
-\\fancyfoot[C]{\\thepage}
-\\setlength{\\headheight}{15pt}
-`;
-  }
 }
 
-/**
- * Get template-specific table styling
- */
-function getTemplateTableStart(template: TexTemplate, labels: typeof LABELS.ja): string {
-  switch (template) {
-    case 'modern':
-      return `\\begin{longtable}{rllll}
-\\rowcolor{headerblue}
-\\textcolor{white}{\\textbf{${labels.no}}} & \\textcolor{white}{\\textbf{${labels.time}}} & \\textcolor{white}{\\textbf{${labels.name}}} & \\textcolor{white}{\\textbf{${labels.affiliation}}} & \\textcolor{white}{\\textbf{${labels.card}}} \\\\
-\\endhead
-`;
+/** Table header block, repeated on every page of a longtable */
+function buildTableHead(
+  spec: TemplateSpec,
+  layout: ColumnLayout,
+  labels: Labels
+): string {
+  const headerCells = layout.headers
+    .map((h) => `\\textbf{${h}}`)
+    .join(' & ');
 
-    case 'elegant':
-      return `\\begin{longtable}{rllll}
-\\toprule
-\\textsc{${labels.no}} & \\textsc{${labels.time}} & \\textsc{${labels.name}} & \\textsc{${labels.affiliation}} & \\textsc{${labels.card}} \\\\
+  const top = `\\specialrule{${spec.rules.top}}{0pt}{0pt}`;
+  const bottom = `\\specialrule{${spec.rules.bottom}}{0pt}{0pt}`;
+  const cont = `\\multicolumn{${layout.count}}{@{}l}{\\small\\itshape ${labels.continued}}\\\\`;
+
+  // \endfirsthead / \endhead give a proper "(続き)" marker after a page break.
+  // \rowcolors must be issued *before* the table for the striping to apply.
+  return `${spec.zebra ? '\\rowcolors{1}{}{zebra}\n' : ''}\\begin{longtable}{${layout.spec}}
+${top}
+\\rowcolor{band} ${headerCells} \\\\
+\\midrule
+\\endfirsthead
+${cont}
+${top}
+\\rowcolor{band} ${headerCells} \\\\
 \\midrule
 \\endhead
+${bottom}
+\\endfoot
+${bottom}
+\\endlastfoot
 `;
+}
 
-    case 'compact':
-      return `\\begin{longtable}{rllll}
-\\hline
-${labels.no} & ${labels.time} & ${labels.name} & ${labels.affiliation} & ${labels.card} \\\\
-\\hline
-\\endhead
-`;
-
-    case 'festival':
-      return `\\begin{longtable}{rllll}
-\\rowcolor{festivalyellow}
-\\textcolor{festivalred}{\\textbf{${labels.no}}} & \\textcolor{festivalred}{\\textbf{${labels.time}}} & \\textcolor{festivalred}{\\textbf{${labels.name}}} & \\textcolor{festivalred}{\\textbf{${labels.affiliation}}} & \\textcolor{festivalred}{\\textbf{${labels.card}}} \\\\
-\\endhead
-`;
-
-    case 'japanese':
-      return `\\begin{longtable}{rllll}
-\\toprule[1.5pt]
-\\textcolor{aiiro}{${labels.no}} & \\textcolor{aiiro}{${labels.time}} & \\textcolor{aiiro}{${labels.name}} & \\textcolor{aiiro}{${labels.affiliation}} & \\textcolor{aiiro}{${labels.card}} \\\\
-\\midrule
-\\endhead
-`;
-
-    case 'sporty':
-      return `\\begin{longtable}{rllll}
-\\rowcolor{sportyblue}
-\\textcolor{white}{\\textbf{${labels.no}}} & \\textcolor{white}{\\textbf{${labels.time}}} & \\textcolor{white}{\\textbf{${labels.name}}} & \\textcolor{white}{\\textbf{${labels.affiliation}}} & \\textcolor{white}{\\textbf{${labels.card}}} \\\\
-\\endhead
-`;
-
-    case 'minimal':
-      return `\\begin{longtable}{rllll}
-\\hline
-\\textcolor{minimalaccent}{${labels.no}} & \\textcolor{minimalaccent}{${labels.time}} & \\textcolor{minimalaccent}{${labels.name}} & \\textcolor{minimalaccent}{${labels.affiliation}} & \\textcolor{minimalaccent}{${labels.card}} \\\\
-\\hline
-\\endhead
-`;
-
-    default:
-      return `\\begin{longtable}{rllll}
-\\toprule
-${labels.no} & ${labels.time} & ${labels.name} & ${labels.affiliation} & ${labels.card} \\\\
-\\midrule
-\\endhead
-`;
-  }
+/** Matching table terminator for buildTableHead */
+function buildTableEnd(): string {
+  return '\\end{longtable}\n\n';
 }
 
 /**
- * Get template-specific table ending
+ * Two-column body for the `compact` template.
+ *
+ * longtable cannot break across multicol columns, so the rows are chunked into
+ * plain tabulars that each fit inside one column; multicol then flows the
+ * chunks. Every chunk repeats the header so a column is readable on its own.
  */
-function getTemplateTableEnd(template: TexTemplate): string {
-  switch (template) {
-    case 'modern':
-      return `\\hline
-\\end{longtable}
+const COMPACT_CHUNK_ROWS = 40;
 
-`;
-    case 'compact':
-      return `\\hline
-\\end{longtable}
+function buildChunkedTable(
+  spec: TemplateSpec,
+  layout: ColumnLayout,
+  labels: Labels,
+  rows: string[]
+): string {
+  const headerCells = layout.headers.map((h) => `\\textbf{${h}}`).join(' & ');
+  const top = `\\specialrule{${spec.rules.top}}{0pt}{0pt}`;
+  const bottom = `\\specialrule{${spec.rules.bottom}}{0pt}{0pt}`;
 
-`;
-    case 'festival':
-      return `\\hline
-\\end{longtable}
-
-`;
-    case 'japanese':
-      return `\\bottomrule[1.5pt]
-\\end{longtable}
-
-`;
-    case 'sporty':
-      return `\\hline
-\\end{longtable}
-
-`;
-    case 'minimal':
-      return `\\hline
-\\end{longtable}
-
-`;
-    default:
-      return `\\bottomrule
-\\end{longtable}
-
-`;
+  let out = '';
+  for (let i = 0; i < rows.length; i += COMPACT_CHUNK_ROWS) {
+    const chunk = rows.slice(i, i + COMPACT_CHUNK_ROWS);
+    out += `\\begin{tabular}{${layout.spec}}\n${top}\n`;
+    if (i > 0) {
+      out += `\\multicolumn{${layout.count}}{@{}l}{\\small\\itshape ${labels.continued}}\\\\\n`;
+    }
+    out += `\\rowcolor{band} ${headerCells} \\\\\n\\midrule\n`;
+    out += chunk.join('');
+    out += `${bottom}\n\\end{tabular}\n\n\\vspace{4pt}\n\n`;
   }
+  return out;
+}
+
+/** One data row */
+function buildRow(
+  entry: StartListEntry,
+  cols: { startTime: boolean; startNumber: boolean },
+  labels: Labels,
+  nameCell: string
+): string {
+  const cardDisplay =
+    entry.isRental || !entry.cardNumber ? labels.rental : escapeLatex(entry.cardNumber);
+  const cells: string[] = [];
+  if (cols.startNumber) cells.push(String(entry.startNumber));
+  if (cols.startTime) cells.push(entry.startTime);
+  cells.push(nameCell);
+  cells.push(escapeLatex(entry.affiliation || '-'));
+  cells.push(cardDisplay);
+  return cells.join(' & ') + ' \\\\\n';
 }
 
 /**
- * Get template-specific section styling
+ * Group the start list by lane (start area + lane) and then by class.
+ * In 練習会モード there are no lanes, so everything lands in a single group.
  */
-function getTemplateSectionStyle(template: TexTemplate, title: string): string {
-  switch (template) {
-    case 'modern':
-      return `\\begin{tcolorbox}[colback=lightgray,colframe=headerblue,arc=3mm,boxrule=1pt]
-{\\Large\\textbf{${title}}}
-\\end{tcolorbox}
-
-`;
-    case 'elegant':
-      return `\\vspace{0.5cm}
-{\\Large\\textcolor{darkgold}{\\textsc{${title}}}}
-\\vspace{0.3cm}
-\\hrule
-\\vspace{0.3cm}
-
-`;
-    case 'compact':
-      return `{\\normalsize\\textbf{${title}}}\\\\
-
-`;
-    case 'festival':
-      return `\\begin{tcolorbox}[colback=festivalyellow!20,colframe=festivalred,arc=5mm,boxrule=2pt]
-{\\Large\\textcolor{festivalred}{\\textbf{${title}}}}
-\\end{tcolorbox}
-
-`;
-    case 'japanese':
-      return `\\vspace{0.5cm}
-{\\Large\\textcolor{aiiro}{\\rule{0.5cm}{0.5pt}\\hspace{0.3cm}${title}\\hspace{0.3cm}\\rule{0.5cm}{0.5pt}}}
-\\vspace{0.3cm}
-
-`;
-    case 'sporty':
-      return `\\begin{tcolorbox}[colback=sportyorange!10,colframe=sportyblue,arc=0mm,boxrule=2pt]
-{\\Large\\textcolor{sportyblue}{\\textbf{${title}}}}
-\\end{tcolorbox}
-
-`;
-    case 'minimal':
-      return `\\vspace{0.8cm}
-{\\Large\\textcolor{minimalaccent}{${title}}}\\\\[3pt]
-\\textcolor{minimalgray}{\\rule{\\textwidth}{0.5pt}}
-\\vspace{0.3cm}
-
-`;
-    default:
-      return `\\section*{${title}}\n\n`;
+function groupStartList(
+  startList: StartListEntry[],
+  practiceMode: boolean
+): Map<string, Map<string, StartListEntry[]>> {
+  const byLane: Map<string, Map<string, StartListEntry[]>> = new Map();
+  for (const entry of startList) {
+    const laneKey = practiceMode ? '' : `${entry.startArea} - ${entry.lane}`;
+    if (!byLane.has(laneKey)) byLane.set(laneKey, new Map());
+    const laneMap = byLane.get(laneKey)!;
+    if (!laneMap.has(entry.className)) laneMap.set(entry.className, []);
+    laneMap.get(entry.className)!.push(entry);
   }
+  return byLane;
+}
+
+function sortLaneKeys(keys: string[]): string[] {
+  return [...keys].sort((a, b) => {
+    const numA = parseInt(a.match(/\d+/)?.[0] || '999');
+    const numB = parseInt(b.match(/\d+/)?.[0] || '999');
+    return numA - numB || a.localeCompare(b);
+  });
 }
 
 /**
- * Get template-specific subsection styling
+ * Build a start list document. Shared by the public and role variants.
  */
-function getTemplateSubsectionStyle(template: TexTemplate, title: string, count: string): string {
-  switch (template) {
-    case 'modern':
-      return `{\\large\\textcolor{headerblue}{\\textbf{${title}}} \\textcolor{accentgreen}{(${count})}}\n\n`;
-    case 'elegant':
-      return `{\\large\\textsc{${title}} \\textcolor{elegantgray}{(${count})}}\n\n`;
-    case 'compact':
-      return `{\\small\\textbf{${title}} (${count})}\n\n`;
-    case 'festival':
-      return `{\\large\\textcolor{festivalorange}{\\textbf{${title}}} \\textcolor{festivalred}{(${count})}}\n\n`;
-    case 'japanese':
-      return `{\\large\\textcolor{matcha}{${title}} \\textcolor{kiniro}{(${count})}}\n\n`;
-    case 'sporty':
-      return `{\\large\\textcolor{sportygreen}{\\textbf{${title}}} \\textcolor{sportyorange}{(${count})}}\n\n`;
-    case 'minimal':
-      return `{\\large\\textcolor{minimalaccent}{${title}} \\textcolor{minimalgray}{(${count})}}\n\n`;
-    default:
-      return `\\subsection*{${title} (${count})}\n\n`;
+function buildTex(
+  startList: StartListEntry[],
+  settings: GlobalSettings,
+  opts: { isRole: boolean }
+): string {
+  const labels = LABELS[settings.language] || LABELS.en;
+  const template = resolveTemplate(settings.texTemplate);
+  const spec = TEMPLATE_SPECS[template];
+  const cols = columnFlags(settings);
+  const practiceMode = settings.practiceMode === true;
+  const docTitle = opts.isRole ? labels.role : labels.startlist;
+
+  const layout = buildColumnLayout(labels, cols, opts.isRole, spec.twoColumn);
+
+  let tex = buildPreamble(spec, settings, docTitle, opts.isRole);
+  tex += `\n\\begin{document}\n${spec.bodyFont}\n\n`;
+
+  // Cover title
+  tex += `\\begin{center}
+{\\LARGE\\bfseries ${escapeLatex(settings.outputFolder || settings.competitionName)}}\\\\[4pt]
+{\\large ${docTitle}}
+\\end{center}
+\\vspace{4mm}
+
+`;
+
+  if (spec.twoColumn) tex += '\\begin{multicols}{2}\n';
+
+  const byLane = groupStartList(startList, practiceMode);
+
+  for (const laneKey of sortLaneKeys(Array.from(byLane.keys()))) {
+    const classesInLane = byLane.get(laneKey)!;
+
+    if (laneKey) {
+      const laneName = laneKey.includes(' - ') ? laneKey.split(' - ')[1] : laneKey;
+      tex += `\\laneheading{${escapeLatex(laneName)}}\n\n`;
+    }
+
+    for (const className of Array.from(classesInLane.keys()).sort()) {
+      const entries = classesInLane.get(className)!;
+      // 練習会モードは入力順のまま。通常はスタート時刻順（番号なしでも崩れない）
+      if (!practiceMode) {
+        entries.sort(
+          (a, b) => a.startTime.localeCompare(b.startTime) || a.startNumber - b.startNumber
+        );
+      }
+
+      tex += `\\classheading{${escapeLatex(className)}}{${entries.length} ${labels.entries}}\n`;
+
+      const rows = entries.map((entry) => {
+        let nameCell: string;
+        if (opts.isRole && entry.name1 && entry.name2) {
+          nameCell = `\\ruby{${escapeLatex(entry.name1)}}{${escapeLatex(entry.name2)}}`;
+        } else {
+          nameCell = escapeLatex(entry.name1);
+        }
+        return buildRow(entry, cols, labels, nameCell);
+      });
+
+      if (spec.twoColumn) {
+        tex += buildChunkedTable(spec, layout, labels, rows);
+      } else {
+        tex += buildTableHead(spec, layout, labels);
+        tex += rows.join('');
+        tex += buildTableEnd();
+      }
+    }
   }
+
+  if (spec.twoColumn) tex += '\\end{multicols}\n';
+
+  tex += '\\end{document}\n';
+  return tex;
 }
 
 /**
  * Generate Public TeX (Public_Startlist.tex)
- * Matches Python: write_public_startlist_tex function
  */
 export function generatePublicTex(
   startList: StartListEntry[],
   settings: GlobalSettings
 ): string {
-  const labels = LABELS[settings.language] || LABELS.en;
-  const template = settings.texTemplate || 'default';
-
-  // Group entries by lane, then by class
-  const byLane: Map<string, Map<string, StartListEntry[]>> = new Map();
-  for (const entry of startList) {
-    const laneKey = `${entry.startArea} - ${entry.lane}`;
-    if (!byLane.has(laneKey)) {
-      byLane.set(laneKey, new Map());
-    }
-    const laneMap = byLane.get(laneKey)!;
-    if (!laneMap.has(entry.className)) {
-      laneMap.set(entry.className, []);
-    }
-    laneMap.get(entry.className)!.push(entry);
-  }
-
-  // Build LaTeX document
-  let tex = getTemplatePreamble(template, settings);
-  tex += `\\begin{document}
-
-`;
-
-  // Title
-  if (template === 'modern') {
-    tex += `\\begin{center}
-{\\Huge\\textcolor{headerblue}{\\textbf{${escapeLatex(settings.outputFolder)}}}}\\\\[5pt]
-{\\Large ${labels.startlist}}
-\\end{center}
-\\vspace{1cm}
-
-`;
-  } else if (template === 'elegant') {
-    tex += `\\begin{center}
-{\\LARGE\\textsc{${escapeLatex(settings.outputFolder)}}}\\\\[10pt]
-\\rule{5cm}{0.4pt}\\\\[5pt]
-{\\large ${labels.startlist}}
-\\end{center}
-\\vspace{1cm}
-
-`;
-  } else if (template === 'compact') {
-    tex += `\\begin{multicols}{2}
-{\\large\\textbf{${escapeLatex(settings.outputFolder)} ${labels.startlist}}}\\\\[5pt]
-
-`;
-  } else {
-    tex += `\\section*{${escapeLatex(settings.outputFolder)} ${labels.startlist}}
-
-`;
-  }
-
-  // Sort lanes
-  const sortedLanes = Array.from(byLane.keys()).sort((a, b) => {
-    const numA = parseInt(a.match(/\d+/)?.[0] || '999');
-    const numB = parseInt(b.match(/\d+/)?.[0] || '999');
-    return numA - numB || a.localeCompare(b);
-  });
-
-  for (const laneKey of sortedLanes) {
-    const classesInLane = byLane.get(laneKey)!;
-
-    // Extract just the lane name (remove area prefix)
-    const laneName = laneKey.includes(' - ') ? laneKey.split(' - ')[1] : laneKey;
-    tex += getTemplateSectionStyle(template, escapeLatex(laneName));
-
-    // Sort classes
-    const sortedClasses = Array.from(classesInLane.keys()).sort();
-
-    for (const className of sortedClasses) {
-      const entries = classesInLane.get(className)!;
-      entries.sort((a, b) => a.startNumber - b.startNumber);
-
-      const countLabel = `${entries.length} ${labels.entries}`;
-      tex += getTemplateSubsectionStyle(template, escapeLatex(className), countLabel);
-      tex += getTemplateTableStart(template, labels);
-
-      for (const entry of entries) {
-        const cardDisplay = entry.isRental || !entry.cardNumber ? labels.rental : entry.cardNumber;
-        tex += `${entry.startNumber} & ${entry.startTime} & ${escapeLatex(entry.name1)} & ${escapeLatex(entry.affiliation)} & ${cardDisplay} \\\\\n`;
-      }
-
-      tex += getTemplateTableEnd(template);
-    }
-  }
-
-  if (template === 'compact') {
-    tex += '\\end{multicols}\n';
-  }
-
-  tex += '\\end{document}\n';
-  return tex;
+  return buildTex(startList, settings, { isRole: false });
 }
 
 /**
- * Get template-specific preamble for Role TeX
- */
-function getRoleTemplatePreamble(template: TexTemplate, settings: GlobalSettings): string {
-  switch (template) {
-    case 'modern':
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{luatexja-ruby}
-\\usepackage{xcolor}
-\\usepackage{colortbl}
-\\usepackage{tcolorbox}
-
-\\definecolor{headerblue}{RGB}{41,128,185}
-\\definecolor{lightgray}{RGB}{245,245,245}
-\\definecolor{accentgreen}{RGB}{46,204,113}
-
-\\geometry{margin=1.5cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\textcolor{headerblue}{\\textbf{${escapeLatex(settings.competitionName)}}} - 役員用スタートリスト}
-\\fancyfoot[C]{\\thepage}
-\\setlength{\\headheight}{15pt}
-\\renewcommand{\\headrulewidth}{2pt}
-\\renewcommand{\\headrule}{\\hbox to\\headwidth{\\color{headerblue}\\leaders\\hrule height \\headrulewidth\\hfill}}
-`;
-
-    case 'elegant':
-      return `\\documentclass[a4paper,11pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{luatexja-ruby}
-\\usepackage{xcolor}
-
-\\definecolor{darkgold}{RGB}{139,119,42}
-\\definecolor{elegantgray}{RGB}{70,70,70}
-
-\\geometry{margin=2.5cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\rule{\\textwidth}{0.4pt}\\\\[2pt]\\textsc{${escapeLatex(settings.competitionName)}}\\\\[-8pt]\\rule{\\textwidth}{0.4pt}}
-\\fancyfoot[C]{\\textcolor{elegantgray}{--- \\thepage\\ ---}}
-\\setlength{\\headheight}{30pt}
-`;
-
-    case 'compact':
-      return `\\documentclass[a4paper,8pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{luatexja-ruby}
-\\usepackage{multicol}
-
-\\geometry{margin=1cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\small ${escapeLatex(settings.competitionName)} - 役員用スタートリスト}
-\\fancyfoot[C]{\\small \\thepage}
-\\setlength{\\headheight}{12pt}
-\\setlength{\\columnsep}{0.5cm}
-`;
-
-    case 'festival':
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{luatexja-ruby}
-\\usepackage{xcolor}
-\\usepackage{colortbl}
-\\usepackage{tcolorbox}
-
-\\definecolor{festivalred}{RGB}{220,50,50}
-\\definecolor{festivalyellow}{RGB}{255,200,0}
-\\definecolor{festivalorange}{RGB}{255,120,0}
-
-\\geometry{margin=1.5cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\textcolor{festivalred}{\\textbf{${escapeLatex(settings.competitionName)}}} - 役員用スタートリスト}
-\\fancyfoot[C]{\\textcolor{festivalorange}{\\thepage}}
-\\setlength{\\headheight}{15pt}
-\\renewcommand{\\headrulewidth}{3pt}
-\\renewcommand{\\headrule}{\\hbox to\\headwidth{\\color{festivalyellow}\\leaders\\hrule height \\headrulewidth\\hfill}}
-`;
-
-    case 'japanese':
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{luatexja-ruby}
-\\usepackage{xcolor}
-
-\\definecolor{aiiro}{RGB}{38,65,107}
-\\definecolor{matcha}{RGB}{104,142,105}
-\\definecolor{kiniro}{RGB}{196,175,112}
-
-\\geometry{margin=2.5cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\textcolor{aiiro}{\\rule{1cm}{0.5pt}\\hspace{0.5cm}${escapeLatex(settings.competitionName)}\\hspace{0.5cm}\\rule{1cm}{0.5pt}}}
-\\fancyfoot[C]{\\textcolor{matcha}{--- \\thepage\\ ---}}
-\\setlength{\\headheight}{20pt}
-`;
-
-    case 'sporty':
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{luatexja-ruby}
-\\usepackage{xcolor}
-\\usepackage{colortbl}
-\\usepackage{tcolorbox}
-
-\\definecolor{sportyorange}{RGB}{255,102,0}
-\\definecolor{sportygreen}{RGB}{0,180,120}
-\\definecolor{sportyblue}{RGB}{0,120,210}
-
-\\geometry{margin=1.5cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\textcolor{sportyblue}{\\textbf{${escapeLatex(settings.competitionName)}}} \\textcolor{sportyorange}{//} 役員用スタートリスト}
-\\fancyfoot[C]{\\textcolor{sportygreen}{\\thepage}}
-\\setlength{\\headheight}{15pt}
-\\renewcommand{\\headrulewidth}{2pt}
-\\renewcommand{\\headrule}{\\hbox to\\headwidth{\\color{sportyorange}\\leaders\\hrule height \\headrulewidth\\hfill}}
-`;
-
-    case 'minimal':
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{luatexja-ruby}
-\\usepackage{xcolor}
-
-\\definecolor{minimalaccent}{RGB}{80,80,80}
-\\definecolor{minimalgray}{RGB}{150,150,150}
-
-\\geometry{margin=3cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{\\textcolor{minimalgray}{${escapeLatex(settings.competitionName)}}}
-\\fancyfoot[C]{\\textcolor{minimalgray}{\\thepage}}
-\\setlength{\\headheight}{15pt}
-\\renewcommand{\\headrulewidth}{0.5pt}
-\\renewcommand{\\headrule}{\\hbox to\\headwidth{\\color{minimalgray}\\leaders\\hrule height \\headrulewidth\\hfill}}
-`;
-
-    default:
-      return `\\documentclass[a4paper,10pt]{ltjsarticle}
-\\usepackage{geometry}
-\\usepackage{longtable}
-\\usepackage{booktabs}
-\\usepackage{fancyhdr}
-\\usepackage{luatexja-ruby}
-
-\\geometry{margin=2cm}
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyhead[C]{${escapeLatex(settings.competitionName)} - 役員用スタートリスト}
-\\fancyfoot[C]{\\thepage}
-\\setlength{\\headheight}{15pt}
-`;
-  }
-}
-
-/**
- * Get template-specific table start for Role TeX
- */
-function getRoleTemplateTableStart(template: TexTemplate): string {
-  switch (template) {
-    case 'modern':
-      return `\\begin{longtable}{rlp{6cm}ll}
-\\rowcolor{headerblue}
-\\textcolor{white}{\\textbf{No.}} & \\textcolor{white}{\\textbf{時刻}} & \\textcolor{white}{\\textbf{氏名}} & \\textcolor{white}{\\textbf{所属}} & \\textcolor{white}{\\textbf{カード}} \\\\
-\\endhead
-`;
-
-    case 'elegant':
-      return `\\begin{longtable}{rlp{6cm}ll}
-\\toprule
-\\textsc{No.} & \\textsc{時刻} & \\textsc{氏名} & \\textsc{所属} & \\textsc{カード} \\\\
-\\midrule
-\\endhead
-`;
-
-    case 'compact':
-      return `\\begin{longtable}{rlp{5cm}ll}
-\\hline
-No. & 時刻 & 氏名 & 所属 & カード \\\\
-\\hline
-\\endhead
-`;
-
-    case 'festival':
-      return `\\begin{longtable}{rlp{6cm}ll}
-\\rowcolor{festivalyellow}
-\\textcolor{festivalred}{\\textbf{No.}} & \\textcolor{festivalred}{\\textbf{時刻}} & \\textcolor{festivalred}{\\textbf{氏名}} & \\textcolor{festivalred}{\\textbf{所属}} & \\textcolor{festivalred}{\\textbf{カード}} \\\\
-\\endhead
-`;
-
-    case 'japanese':
-      return `\\begin{longtable}{rlp{6cm}ll}
-\\toprule[1.5pt]
-\\textcolor{aiiro}{No.} & \\textcolor{aiiro}{時刻} & \\textcolor{aiiro}{氏名} & \\textcolor{aiiro}{所属} & \\textcolor{aiiro}{カード} \\\\
-\\midrule
-\\endhead
-`;
-
-    case 'sporty':
-      return `\\begin{longtable}{rlp{6cm}ll}
-\\rowcolor{sportyblue}
-\\textcolor{white}{\\textbf{No.}} & \\textcolor{white}{\\textbf{時刻}} & \\textcolor{white}{\\textbf{氏名}} & \\textcolor{white}{\\textbf{所属}} & \\textcolor{white}{\\textbf{カード}} \\\\
-\\endhead
-`;
-
-    case 'minimal':
-      return `\\begin{longtable}{rlp{6cm}ll}
-\\hline
-\\textcolor{minimalaccent}{No.} & \\textcolor{minimalaccent}{時刻} & \\textcolor{minimalaccent}{氏名} & \\textcolor{minimalaccent}{所属} & \\textcolor{minimalaccent}{カード} \\\\
-\\hline
-\\endhead
-`;
-
-    default:
-      return `\\begin{longtable}{rlp{6cm}ll}
-\\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\\\
-\\midrule
-\\endhead
-`;
-  }
-}
-
-/**
- * Generate Role TeX (Role_Startlist.tex)
- * Matches Python: write_role_startlist_tex function
+ * Generate Role TeX (Role_Startlist.tex) — 氏名にふりがな（ルビ）を付ける
  */
 export function generateRoleTex(
   startList: StartListEntry[],
   settings: GlobalSettings
 ): string {
-  const template = settings.texTemplate || 'default';
-
-  // Group entries by lane, then by class
-  const byLane: Map<string, Map<string, StartListEntry[]>> = new Map();
-  for (const entry of startList) {
-    const laneKey = `${entry.startArea} - ${entry.lane}`;
-    if (!byLane.has(laneKey)) {
-      byLane.set(laneKey, new Map());
-    }
-    const laneMap = byLane.get(laneKey)!;
-    if (!laneMap.has(entry.className)) {
-      laneMap.set(entry.className, []);
-    }
-    laneMap.get(entry.className)!.push(entry);
-  }
-
-  // Build LaTeX document
-  let tex = getRoleTemplatePreamble(template, settings);
-  tex += `\\begin{document}
-
-`;
-
-  // Title
-  if (template === 'modern') {
-    tex += `\\begin{center}
-{\\Huge\\textcolor{headerblue}{\\textbf{${escapeLatex(settings.outputFolder)}}}}\\\\[5pt]
-{\\Large 役員用スタートリスト}
-\\end{center}
-\\vspace{1cm}
-
-`;
-  } else if (template === 'elegant') {
-    tex += `\\begin{center}
-{\\LARGE\\textsc{${escapeLatex(settings.outputFolder)}}}\\\\[10pt]
-\\rule{5cm}{0.4pt}\\\\[5pt]
-{\\large 役員用スタートリスト}
-\\end{center}
-\\vspace{1cm}
-
-`;
-  } else if (template === 'compact') {
-    tex += `\\begin{multicols}{2}
-{\\large\\textbf{${escapeLatex(settings.outputFolder)} 役員用スタートリスト}}\\\\[5pt]
-
-`;
-  } else {
-    tex += `\\section*{${escapeLatex(settings.outputFolder)} 役員用スタートリスト}
-
-`;
-  }
-
-  // Sort lanes
-  const sortedLanes = Array.from(byLane.keys()).sort((a, b) => {
-    const numA = parseInt(a.match(/\d+/)?.[0] || '999');
-    const numB = parseInt(b.match(/\d+/)?.[0] || '999');
-    return numA - numB || a.localeCompare(b);
-  });
-
-  for (const laneKey of sortedLanes) {
-    const classesInLane = byLane.get(laneKey)!;
-
-    // Extract just the lane name
-    const laneName = laneKey.includes(' - ') ? laneKey.split(' - ')[1] : laneKey;
-    tex += getTemplateSectionStyle(template, escapeLatex(laneName));
-
-    // Sort classes
-    const sortedClasses = Array.from(classesInLane.keys()).sort();
-
-    for (const className of sortedClasses) {
-      const entries = classesInLane.get(className)!;
-      entries.sort((a, b) => a.startNumber - b.startNumber);
-
-      tex += getTemplateSubsectionStyle(template, escapeLatex(className), `${entries.length}名`);
-      tex += getRoleTemplateTableStart(template);
-
-      for (const entry of entries) {
-        const cardDisplay = entry.isRental || !entry.cardNumber ? 'レンタル' : entry.cardNumber;
-
-        // Create name with furigana if name2 exists
-        let nameDisplay: string;
-        if (entry.name2 && entry.name1) {
-          nameDisplay = `\\ruby{${escapeLatex(entry.name1)}}{${escapeLatex(entry.name2)}}`;
-        } else {
-          nameDisplay = escapeLatex(entry.name1);
-        }
-
-        tex += `${entry.startNumber} & ${entry.startTime} & ${nameDisplay} & ${escapeLatex(entry.affiliation)} & ${cardDisplay} \\\\\n`;
-      }
-
-      tex += getTemplateTableEnd(template);
-    }
-  }
-
-  if (template === 'compact') {
-    tex += '\\end{multicols}\n';
-  }
-
-  tex += '\\end{document}\n';
-  return tex;
+  return buildTex(startList, settings, { isRole: true });
 }
 
 /**
@@ -1055,8 +683,8 @@ export async function generateOutputFiles(
   ]);
 
   return {
-    mulkaCsv: generateMulkaCsv(startList),
-    roleCsv: generateRoleCsv(startList),
+    mulkaCsv: generateMulkaCsv(startList, settings),
+    roleCsv: generateRoleCsv(startList, settings),
     publicTex: generatePublicTex(startList, settings),
     roleTex: generateRoleTex(startList, settings),
     publicDocx,

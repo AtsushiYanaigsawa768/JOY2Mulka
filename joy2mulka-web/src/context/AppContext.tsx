@@ -35,7 +35,9 @@ const initialState: AppState = {
     interCourseGap: 0,
     seed: 42,
     personPositionConstraints: [],
-    texTemplate: 'default',
+    texTemplate: 'standard',
+    practiceMode: false,
+    generateStartNumbers: true,
   },
   generationResult: null,
   startList: [],
@@ -339,6 +341,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return state.courses.every((c) => assignedCourseIds.has(c.id));
     };
 
+    // 練習会モードではスタート設定（Step 2）を行わないため、レーン配置は要求しない
+    const practice = state.globalSettings.practiceMode;
+
     switch (step) {
       case 'menu':
         return true;
@@ -347,12 +352,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       case 'step1':
         return state.entries.length > 0;
       case 'step2':
-        return state.courses.length > 0;
+        return !practice && state.courses.length > 0;
       case 'step3':
         // All courses must be assigned to lanes
-        return allCoursesAssigned();
+        return practice ? state.courses.length > 0 : allCoursesAssigned();
       case 'step4':
-        return allCoursesAssigned();
+        return practice ? state.courses.length > 0 : allCoursesAssigned();
       case 'done':
         return state.startList.length > 0;
       default:

@@ -65,16 +65,18 @@ export default function Step0Update() {
     // Match lines like: 1 & 10:00:00 & 山田太郎 & 東京OLC & 12345 \\
     const tableRowRegex = /(\d+)\s*&\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*&\s*(.+?)\s*&\s*(.+?)\s*&\s*(\S+)\s*\\\\/g;
 
-    // Also match subsection for class names
-    const subsectionRegex = /\\subsection\*\{([^}]+)\}/g;
+    // Class headings: \classheading{M21A}{30 名} (現行テンプレート) と
+    // \subsection*{M21A (30名)} (旧テンプレート) の両方を拾う
+    const classHeadingRegex = /\\classheading\{([^}]+)\}|\\subsection\*\{([^}]+)\}/g;
 
     let match;
 
     // Find class names
     const classMatches: { index: number; name: string }[] = [];
-    while ((match = subsectionRegex.exec(content)) !== null) {
+    while ((match = classHeadingRegex.exec(content)) !== null) {
       // Extract class name (remove count like "(10名)")
-      const className = match[1].replace(/\s*\(\d+[名件]\)/, '').trim();
+      const raw = match[1] ?? match[2] ?? '';
+      const className = raw.replace(/\s*\(\d+[名件]\)/, '').trim();
       classMatches.push({ index: match.index, name: className });
     }
 

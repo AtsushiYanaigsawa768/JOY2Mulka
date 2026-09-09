@@ -1,29 +1,74 @@
+% !TEX program = lualatex
 \documentclass[a4paper,10pt]{ltjsarticle}
 \usepackage{geometry}
+\usepackage{array}
 \usepackage{longtable}
 \usepackage{booktabs}
+\usepackage{needspace}
 \usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{colortbl}
 \usepackage{luatexja-ruby}
+\definecolor{rule}{gray}{0.35}
+\definecolor{band}{gray}{0.90}
 
-\geometry{margin=2cm}
+\geometry{top=20mm,bottom=20mm,left=18mm,right=18mm,headsep=6mm}
+
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[C]{Sample Orienteering Competition 2024 - 役員用スタートリスト}
-\fancyfoot[C]{\thepage}
-\setlength{\headheight}{15pt}
+\fancyhead[L]{\small Sample Orienteering Competition 2024}
+\fancyhead[R]{\small 役員用スタートリスト}
+\fancyfoot[C]{\small \thepage}
+\setlength{\headheight}{14pt}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.25}
+\setlength{\LTpre}{2pt}
+\setlength{\LTpost}{10pt}
+
+% クラス見出し
+\newcommand{\classheading}[2]{%
+  \Needspace*{6\baselineskip}%
+  \par\vspace{3pt}%
+  \noindent{\large\bfseries #1}\hspace{0.6em}{\small #2}%
+  \par\vspace{1pt}%
+  \noindent\textcolor{rule}{\rule{\textwidth}{0.4pt}}%
+  \par\vspace{2pt}%
+}
+% レーン見出し
+\newcommand{\laneheading}[1]{%
+  \par\vspace{10pt}%
+  \noindent\textcolor{rule}{\rule{2.5mm}{3.4mm}}\hspace{0.5em}{\LARGE\bfseries #1}%
+  \par\vspace{4pt}%
+}
 \begin{document}
+\gtfamily\sffamily
 
-\section*{Competition2024 役員用スタートリスト}
+\begin{center}
+{\LARGE\bfseries Competition2024}\\[4pt]
+{\large 役員用スタートリスト}
+\end{center}
+\vspace{4mm}
 
-\section*{Lane 1}
+\laneheading{Lane 1}
 
-\subsection*{M21A1 (71名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{M21A1}{71名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1100 & 11:00:00 & \ruby{田中 太郎}{たなか たろう} & - & 2377870 \\
 1101 & 11:01:00 & \ruby{松本 直樹}{まつもと なおき} & サンプルOLC & レンタル \\
 1102 & 11:02:00 & \ruby{森 翔太}{もり しょうた} & 架空OLC & レンタル \\
@@ -95,18 +140,25 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1168 & 12:08:00 & \ruby{中村 誠}{なかむら まこと} & - & レンタル \\
 1169 & 12:09:00 & \ruby{松本 健}{まつもと けん} & テストクラブ & レンタル \\
 1170 & 12:10:00 & \ruby{高橋 直樹}{たかはし なおき} & サンプルOLC & 6625433 \\
-\bottomrule
 \end{longtable}
 
-\section*{Lane 2}
+\laneheading{Lane 2}
 
-\subsection*{M21A2 (71名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{M21A2}{71名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1200 & 11:00:00 & \ruby{山田 大輝}{やまだ だいき} & 匿名走林会 & 7929016 \\
 1201 & 11:01:00 & \ruby{林 健}{はやし けん} & サンプルOLC & レンタル \\
 1202 & 11:02:00 & \ruby{松本 太郎}{まつもと たろう} & 匿名走林会 & レンタル \\
@@ -178,30 +230,44 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1268 & 12:08:00 & \ruby{井上 健太}{いのうえ けんた} & 匿名走林会 & レンタル \\
 1269 & 12:09:00 & \ruby{中村 拓也}{なかむら たくや} & サンプルOLC & レンタル \\
 1270 & 12:10:00 & \ruby{加藤 翔太}{かとう しょうた} & デモOLK & 9950074 \\
-\bottomrule
 \end{longtable}
 
-\section*{Lane 3}
+\laneheading{Lane 3}
 
-\subsection*{M18A (2名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{M18A}{2名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1302 & 11:04:00 & \ruby{吉田 拓也}{よしだ たくや} & デモOLK & レンタル \\
 1303 & 11:06:00 & \ruby{山田 拓也}{やまだ たくや} & サンプルOLC & 7952921 \\
-\bottomrule
 \end{longtable}
 
-\subsection*{M20A (9名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{M20A}{9名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1436 & 15:48:00 & \ruby{斎藤 健}{さいとう けん} & テストクラブ & レンタル \\
 1437 & 15:50:00 & \ruby{渡辺 翔太}{わたなべ しょうた} & - & レンタル \\
 1438 & 15:52:00 & \ruby{高橋 誠}{たかはし まこと} & サンプルOLC & レンタル \\
@@ -211,16 +277,23 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1442 & 16:00:00 & \ruby{山田 拓也}{やまだ たくや} & サンプルOLC & レンタル \\
 1443 & 16:02:00 & \ruby{井上 直樹}{いのうえ なおき} & テストクラブ & レンタル \\
 1444 & 16:04:00 & \ruby{山田 翔太}{やまだ しょうた} & サンプルOLC & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{M21AS (16名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{M21AS}{16名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1361 & 13:02:00 & \ruby{小林 浩}{こばやし ひろし} & デモOLK & レンタル \\
 1362 & 13:05:00 & \ruby{鈴木 翔太}{すずき しょうた} & 匿名走林会 & レンタル \\
 1363 & 13:08:00 & \ruby{森 健}{もり けん} & デモOLK & 5281449 \\
@@ -237,16 +310,23 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1374 & 13:41:00 & \ruby{渡辺 誠}{わたなべ まこと} & デモOLK & レンタル \\
 1375 & 13:44:00 & \ruby{田中 拓也}{たなか たくや} & - & レンタル \\
 1376 & 13:47:00 & \ruby{井上 太郎}{いのうえ たろう} & 仮想クラブ & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{M35A (13名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{M35A}{13名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1348 & 12:36:00 & \ruby{山口 誠}{やまぐち まこと} & - & 5777493 \\
 1349 & 12:38:00 & \ruby{田中 拓也}{たなか たくや} & デモOLK & レンタル \\
 1350 & 12:40:00 & \ruby{鈴木 拓也}{すずき たくや} & - & レンタル \\
@@ -260,16 +340,23 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1358 & 12:56:00 & \ruby{高橋 大輝}{たかはし だいき} & サンプルOLC & レンタル \\
 1359 & 12:58:00 & \ruby{山本 大輝}{やまもと だいき} & - & 1602575 \\
 1360 & 13:00:00 & \ruby{林 大輝}{はやし だいき} & サンプルOLC & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{M50A (54名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{M50A}{54名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1377 & 13:50:00 & \ruby{高橋 太郎}{たかはし たろう} & - & レンタル \\
 1378 & 13:52:00 & \ruby{伊藤 翔太}{いとう しょうた} & 仮想クラブ & レンタル \\
 1379 & 13:54:00 & \ruby{木村 拓也}{きむら たくや} & サンプルOLC & レンタル \\
@@ -324,41 +411,62 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1428 & 15:32:00 & \ruby{伊藤 大輝}{いとう だいき} & 匿名走林会 & レンタル \\
 1429 & 15:34:00 & \ruby{井上 太郎}{いのうえ たろう} & デモOLK & 3876117 \\
 1430 & 15:36:00 & \ruby{山田 太郎}{やまだ たろう} & 架空OLC & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{MF (3名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{MF}{3名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1304 & 11:08:00 & \ruby{井上 誠}{いのうえ まこと} & サンプルOLC & レンタル \\
 1305 & 11:10:00 & \ruby{林 直樹}{はやし なおき} & テストクラブ & レンタル \\
 1306 & 11:12:00 & \ruby{渡辺 直樹}{わたなべ なおき} & 匿名走林会 & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{W20A (2名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{W20A}{2名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1300 & 11:00:00 & \ruby{小林 裕子}{こばやし ゆうこ} & 匿名走林会 & レンタル \\
 1301 & 11:02:00 & \ruby{山口 由美}{やまぐち ゆみ} & 匿名走林会 & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{W21A (41名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{W21A}{41名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1307 & 11:14:00 & \ruby{吉田 麻衣}{よしだ まい} & 仮想クラブ & 8209036 \\
 1308 & 11:16:00 & \ruby{松本 愛}{まつもと あい} & 匿名走林会 & レンタル \\
 1309 & 11:18:00 & \ruby{中村 真由}{なかむら まゆ} & 架空OLC & 8594048 \\
@@ -400,47 +508,68 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1345 & 12:30:00 & \ruby{森 美咲}{もり みさき} & 匿名走林会 & レンタル \\
 1346 & 12:32:00 & \ruby{鈴木 陽子}{すずき ようこ} & テストクラブ & レンタル \\
 1347 & 12:34:00 & \ruby{伊藤 美咲}{いとう みさき} & デモOLK & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{W21AS (4名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{W21AS}{4名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1465 & 13:10:00 & \ruby{山口 花子}{やまぐち はなこ} & 架空OLC & レンタル \\
 1466 & 13:13:00 & \ruby{高橋 裕子}{たかはし ゆうこ} & 仮想クラブ & レンタル \\
 1467 & 13:16:00 & \ruby{佐藤 麻衣}{さとう まい} & 匿名走林会 & レンタル \\
 1468 & 13:19:00 & \ruby{山口 真由}{やまぐち まゆ} & 架空OLC & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{W35A (5名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{W35A}{5名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1431 & 15:38:00 & \ruby{斎藤 愛}{さいとう あい} & テストクラブ & 4053512 \\
 1432 & 15:40:00 & \ruby{井上 花子}{いのうえ はなこ} & - & 8207044 \\
 1433 & 15:42:00 & \ruby{井上 由美}{いのうえ ゆみ} & - & レンタル \\
 1434 & 15:44:00 & \ruby{田中 彩}{たなか あや} & デモOLK & 9640957 \\
 1435 & 15:46:00 & \ruby{山本 麻衣}{やまもと まい} & サンプルOLC & レンタル \\
-\bottomrule
 \end{longtable}
 
-\section*{Lane 4}
+\laneheading{Lane 4}
 
-\subsection*{B (9名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{B}{9名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1414 & 11:28:00 & \ruby{清水 健太}{しみず けんた} & テストクラブ & レンタル \\
 1415 & 11:30:00 & \ruby{山田 浩}{やまだ ひろし} & - & レンタル \\
 1416 & 11:32:00 & \ruby{山本 翔太}{やまもと しょうた} & - & レンタル \\
@@ -450,29 +579,43 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1420 & 11:40:00 & \ruby{山口 太郎}{やまぐち たろう} & - & レンタル \\
 1421 & 11:42:00 & \ruby{山本 浩}{やまもと ひろし} & - & 3824896 \\
 1422 & 11:44:00 & \ruby{山田 恵子}{やまだ けいこ} & デモOLK & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{C (3名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{C}{3名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1410 & 11:20:00 & \ruby{田中 麻衣}{たなか まい} & デモOLK & レンタル \\
 1411 & 11:22:00 & \ruby{渡辺 美咲}{わたなべ みさき} & デモOLK & レンタル \\
 1412 & 11:24:00 & \ruby{小林 一郎}{こばやし いちろう} & テストクラブ & 9603146 \\
-\bottomrule
 \end{longtable}
 
-\subsection*{G (7名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{G}{7名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1469 & 13:22:00 & \ruby{森 一郎}{もり いちろう} & - & レンタル \\
 1470 & 13:24:00 & \ruby{清水 美咲}{しみず みさき} & 匿名走林会 & レンタル \\
 1471 & 13:26:00 & \ruby{加藤 拓也}{かとう たくや} & - & レンタル \\
@@ -480,27 +623,41 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1473 & 13:30:00 & \ruby{吉田 拓也}{よしだ たくや} & 匿名走林会 & レンタル \\
 1474 & 13:32:00 & \ruby{山田 大輝}{やまだ だいき} & - & レンタル \\
 1475 & 13:34:00 & \ruby{中村 浩}{なかむら ひろし} & 匿名走林会 & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{M15A (1名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{M15A}{1名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1423 & 11:46:00 & \ruby{田中 翔太}{たなか しょうた} & - & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{M65A (19名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{M65A}{19名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1432 & 12:04:00 & \ruby{加藤 浩}{かとう ひろし} & 仮想クラブ & 6170757 \\
 1433 & 12:06:00 & \ruby{山本 健}{やまもと けん} & サンプルOLC & 7111789 \\
 1434 & 12:08:00 & \ruby{吉田 太郎}{よしだ たろう} & サンプルOLC & 6075280 \\
@@ -520,77 +677,119 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1448 & 12:36:00 & \ruby{山口 健}{やまぐち けん} & 匿名走林会 & 6578848 \\
 1449 & 12:38:00 & \ruby{松本 健}{まつもと けん} & 架空OLC & レンタル \\
 1450 & 12:40:00 & \ruby{渡辺 翔太}{わたなべ しょうた} & デモOLK & 3706623 \\
-\bottomrule
 \end{longtable}
 
-\subsection*{M75A (5名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{M75A}{5名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1404 & 11:08:00 & \ruby{山田 健太}{やまだ けんた} & 架空OLC & 2069313 \\
 1405 & 11:10:00 & \ruby{山口 誠}{やまぐち まこと} & 架空OLC & 8903786 \\
 1406 & 11:12:00 & \ruby{鈴木 一郎}{すずき いちろう} & 架空OLC & 8109371 \\
 1407 & 11:14:00 & \ruby{加藤 誠}{かとう まこと} & - & 8577888 \\
 1408 & 11:16:00 & \ruby{加藤 拓也}{かとう たくや} & - & 3965006 \\
-\bottomrule
 \end{longtable}
 
-\subsection*{N (3名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{N}{3名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1476 & 13:36:00 & \ruby{木村 太郎}{きむら たろう} & - & レンタル \\
 1477 & 13:38:00 & \ruby{高橋 大輝}{たかはし だいき} & 匿名走林会 & レンタル \\
 1478 & 13:40:00 & \ruby{中村 美咲}{なかむら みさき} & - & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{W10 (1名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{W10}{1名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1479 & 13:42:00 & \ruby{田中 彩}{たなか あや} & - & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{W12 (1名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{W12}{1名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1413 & 11:26:00 & \ruby{山田 陽子}{やまだ ようこ} & 匿名走林会 & レンタル \\
-\bottomrule
 \end{longtable}
 
-\subsection*{W15A (1名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{W15A}{1名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1424 & 11:48:00 & \ruby{山本 真由}{やまもと まゆ} & 匿名走林会 & 4226333 \\
-\bottomrule
 \end{longtable}
 
-\subsection*{W50A (14名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{W50A}{14名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1451 & 12:42:00 & \ruby{田中 陽子}{たなか ようこ} & 架空OLC & レンタル \\
 1452 & 12:44:00 & \ruby{山口 真由}{やまぐち まゆ} & テストクラブ & レンタル \\
 1453 & 12:46:00 & \ruby{清水 美咲}{しみず みさき} & - & レンタル \\
@@ -605,41 +804,62 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1462 & 13:04:00 & \ruby{小林 恵子}{こばやし けいこ} & 仮想クラブ & レンタル \\
 1463 & 13:06:00 & \ruby{中村 愛}{なかむら あい} & 仮想クラブ & 2297859 \\
 1464 & 13:08:00 & \ruby{林 美咲}{はやし みさき} & 架空OLC & 3939578 \\
-\bottomrule
 \end{longtable}
 
-\subsection*{W65A (4名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{W65A}{4名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1400 & 11:00:00 & \ruby{山本 花子}{やまもと はなこ} & 架空OLC & 1347000 \\
 1401 & 11:02:00 & \ruby{高橋 花子}{たかはし はなこ} & サンプルOLC & 8020633 \\
 1402 & 11:04:00 & \ruby{田中 真由}{たなか まゆ} & デモOLK & 7526241 \\
 1403 & 11:06:00 & \ruby{林 彩}{はやし あや} & 仮想クラブ & 8839296 \\
-\bottomrule
 \end{longtable}
 
-\subsection*{W75A (1名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{W75A}{1名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1409 & 11:18:00 & \ruby{山本 花子}{やまもと はなこ} & デモOLK & 2939306 \\
-\bottomrule
 \end{longtable}
 
-\subsection*{WF (7名)}
-
-\begin{longtable}{rlp{6cm}ll}
-\toprule
-No. & 時刻 & 氏名 & 所属 & カード \\
+\classheading{WF}{7名}
+\begin{longtable}{rl>{\raggedright\arraybackslash}p{0.281\textwidth}>{\raggedright\arraybackslash}p{0.329\textwidth}l}
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\rowcolor{band} \textbf{No.} & \textbf{時刻} & \textbf{氏名} & \textbf{所属} & \textbf{カード} \\
 \midrule
 \endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
 1425 & 11:50:00 & \ruby{鈴木 愛}{すずき あい} & 架空OLC & レンタル \\
 1426 & 11:52:00 & \ruby{高橋 真由}{たかはし まゆ} & 匿名走林会 & レンタル \\
 1427 & 11:54:00 & \ruby{小林 恵子}{こばやし けいこ} & テストクラブ & レンタル \\
@@ -647,7 +867,6 @@ No. & 時刻 & 氏名 & 所属 & カード \\
 1429 & 11:58:00 & \ruby{小林 真由}{こばやし まゆ} & テストクラブ & レンタル \\
 1430 & 12:00:00 & \ruby{清水 花子}{しみず はなこ} & - & レンタル \\
 1431 & 12:02:00 & \ruby{木村 由美}{きむら ゆみ} & テストクラブ & レンタル \\
-\bottomrule
 \end{longtable}
 
 \end{document}
