@@ -1,0 +1,394 @@
+% =====================================================================
+\chapter{用語集}
+% =====================================================================
+
+五十音順・アルファベット順に並べています。
+タグは，その用語がどのシステム・大会形態に関係するかを示します。
+
+\section*{あ行}
+\addcontentsline{toc}{section}{あ行}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{34mm}P{14mm}P{96mm}@{}}
+\toprule
+\hd{用語} & \hd{関係} & \hd{意味} \\
+\midrule
+\endhead
+アクティベート & \tEMIT &
+  E カードを起動して，カード内の時計を 0 から動かし始めること。
+  スタートユニットで行う。カード内の古いデータもここで消去される。
+  個人戦では 3 分前枠に入るとき，リレーではチェンジオーバーの前に行う \\
+
+イベントデータ & \tALL &
+  Mulka2 が 1 つの大会について持つデータ一式。
+  \texttt{Event.dat} \texttt{Startlist.dat} \texttt{Class.dat} \texttt{Course.dat}
+  \texttt{Changes.dat} などを含む 1 フォルダ \\
+
+イベントマネージャ & \tALL &
+  Mulka2 でイベントを作成・編集する画面。
+  \textbf{競技が始まると開けない}ので，当日の変更はメインウィンドウから行う \\
+
+動作時間 & \tSI &
+  ステーションが最後のパンチからスタンバイモードに戻るまでの時間。
+  短すぎると競技中にスタンバイに戻り，パンチが遅くなって不公平になる \\
+
+オンラインコントロール & \tALL &
+  中間コントロールやフィニッシュのパンチ情報を，
+  その場で計センに送る仕組み。実況や中間速報に使う \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{か行}
+\addcontentsline{toc}{section}{か行}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{34mm}P{14mm}P{96mm}@{}}
+\toprule
+\hd{用語} & \hd{関係} & \hd{意味} \\
+\midrule
+\endhead
+カード備考 & \tALL &
+  スタートリストの列の 1 つ。「レンタル」「マイカード」などを入れる。
+  \textbf{読み取り時に音を鳴らす条件に使える}ので，回収漏れ防止に有効 \\
+
+管理者用リスト／役職用スタートリスト & \tALL &
+  救護・スタート・フィニッシュなど，役職ごとに最適化したスタートリスト。
+  並び順と強調する項目を用途に合わせて変える（Step 13） \\
+
+競技時間 & \tALL &
+  クラスごとの制限時間。Mulka2 のクラスデータに入れておくと，
+  超過した競技者に順位が付かない \\
+
+競技者登録番号 & \tRANK &
+  公認大会の公式成績表で必要になる，競技者ごとの登録番号 \\
+
+クリア & \tSI\ \tSIAC &
+  SI カードの前回データを消去する操作。スタート地区で競技者自身が行う。
+  \textbf{クリアを忘れると，前の大会のデータが正解チェックに使われて
+  誤って OK になることがある} \\
+
+繰り上げスタート（リスタート） & \tRELAY &
+  前走者が戻らない，または大きく遅れているチームを，
+  決められた時刻に一斉にスタートさせる仕組み \\
+
+計セン（計算センター） & \tALL &
+  競技者の記録を計算して公表する部署。本書の主題 \\
+
+ゴール計セン & \tALL &
+  会場から離れたフィニッシュ地区に置く計セン。
+  読み取り・ペナチェック・速報印刷を担当する \\
+
+コース設定変更 & \tALL &
+  メインウィンドウから，コースのコントロール番号や
+  パンチングスタート／フィニッシュの設定を変更する機能。
+  \textbf{競技中でも使える}。実行すると再ペナチェックが走る \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{さ行}
+\addcontentsline{toc}{section}{さ行}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{34mm}P{14mm}P{96mm}@{}}
+\toprule
+\hd{用語} & \hd{関係} & \hd{意味} \\
+\midrule
+\endhead
+サービスモード & \tSI &
+  ステーションの設定を読み書きできる状態。
+  Service/OFF カードでパンチして切り替える。液晶が表示される \\
+
+試走・ポ確（ポスト確認） & \tALL &
+  競技開始前に，コントロールが正しく設置され動作しているかを確認する作業。
+  \textbf{事前準備でいちばん効く作業}（Step 17・23） \\
+
+再現テストツール & \tALL &
+  \texttt{Changes.dat} に記録された当日の操作を，時間の流れどおりに再生する機能。
+  機材が手元になくても，当日の計セン運営を練習できる（Step 16） \\
+
+スタンバイモード & \tSI &
+  ステーションの保管時の状態。液晶表示が消えている。消費電力が最小 \\
+
+ゼッケン番号（スタートナンバー） & \tALL &
+  競技者を一意に識別する番号。
+  \textbf{桁ごとに意味を持たせて設計}すると，現場での判断が速くなる（Step 10） \\
+
+全ポ図 & \tALL &
+  全コントロールを 1 枚に描いた地図。
+  \textbf{ペナチェックで競技者に説明するときに必須}。
+  救護・パトロールに渡す分には\textbf{格子（メッシュ）}を入れ，
+  区画で場所を伝えられるようにしておく \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{た行〜な行}
+\addcontentsline{toc}{section}{た行〜な行}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{34mm}P{14mm}P{96mm}@{}}
+\toprule
+\hd{用語} & \hd{関係} & \hd{意味} \\
+\midrule
+\endhead
+ダブルコントロール & \tALL &
+  混雑対策で同じコントロールに 2 台の機材を置くこと。
+  コースデータでは \texttt{35/36} のようにスラッシュで区切って記述する \\
+
+タッチフリー & \tSIAC &
+  カードを機材に差し込まず，近づけるだけでパンチできる方式 \\
+
+チェック & \tSI\ \tSIAC &
+  クリアされていることを確認する操作。
+  \tSIAC\ SIAC はこのチェックで電源が ON になる \\
+
+当日申込 & \tALL\ \tPRAC &
+  大会当日に受け付ける申込。
+  \textbf{スタート時刻は受付が決め，計センは入力するだけ}にする \\
+
+ドロップ（取り込み） & \tALL &
+  イベントマネージャの所定の枠に CSV ファイルをドラッグ\&ドロップして，
+  データを読み込ませること \\
+
+ネットワークツリー & \tALL &
+  Mulka2 の通信マネージャで，接続中の PC が表示される画面 \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{は行〜わ行}
+\addcontentsline{toc}{section}{は行〜わ行}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{34mm}P{14mm}P{96mm}@{}}
+\toprule
+\hd{用語} & \hd{関係} & \hd{意味} \\
+\midrule
+\endhead
+バックアップメモリ & \tSI &
+  ステーションの内部に残るパンチの記録。
+  カードに記録が無くても，ここに残っていることがある。
+  \textbf{大会前に消去し，トラブル時は読み出して保存する} \\
+
+バックアップラベル（BUL） & \tEMIT &
+  E カードに挟む紙。ユニットごとに異なる穴のパターンが押され，
+  電子データが失われても通過を証明できる \\
+
+パンチングスタート & \tSI &
+  スタート地点でカードをステーションに差し込み，
+  \textbf{その時刻を計時開始とする}方式。フリースタートで使う \\
+
+パンチングフィニッシュ & \tALL &
+  フィニッシュラインの機材をパンチした時刻を，フィニッシュ時刻とする方式。
+  \textbf{Mulka2 のコース設定でチェックが必要} \\
+
+ふりがな（氏名2） & \tALL &
+  スタートリストの列。\textbf{スタート地区での呼び出しに使うので必須} \\
+
+ペナチェック & \tALL &
+  ペナルティ判定が出た競技者について，
+  通過していないコントロールを特定し，本人に説明して判定を確定する作業 \\
+
+未帰還者リスト & \tALL &
+  まだフィニッシュしていない競技者の一覧。
+  \textbf{フィニッシュ閉鎖の 30 分前と直後の 2 回}共有する \\
+
+メインウィンドウ & \tALL &
+  Mulka2 の中心となる画面。
+  スタートリスト・リザルトリスト・操作履歴などを表示し，当日の作業はここから行う \\
+
+メインステーション（Mini Reader） & \tSI &
+  計センで SI カードを読み取る機材。ステーションの設定にも使う。
+  \textbf{必ず予備を用意する} \\
+
+リーディングユニット（RU） & \tEMIT &
+  計センで E カードを読み取る機材。読み取ると\textbf{カードの時計が止まる}。
+  RS-232C 接続なので USB 変換アダプタが必要。\textbf{必ず予備を用意する} \\
+
+リフトアップスタート & \tEMIT &
+  スタート時刻の瞬間に，カードをスタートユニットから\textbf{離す}方式。
+  差し込む SI のパンチングスタートとは動作が逆なので，区別すること \\
+
+レンタルカード & \tALL &
+  マイカードを持たない参加者に貸し出すカード。
+  \textbf{回収漏れが起きやすいので，備考と読み取り音で対策する} \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{アルファベット}
+\addcontentsline{toc}{section}{アルファベット}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{34mm}P{14mm}P{96mm}@{}}
+\toprule
+\hd{用語} & \hd{関係} & \hd{意味} \\
+\midrule
+\endhead
+\texttt{Changes.dat} & \tALL &
+  イベントデータの中で，\textbf{当日の変更がすべて時系列で追記される}ファイル。
+  これを削除すると競技前の状態に戻る（\textbf{競技中は削除しない}） \\
+
+\texttt{Class.dat} / \texttt{Class.csv} & \tALL &
+  クラス名・コース名・入賞人数・競技時間を定義するファイル \\
+
+\texttt{Course.dat} / \texttt{Course.csv} & \tALL &
+  コースごとのコントロール番号の並びを定義するファイル \\
+
+DISQ & \tALL & 失格 \\
+
+DNF & \tALL & 途中棄権 \\
+
+DNS & \tALL & 未出走（欠席） \\
+
+E カード & \tEMIT &
+  EMIT のコントロールカード。内部に電池と時計を持ち，
+  \textbf{経過時間}を記録する。記録可能数は最大 50
+  （スタート・フィニッシュ・読み取りを含むので実質 47 前後） \\
+
+JOY & \tALL & エントリーサイト。本書では「エントリーサイト」と同義で使う \\
+
+JOY2Mulka & \tALL &
+  エントリーリストを Mulka2 用の \texttt{Startlist.csv} に変換するツール。
+  役職用・公開用のスタートリストも同時に生成する \\
+
+Lap Center & \tALL & 大会後にラップを公開する場所 \\
+
+MP & \tALL & ミスパンチ（通過すべきコントロールを通っていない） \\
+
+MTR & \tEMIT &
+  E カードを読み取る機材。本体にデータを記録でき，読み取りと同時に印刷もできる。
+  リーディングユニットの代替になる。\textbf{電源ボタンの長押しが必要} \\
+
+OCAD & \tALL &
+  コース設計に使われるソフト。
+  コース設定データをテキストで書き出して Mulka2 に取り込める \\
+
+\texttt{RelayClass.csv} & \tRELAY &
+  リレークラス名・走者数・スタート時刻・繰り上げ設定を定義するファイル \\
+
+\texttt{RelayTeam.csv} & \tRELAY &
+  チームと，各走順のスタートナンバーの対応を定義するファイル \\
+
+Service/OFF カード & \tSI &
+  ステーションをサービスモード／スタンバイモードに切り替えるカード \\
+
+SI Config+ & \tSI\ \tSIAC &
+  SI 機材の設定・読み取り・時計合わせを行うソフト \\
+
+SI カード & \tSI &
+  SPORTident のコントロールカード。カードに時計は無く，
+  \textbf{通過した時刻}が記録される。記録可能数は種類により 30〜128 \\
+
+SI マスタ & \tSI &
+  ステーションの時計合わせなどに使う機材。
+  \textbf{設定変更モードは大会前に使わない}（意図しない設定変更の事故が起きる） \\
+
+SIAC & \tSIAC &
+  タッチフリー対応の SI カード。電池を内蔵し，電源の ON／OFF がある。
+  \textbf{チェックで ON，フィニッシュで OFF} になる \\
+
+SIAC TEST & \tSIAC &
+  SIAC のタッチフリー動作を確認するためのステーション。
+  会場とスタート地区に設置する \\
+
+\texttt{Startlist.dat} / \texttt{Startlist.csv} & \tALL &
+  出場者一覧。クラス・スタートナンバー・氏名・ふりがな・所属・
+  スタート時刻・カード番号・カード備考・競技者登録番号 \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{ソフトウェア・資料の入手先}
+\addcontentsline{toc}{section}{ソフトウェア・資料の入手先}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{30mm}P{34mm}P{80mm}@{}}
+\toprule
+\hd{名前} & \hd{何に使うか} & \hd{入手先} \\
+\midrule
+\endhead
+Mulka2 & 計時・記録の本体（Step 4 以降のほぼ全部） &
+  \url{https://mulka2.com/mulka2/ja/index.php/Mulka2}\newline
+  \footnotesize 公式 wiki のトップページ。左側の【インストール】から
+  インストール方法・バージョンアップ方法へ進みます。
+  ほかのファイルは【その他のダウンロード】にあります。 \\
+ラップセンター & ラップ・成績の公開（Step 39） &
+  \url{https://mulka2.com/lapcenter/} \\
+\tSI\ \tSIAC\ SI Config+ &
+  ステーションの設定・時計合わせ・バックアップ読み出し（Step 8・24・37） &
+  \url{https://www.sportident.com/support/downloads}\newline
+  \footnotesize 製品ページの
+  \url{https://www.sportident.com/products\#category=software} からも辿れます。 \\
+SI システム運営マニュアル & SI Config+ の詳しい使い方（Step 8 の出典） &
+  \url{https://sans-souci.jpn.org/sisystem/simanual/}\newline
+  \footnotesize オリエンテーリングクラブ サン・スーシ。複製・配布が認められています。 \\
+JOY2Mulka & エントリーリストの整形・スタートリスト生成（Step 9〜13） &
+  \url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka}\newline
+  \footnotesize リポジトリそのものが配布元です。
+  サンプルデータは \texttt{sample/} にあります。 \\
+JOA 競技者番号 & 公認大会の登録番号の照合（Step 9）\tRANK &
+  \url{https://japan-o-entry.com/joaregist/openlist} \\
+JOA ランキング & 分割の実力均等化（Step 11）\tRANK &
+  \footnotesize フォレスト：
+  \url{https://japan-o-entry.com/ranking/ranking/ranking_index/5/39}（男子）／
+  \url{https://japan-o-entry.com/ranking/ranking/ranking_index/5/46}（女子）\newline
+  スプリント：
+  \url{https://japan-o-entry.com/ranking/ranking/ranking_index/17/85}（男子）／
+  \url{https://japan-o-entry.com/ranking/ranking/ranking_index/17/86}（女子） \\
+日本標準時 & PC の時計が合っているかの確認（Step 24） &
+  \url{https://www.nict.go.jp/JST/JST5.html}\newline
+  \footnotesize NTP サーバは \texttt{ntp.nict.jp}。 \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\begin{Note}[入れておく PC を決めておく]
+当日に使う PC には，\textbf{Mulka2 と（SI なら）SI Config+ のインストーラを
+PC 内に保存}しておきます。
+会場でインターネットにつながらないことがあり，
+そこで入れ直しが必要になると手が止まります。
+USB ドライバも同じ扱いです（Step 2）。
+\end{Note}
+
+\vspace{6mm}
+\noindent\textcolor{rulec}{\rule{\textwidth}{0.8pt}}
+\vspace{2mm}
+
+\noindent{\sffamily\small\textbf{図版の出典}}\par
+\vspace{1mm}
+\noindent{\sffamily\footnotesize
+\textbf{Mulka2 の画面}（イベントマネージャ・ネットワーク時計・カード読み取り・
+読み取り音設定・ペナレポート・カードデータ詳細）は，Mulka2 公式マニュアルから引用しました。\par
+\hspace{1em}\url{https://mulka2.com/mulka2/ja/index.php/Mulka2}\par
+\vspace{1.5mm}
+\textbf{SI Config+ の画面}は，次の資料から引用しました。\par
+\hspace{1em}「オリエンテーリング大会 SI システム運営マニュアル」rev.9.0\par
+\hspace{1em}オリエンテーリングクラブ サン・スーシ（大場隆夫）\par
+\hspace{1em}\url{https://sans-souci.jpn.org/sisystem/simanual/}\par
+\hspace{1em}\footnotesize 同資料は，著作権者により自由な複製・配布が認められています。\par
+\vspace{1.5mm}
+\textbf{JOY2Mulka の画面}は，同ツールに同梱の匿名サンプルデータを読み込んだ状態のものです。\par
+\vspace{1.5mm}
+\textbf{それ以外の図}（フローチャート・配置図・帳票の書式例など）は，すべて本書のために作成しました。\par
+\vspace{1.5mm}
+なお，引用した画面の中には，撮影者の PC のユーザー名やクラブ名が
+小さく写り込んでいる場合があります。引用元を改変しないため，そのまま掲載しています。}
+
+\vspace{4mm}
+\noindent\textcolor{rulec}{\rule{\textwidth}{0.4pt}}
+\vspace{2mm}
+
+\noindent{\sffamily\small
+本書の例に登場する人名・所属名・カード番号・ゼッケン番号・時刻は，すべて架空のものです。\par
+画面上のメニュー名・ボタン名は，使用するソフトウェアのバージョンによって異なります。\par
+機材の設定値・電圧の目安は，使用する機材と大会条件に合わせて確認したうえで使ってください。}

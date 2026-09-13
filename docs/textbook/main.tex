@@ -1,0 +1,345 @@
+% !TEX program = lualatex
+% =====================================================================
+%  Mulka2 / JOY2Mulka による計算センター運営テキストブック
+% =====================================================================
+\documentclass[a4paper,10pt,openany]{ltjsbook}
+
+\usepackage{geometry}
+\geometry{top=22mm,bottom=22mm,left=20mm,right=18mm,headsep=5mm,footskip=12mm}
+
+\usepackage{luatexja-ruby}
+\usepackage{graphicx}
+\graphicspath{{img/}}
+\usepackage{amsmath,amssymb}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,shapes.misc,calc,fit,
+                backgrounds,decorations.pathreplacing,patterns,shadows.blur}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=linkc,urlcolor=linkc,bookmarksnumbered=true,
+            pdftitle={Mulka2 / JOY2Mulka による計算センター運営テキストブック}}
+
+% ---------------------------------------------------------------- 色
+\definecolor{linkc}{HTML}{1A4E8A}
+\definecolor{cSI}{HTML}{1F5FA8}
+\definecolor{cEMIT}{HTML}{9C5A00}
+\definecolor{cSIAC}{HTML}{0E7A5F}
+\definecolor{cRANK}{HTML}{7A2B6B}
+\definecolor{cPRAC}{HTML}{2F6B2F}
+\definecolor{cRELAY}{HTML}{A03030}
+\definecolor{goalbg}{HTML}{EAF1FA}
+\definecolor{goalfr}{HTML}{2E6DB4}
+\definecolor{donebg}{HTML}{EAF6EE}
+\definecolor{donefr}{HTML}{2E8B57}
+\definecolor{failbg}{HTML}{FCEEEA}
+\definecolor{failfr}{HTML}{B5502E}
+\definecolor{notebg}{HTML}{F4F4F0}
+\definecolor{notefr}{HTML}{888880}
+\definecolor{band}{gray}{0.90}
+\definecolor{band2}{gray}{0.96}
+\definecolor{rulec}{gray}{0.35}
+\definecolor{figbg}{HTML}{F7F7F4}
+\definecolor{boxln}{HTML}{444444}
+
+% ------------------------------------------------------- ヘッダフッタ
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\nouppercase{\leftmark}}
+\fancyhead[R]{\small\nouppercase{\rightmark}}
+\fancyfoot[C]{\small\thepage}
+\setlength{\headheight}{14pt}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{}
+
+% ------------------------------------------------------------ 「部」
+\renewcommand{\prechaptername}{第}
+\renewcommand{\postchaptername}{部}
+
+% ------------------------------------------------------------ タグ
+\setlength{\fboxsep}{2pt}
+\DeclareRobustCommand{\tg}[2]{{\colorbox{#1}{\color{white}\sffamily\bfseries\scriptsize\strut #2}}}
+\DeclareRobustCommand{\tSI}{\tg{cSI}{SI}}
+\DeclareRobustCommand{\tEMIT}{\tg{cEMIT}{EMIT}}
+\DeclareRobustCommand{\tSIAC}{\tg{cSIAC}{SIAC}}
+\DeclareRobustCommand{\tRANK}{\tg{cRANK}{ランキング}}
+\DeclareRobustCommand{\tPRAC}{\tg{cPRAC}{練習会}}
+\DeclareRobustCommand{\tRELAY}{\tg{cRELAY}{リレー}}
+\DeclareRobustCommand{\tALL}{\tg{boxln}{共通}}
+
+% 本文中で使う小さな注記
+\newcommand{\ver}{\textsf{\small（画面上の表記はバージョンにより異なる）}}
+
+% ------------------------------------------------------------ Step
+\newcounter{step}
+\newcommand{\Step}[2]{%
+  \Needspace*{6\baselineskip}%
+  \refstepcounter{step}%
+  \par\vspace{9pt}%
+  \noindent\begin{tikzpicture}
+    \node[fill=boxln,text=white,inner xsep=6pt,inner ysep=3pt,rounded corners=2pt]
+      (s) {\sffamily\bfseries Step \thestep};
+  \end{tikzpicture}\hspace{6pt}{\large\sffamily\bfseries #1}\hfill #2\par
+  \vspace{2pt}\noindent\textcolor{rulec}{\rule{\textwidth}{0.8pt}}\par\vspace{4pt}%
+  \addcontentsline{toc}{section}{Step \thestep\quad #1}%
+}
+
+% ------------------------------------------------------------ ボックス
+\newtcolorbox{Goal}{enhanced,breakable,colback=goalbg,colframe=goalfr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=3pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize この Step の目標},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=goalfr,arc=1pt,boxrule=0pt},top=8pt}
+\newtcolorbox{Key}[1]{enhanced,breakable,colback=goalbg,colframe=goalfr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=8pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize #1},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=goalfr,arc=1pt,boxrule=0pt}}
+\newtcolorbox{GoalC}{enhanced,breakable,colback=goalbg,colframe=goalfr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=3pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize このパターンのねらい},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=goalfr,arc=1pt,boxrule=0pt},top=8pt}
+\newtcolorbox{Done}{enhanced,breakable,colback=donebg,colframe=donefr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=8pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize 「できた」の判断基準},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=donefr,arc=1pt,boxrule=0pt}}
+\newtcolorbox{Fail}{enhanced,breakable,colback=failbg,colframe=failfr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=8pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize つまずきやすいところ},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=failfr,arc=1pt,boxrule=0pt}}
+% JOY2Mulka でこの Step をどう進めるか
+\definecolor{j2mbg}{HTML}{EDF0FB}
+\definecolor{j2mfr}{HTML}{3A49A8}
+\newtcolorbox{J2M}[1][JOY2Mulka を使う場合]{enhanced,breakable,
+  colback=j2mbg,colframe=j2mfr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=8pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize #1},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=j2mfr,arc=1pt,boxrule=0pt}}
+\newtcolorbox{Note}[1][メモ]{enhanced,breakable,colback=notebg,colframe=notefr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=8pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize #1},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=notefr,arc=1pt,boxrule=0pt}}
+
+% ------------------------------------------------------------ 図
+\newcounter{figno}
+\newcommand{\figcap}[1]{\par\vspace{2pt}\centering{\sffamily\footnotesize
+  \refstepcounter{figno}図 \thefigno\quad #1}\par\vspace{6pt}}
+\newenvironment{Fig}{\par\vspace{6pt}\begin{center}}{\end{center}\vspace{2pt}}
+
+% 画面キャプチャ（枠つき）：\shot[幅]{ファイル}{説明}
+\newcommand{\shot}[3][0.94]{%
+  \begin{Fig}%
+  \fcolorbox{rulec}{white}{\includegraphics[width=#1\textwidth]{#2}}%
+  \figcap{#3}%
+  \end{Fig}}
+
+% Mulka2 の画面キャプチャ枠。
+% \mshot[幅]{ファイル}{説明}{出典ページ名}
+% img/mulka2/<ファイル> があれば貼り込み，無ければ「撮影してここに置く」枠を出す。
+\newcommand{\mshot}[4][0.86]{%
+  \IfFileExists{img/mulka2/#2}{%
+    \begin{Fig}%
+    \fcolorbox{rulec}{white}{\includegraphics[width=#1\textwidth]{mulka2/#2}}%
+    \par\vspace{2pt}\centering{\sffamily\footnotesize
+      \refstepcounter{figno}図 \thefigno\quad #3}%
+    \par\vspace{1pt}{\sffamily\tiny\color{rulec}
+      出典：Mulka2 公式マニュアル「#4」\ \url{https://mulka2.com/mulka2/ja/index.php/Mulka2}}%
+    \par\vspace{6pt}%
+    \end{Fig}}{%
+    \begin{Fig}%
+    \setlength{\fboxsep}{0pt}%
+    \fcolorbox{rulec}{figbg}{\parbox[c][24mm][c]{#1\textwidth}{\centering
+      {\sffamily\footnotesize\color{rulec}
+       画面キャプチャの差し込み位置\\[3pt]
+       \texttt{img/mulka2/#2}\\[3pt]
+       #3}}}%
+    \setlength{\fboxsep}{2pt}%
+    \figcap{#3（キャプチャ未挿入）}%
+    \end{Fig}}}
+
+% SI Config+ の画面キャプチャ（引用）：\sishot[幅]{ファイル}{説明}
+\newcommand{\sishot}[3][0.80]{%
+  \begin{Fig}%
+  \fcolorbox{rulec}{white}{\includegraphics[width=#1\textwidth]{siconfig/#2}}%
+  \par\vspace{2pt}\centering{\sffamily\footnotesize
+    \refstepcounter{figno}図 \thefigno\quad #3}%
+  \par\vspace{1pt}{\sffamily\tiny\color{rulec}
+    出典：「オリエンテーリング大会 SI システム運営マニュアル」rev.9.0\\
+    オリエンテーリングクラブ サン・スーシ（大場隆夫）\ \url{https://sans-souci.jpn.org/sisystem/simanual/}}%
+  \par\vspace{6pt}%
+  \end{Fig}}
+
+% ------------------------------------------------------------ リスト
+\setlist[enumerate]{itemsep=1pt,topsep=2pt,parsep=0pt,leftmargin=*}
+\setlist[itemize]{itemsep=1pt,topsep=2pt,parsep=0pt,leftmargin=*,label=\textbullet}
+
+% ------------------------------------------------------------ 表
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\newcommand{\hd}[1]{\textbf{#1}}
+% 和文の狭いセルで行が間延びしないよう，段落列は左揃えにする
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% 第 5 部の「標準との違い」表：ページをまたいで分割できるようにする
+\newenvironment{PatTable}{%
+  \par\vspace{3pt}\small
+  \begin{longtable}{@{}P{22mm}P{34mm}P{88mm}@{}}
+  \toprule
+  \hd{該当 Step} & \hd{項目} & \hd{標準との違い} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+}{\end{longtable}\par\vspace{3pt}}
+
+% チェックリスト用の四角
+\newcommand{\ck}{\tikz[baseline=-0.6ex]{\draw[boxln,line width=0.5pt] (0,0) rectangle (2.6mm,2.6mm);}}
+
+% TikZ 共通スタイル
+\tikzset{
+  blk/.style   ={draw=boxln,line width=0.5pt,rounded corners=2pt,fill=white,
+                 align=center,inner sep=4pt,font=\sffamily\scriptsize},
+  blkg/.style  ={blk,fill=figbg},
+  blkd/.style  ={blk,fill=boxln,text=white},
+  dec/.style   ={draw=boxln,line width=0.5pt,diamond,aspect=2,fill=white,
+                 align=center,inner sep=1pt,font=\sffamily\scriptsize},
+  ar/.style    ={-{Stealth[length=4pt]},draw=boxln,line width=0.5pt},
+  ard/.style   ={ar,dashed},
+  lbl/.style   ={font=\sffamily\tiny,inner sep=1.5pt,fill=white},
+  grp/.style   ={draw=rulec,dashed,line width=0.4pt,rounded corners=3pt,inner sep=6pt},
+  scr/.style   ={draw=boxln,line width=0.7pt,fill=white,inner sep=0pt},
+  btn/.style   ={draw=boxln,line width=0.4pt,fill=band,rounded corners=1pt,
+                 font=\sffamily\tiny,inner xsep=3pt,inner ysep=1.5pt},
+  fld/.style   ={draw=rulec,line width=0.4pt,fill=white,font=\sffamily\tiny,
+                 inner xsep=3pt,inner ysep=1.5pt,align=left},
+}
+
+\begin{document}
+
+% =====================================================================
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+\vspace*{28mm}
+{\sffamily\bfseries\Huge Mulka2 / JOY2Mulka による}\\[6mm]
+{\sffamily\bfseries\Huge 計算センター運営テキストブック}\\[14mm]
+{\sffamily\large ―― 初めて計センを担当する人のための，手順どおりに進める本 ――}\\[24mm]
+
+\begin{tikzpicture}[node distance=6mm]
+  \node[blkg,minimum width=26mm] (joy)  {エントリー\\（JOY）};
+  \node[blkg,minimum width=26mm,right=8mm of joy] (j2m) {JOY2Mulka};
+  \node[blkg,minimum width=26mm,right=8mm of j2m] (mul) {Mulka2};
+  \node[blkg,minimum width=26mm,right=8mm of mul] (res) {成績・ラップ};
+  \draw[ar] (joy)--(j2m); \draw[ar] (j2m)--(mul); \draw[ar] (mul)--(res);
+  \node[blk,below=9mm of j2m,minimum width=26mm] (sl) {スタートリスト\\（公開用／役職用）};
+  \draw[ar] (j2m)--(sl);
+  \node[blk,below=9mm of mul,minimum width=26mm] (fin) {フィニッシュ\\カード読み取り};
+  \draw[ar] (fin)--(mul);
+\end{tikzpicture}
+
+\vspace{26mm}
+{\sffamily\normalsize 対応システム：SPORTident（SI／SIAC）・EMIT}\\[3mm]
+{\sffamily\normalsize 対応大会形態：ランキング大会／練習会・フリースタート／リレー ほか}
+\vfill
+{\sffamily\small 本書の例に登場する人名・所属・カード番号・ゼッケン番号・時刻は，すべて架空のものです。\\
+引用したソフトウェアの画面については，巻末の「図版の出典」を参照してください。}
+\end{titlepage}
+
+% =====================================================================
+\frontmatter
+\pagestyle{fancy}
+
+\chapter*{本書の使い方}
+\addcontentsline{toc}{chapter}{本書の使い方}
+\markboth{本書の使い方}{}
+
+本書は，オリエンテーリング大会の\textbf{計算センター（以下「計セン」）}を初めて担当する人が，
+大会前日の夜に一度通読し，当日はそのまま机の上に開いて作業できることを目標に書かれています。
+
+\vspace{4pt}
+\noindent\textbf{構成}
+
+\begin{itemize}
+\item 第 0 部で「計センとは何をする部署か」を押さえます。
+\item 第 1 部から第 4 部までが，時系列に並んだ \textbf{Step 1〜Step 43} です。
+      当日は上から順に実行すれば運営が回るように並べてあります。
+\item 第 5 部は，大会の種類ごとに「標準の流れと\textbf{どこが違うか}」だけをまとめた章です。
+\item 第 6 部は印刷して持ち歩くためのチェックリストです。
+\item 第 7 部は逆引き索引，第 8 部は用語集です。
+\end{itemize}
+
+\vspace{4pt}
+\noindent\textbf{JOY2Mulka を使う場合}\quad
+エントリー変換ツール JOY2Mulka の操作は，独立した章にせず，
+\textbf{該当する Step の中に\ \colorbox{j2mfr}{\color{white}\sffamily\bfseries\scriptsize\strut JOY2Mulka を使う場合}\ の
+ボックス}として置いてあります。
+手作業や他のツールで進める場合は，このボックスを読み飛ばしてください。
+
+\vspace{4pt}
+\noindent\textbf{各 Step の読み方}\quad どの Step も次の 4 つで構成されています。
+
+\begin{enumerate}
+\item \textbf{この Step の目標}（青いボックス）……1 行で書いてあります。ここだけ読んで動けるなら，本文は飛ばして構いません。
+\item \textbf{手順}……番号順に進めます。
+\item \textbf{「できた」の判断基準}（緑のボックス）……これが確認できてから次の Step に移ります。
+\item \textbf{つまずきやすいところ}（赤いボックス）……過去に起きたことと，その場での対処です。先に読んでおくと当日が楽になります。
+\end{enumerate}
+
+\vspace{6pt}
+\noindent\textbf{タグの意味}\quad 見出しと本文の右肩に付いている記号は，その内容が
+「どの計時システム」「どの大会形態」に当てはまるかを示します。
+
+\vspace{3pt}
+\begin{center}
+\begin{tabular}{@{}ll@{\hspace{10mm}}ll@{}}
+\toprule
+\tSI    & 差し込み式の SPORTident を使う日に読む  & \tRANK  & 公認・ランキング大会のとき読む \\
+\tEMIT  & EMIT の E カードを使う日に読む          & \tPRAC  & 練習会・フリースタートのとき読む \\
+\tSIAC  & タッチフリー（SIAC）を併用する日に読む  & \tRELAY & リレーのとき読む \\
+\tALL   & システム・大会形態を問わず共通          &         & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{8pt}
+\begin{Note}[画面の表記について]
+Mulka2 も SI Config+ もバージョンによってメニュー名やボタンの位置が変わります。
+本書ではメニュー名を \textbf{【　】} で示しますが，見つからないときは
+「同じ意味の項目」を探してください。とくに新しいバージョンでは，
+本書の \textbf{【入力/編集】}が\textbf{【編集】}に，\textbf{【EMIT/SI】}が
+\textbf{【カード】}に相当することがあります。
+\end{Note}
+
+\tableofcontents
+
+\input{map}
+
+% =====================================================================
+\mainmatter
+\setcounter{chapter}{-1}
+
+\input{part0}
+\input{part1}
+\input{part2}
+\input{part3}
+\input{part4}
+\input{part5}
+\input{part6}
+\input{lookup}
+\input{part7}
+
+\end{document}

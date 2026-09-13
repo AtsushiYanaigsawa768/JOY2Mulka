@@ -1,0 +1,243 @@
+% !TEX program = lualatex
+% =====================================================================
+%  練習会 最小手順シート（A4 表裏 1 枚・当日持ち歩き用）
+%  ・詳しい版：practice.tex（練習会ミニマニュアル・11 ページ）
+%  ・本編　　：main.tex（計算センター運営テキストブック）
+% =====================================================================
+\documentclass[a4paper,9pt]{ltjsarticle}
+
+\usepackage{geometry}
+\geometry{top=12mm,bottom=12mm,left=12mm,right=12mm,headsep=3mm,footskip=8mm}
+
+\usepackage{array,longtable,booktabs,colortbl,xcolor,needspace,enumitem,fancyhdr}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cSI}{HTML}{1F5FA8}
+\definecolor{cEMIT}{HTML}{9C5A00}
+\definecolor{cSIAC}{HTML}{0E7A5F}
+\definecolor{j2mbg}{HTML}{EDF0FB}
+\definecolor{j2mfr}{HTML}{3A49A8}
+\definecolor{notebg}{HTML}{F4F4F0}
+\definecolor{notefr}{HTML}{888880}
+\definecolor{failbg}{HTML}{FCEEEA}
+\definecolor{failfr}{HTML}{B5502E}
+\definecolor{band}{gray}{0.90}
+\definecolor{rulec}{gray}{0.35}
+\definecolor{boxln}{HTML}{444444}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small 練習会 最小手順シート}
+\fancyhead[R]{\small 計算センター}
+\fancyfoot[C]{\small\thepage}
+\setlength{\headheight}{14pt}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\setlength{\fboxsep}{2pt}
+
+\DeclareRobustCommand{\tg}[2]{{\colorbox{#1}{\color{white}\sffamily\bfseries\scriptsize\strut #2}}}
+\DeclareRobustCommand{\tSI}{\tg{cSI}{SI}}
+\DeclareRobustCommand{\tEMIT}{\tg{cEMIT}{EMIT}}
+\DeclareRobustCommand{\tSIAC}{\tg{cSIAC}{SIAC}}
+
+\newcommand{\hd}[1]{\textbf{\sffamily #1}}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\newcommand{\Head}[1]{%
+  \Needspace*{4\baselineskip}%
+  \par\vspace{5pt}%
+  \noindent\colorbox{boxln}{\color{white}\sffamily\bfseries\strut\ #1\ }\par
+  \vspace{1pt}\noindent\textcolor{rulec}{\rule{\textwidth}{0.7pt}}\par\vspace{2pt}%
+}
+
+\newtcolorbox{Note}[1][]{enhanced,breakable,colback=notebg,colframe=notefr,
+  boxrule=0.4pt,left=5pt,right=5pt,top=7pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize #1},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=notefr,arc=1pt,boxrule=0pt}}
+\newtcolorbox{J2M}[1][JOY2Mulka を使う場合]{enhanced,breakable,
+  colback=j2mbg,colframe=j2mfr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=7pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize #1},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=j2mfr,arc=1pt,boxrule=0pt}}
+\newtcolorbox{Fail}[1][つまずきやすいところ]{enhanced,breakable,
+  colback=failbg,colframe=failfr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=7pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize #1},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=failfr,arc=1pt,boxrule=0pt}}
+
+\begin{document}
+\gtfamily\sffamily
+
+\begin{center}
+{\LARGE\bfseries 練習会 最小手順シート}\quad
+{\small フリースタート・PC 1 台・当日申込中心}\\[1mm]
+\textcolor{rulec}{\rule{\textwidth}{0.8pt}}
+\end{center}
+
+\textbf{このシートは A4 表裏 1 枚です。当日はこれだけ持てば回ります。}
+詳しい説明は『練習会の計セン ミニマニュアル』（\texttt{practice.pdf}），
+大会運営は本編『計算センター運営テキストブック』（\texttt{main.pdf}）。
+
+\Head{計センがやること（3 つだけ）}
+
+\begin{enumerate}[leftmargin=*,itemsep=0pt]
+\item 走る人と\textbf{カード番号}をひもづける
+\item コースの\textbf{正解の並び}を Mulka2 に入れておく
+\item 帰ってきた\textbf{カードを読む}
+\end{enumerate}
+
+記録の計算は Mulka2 がやります。トラブルの大半は，この 3 つのどれかがズレているだけです。
+
+\Head{持っていくもの}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{26mm}P{150mm}@{}}
+\toprule
+\hd{機材} & PC 1 台／読み取り機 1 台\textbf{＋予備 1 台}／USB ケーブル\textbf{＋予備}／
+  コントロール用の機材／クリア・チェック・スタート・フィニッシュ \\
+\hd{紙} & \textbf{カード番号と氏名の対応表}（カード番号順）／\textbf{救護用リスト}（全員・1 枚）／
+  全ポ図・コース図／白紙と筆記具 \\
+\hd{電源} & PC の電源とモバイルバッテリー。屋外なら発電機かポータブル電源 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{プリンタは要りません。}結果はあとからクラウド／ラップセンターで公開します。
+紙は前日までに刷っておきます。
+
+\Head{前日までにやること}
+
+\begin{enumerate}[leftmargin=*,itemsep=1pt]
+\item \textbf{イベントを作る}：Mulka2 のイベントマネージャで新規作成。大会名と日付を入れる。
+\item \textbf{コースデータを入れる}：OCAD の \texttt{〜CoursesV8.txt} をドロップ枠に入れる。
+      無ければ表計算ソフトで \texttt{Course.csv} を作る
+      （列：コース，距離，登距離，コントロール数，S，1，2，…，F）。
+\item \textbf{クラスデータを入れる}：\texttt{Class.csv}（クラス，コース，入賞人数，競技時間）。
+      \textbf{競技時間は入れる}。空欄だと何時間かかっても完走扱いになる。
+\item \textbf{参加者を入れる}：\texttt{Startlist.csv} をドロップ枠へ。
+      スタート時刻の列は\textbf{空でよい}（フリースタート）。
+\item \textbf{紙を 2 枚刷る}：カード対応表（カード番号順）と救護用リスト（全員）。
+\item \textbf{時計を合わせる}：PC の時計。「設定」→【今すぐ同期】が失敗したら，
+      管理者権限のコマンドプロンプトで\ \texttt{w32tm /resync /force}。
+      確認は\ \url{https://www.nict.go.jp/JST/JST5.html}。
+\end{enumerate}
+
+\begin{J2M}[エントリーリストから 3 つの CSV を作る]
+\textbf{練習会モード}を使います。スタート時刻の割り当てをせず，入力順にクラスごとに出力します。
+
+\begin{enumerate}[leftmargin=*,itemsep=0pt]
+\item メニューで\textbf{【新規作成】}→ Step 0 でエントリーリスト（CSV／XLSX）をアップロード。
+\item 大会設定で\textbf{【練習会モード】にチェック}。
+      ゼッケンが要らなければ\textbf{【ゼッケン番号を生成する】を外す}。
+\item Step 1 でクラスを確認したら，そのまま\textbf{【生成】}。
+      レーン割・シャッフル・制約設定（Step 2・3）は練習会モードでは出ません。
+\item Done 画面で ZIP を落とす。\texttt{Startlist.csv} を Mulka2 にドロップし，
+      \texttt{RoleStartlists\textbackslash{}Rescue\_ByKana} を救護用に印刷する。
+\end{enumerate}
+
+サンプル：\ \url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka/tree/main/sample}
+\end{J2M}
+
+\newpage
+
+\Head{当日の手順}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{16mm}P{50mm}P{106mm}@{}}
+\toprule
+\hd{いつ} & \hd{やること} & \hd{中身} \\
+\midrule
+開場前 & 立ち上げ &
+  読み取り機を\textbf{先に}つないでから Mulka2 を起動。
+  メインウィンドウ →【EMIT/SI】→【E カード読み取り】で接続。
+  COM 番号は後ろに \texttt{USB} などが付いているものを選ぶ \\
+開場前 & ポ確カードを読む &
+  設置者が持ち帰ったポ確カードを読み，
+  \textbf{全コントロールが正しい番号で動いている}ことを確認。
+  \tSIAC\ SIAC を使う日は，タッチフリー用の設定になっているステーションかも見る \\
+受付中 & 当日申込を入れる &
+  メインウィンドウ →【入力】→【当日申込】。
+  \textbf{カード番号・氏名・クラス}だけ入れればよい。
+  カード備考に\textbf{「レンタル」}と入れておくと回収漏れが減る \\
+競技中 & カードを読む &
+  読み取り画面を開いたままにする。
+  \tEMIT\ E カードは\textbf{読むとカードの時計が止まる}ので，読む前に人を待たせない。
+  \tSI\ SI はステーション側に時刻が入っているので順番は問わない \\
+競技中 & ペナをさばく &
+  MP（ミスパンチ）が出たら本人に説明して確定。
+  \textbf{読めなかったカードは横に置き，あとでバックアップから復元} \\
+閉鎖前 & 未帰還を確認 &
+  読み取り済みの人に対応表の印を付け，\textbf{印の付いていない人を読み上げる}。
+  残っている人がいれば救護・運営に伝える \\
+撤収後 & 結果を出す &
+  メインウィンドウ →【リザルト】で確定。
+  ラップと成績はクラウド／ラップセンターで公開する \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\Head{困ったときの初動}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{44mm}P{128mm}@{}}
+\toprule
+\hd{起きたこと} & \hd{最初にやること} \\
+\midrule
+読み取り機を認識しない &
+  (1) 別の USB ポート　(2) 別のケーブル　(3) ドライバ再インストール　(4) 予備機に交換。
+  \textbf{この順で試す}。ケーブルの断線が意外に多い \\
+カードが読めない &
+  そのカードを横に置き，\textbf{氏名とカード番号を紙に控える}。
+  あとでステーションのバックアップメモリから復元する。
+  \tEMIT\ E カードならバックアップラベルの穴で通過を証明できる \\
+未登録のカードが来た &
+  読み取り画面に「未登録」と出る。
+  \textbf{その場でカード番号と氏名を控え}，当日申込として入れ直す \\
+コースが違った &
+  【コース設定変更】で直す。
+  すでに読んだ人の記録は\textbf{再計算される}ので，読み直しは不要 \\
+PC が固まった &
+  \textbf{慌てて電源を切らない}。読み取り済みの記録は \texttt{Changes.dat} に追記済みなので，
+  再起動すれば残っている \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Fail}
+\textbf{起きること：}カードを読んだのに記録が出ない。\\
+\textbf{対処：}その人が\textbf{参加者データに入っていない}ことがほとんどです。
+当日申込で入れ忘れていないか，クラス名の表記がコースと合っているかを見ます。
+\end{Fail}
+
+\begin{Note}[練習会でも守ること]
+\begin{itemize}[leftmargin=*,itemsep=0pt]
+\item \textbf{レンタルカードは番号順に並べて渡し，番号順に回収する。}
+      練習会の紛失はほぼこれで防げます。
+\item \textbf{イベントフォルダは帰る前に zip で固めて 1 か所に置く。}
+      あとから「あの日の記録は？」と聞かれます。
+\item \textbf{読めなかったカード・止めた処理は，紙にその場で書く。}
+      記憶に頼ると翌日には消えています。
+\end{itemize}
+\end{Note}
+
+\vspace{2mm}
+\noindent\textcolor{rulec}{\rule{\textwidth}{0.4pt}}\par
+\vspace{1mm}
+{\footnotesize
+入手先：\\
+Mulka2 \url{https://mulka2.com/mulka2/ja/index.php/Mulka2}\\
+ラップセンター \url{https://mulka2.com/lapcenter/}\\
+JOY2Mulka \url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka}\par
+この例に登場する人名・所属・カード番号・時刻は架空のものです。
+画面上のメニュー名はバージョンによって異なります。}
+
+\end{document}

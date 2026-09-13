@@ -1,0 +1,1540 @@
+% =====================================================================
+\chapter{当日運営}
+% =====================================================================
+
+この部だけで当日が回るように書いてあります。
+\textbf{他の資料を開かずに，Step 22 から順に進められる構成にしています。}
+
+% ---------------------------------------------------------------------
+\Step{起動順序を守って立ち上げる}{\tALL}
+
+\begin{Goal}
+開場までに，計センのシステムを「カードが読める状態」まで立ち上げる。
+\end{Goal}
+
+\textbf{順番に意味があります。}とくに，時計合わせより先にステーションを配ってしまうと，
+取り返しがつきません。
+
+\begin{Fig}
+\begin{tikzpicture}[node distance=4mm]
+\node[blkd,minimum width=44mm] (a) {1．電源を確保して PC を並べる};
+\node[blk,minimum width=44mm,below=of a] (b) {2．\textbf{PC の時計を合わせる}\\\scriptsize 時報またはアナログラジオ。全 PC で };
+\node[blk,minimum width=44mm,below=of b] (c) {3．読み取り機を USB に接続する\\\scriptsize 認識するか確認（COM 番号を控える）};
+\node[blk,minimum width=44mm,below=of c] (d) {4．ネットワークを組む（Step 23）\\\scriptsize サーバ → クライアントの順};
+\node[blk,minimum width=44mm,below=of d] (e) {5．Mulka2 の時刻同期（Step 24）};
+\node[blk,minimum width=44mm,below=of e] (f) {6．\tSI\ ステーションの時計合わせ\\\scriptsize スタート・フィニッシュ用を最優先};
+\node[blk,minimum width=44mm,below=of f] (g) {7．各パートへ機材を渡す\\\scriptsize スタート：クリア・チェック（・スタート）\\\scriptsize 受付：予備カード・チェック・クリア};
+\node[blk,minimum width=44mm,below=of g] (h) {8．ポ確カードの読み取り（Step 25）};
+\node[blkd,minimum width=44mm,below=of h] (i) {9．競技責任者へ「競技開始可能」を報告};
+\foreach \x/\y in {a/b,b/c,c/d,d/e,e/f,f/g,g/h,h/i}{\draw[ar] (\x)--(\y);}
+
+\node[blk,right=16mm of c,minimum width=56mm,align=left,font=\sffamily\scriptsize,anchor=west]
+ {\textbf{ここまでを開場前に終わらせる}\\[2pt]
+  開場すると，受付からの届出・当日申込・\\
+  参加者からの質問が同時に来ます。\\
+  落ち着いて作業できるのは開場前だけです。};
+\node[blk,right=16mm of f,minimum width=56mm,align=left,font=\sffamily\scriptsize,anchor=west]
+ {\textbf{間に合わないときの優先順位}\\[2pt]
+  1. PC とステーションの時計合わせ\\
+  \hspace{1em}\scriptsize（後から取り返しがつかない）\\
+  2. ポ確カードの読み取り\\
+  3. ネットワーク（最悪，1 台運用で始められる）};
+\end{tikzpicture}
+\figcap{当日朝の起動順序}
+\end{Fig}
+
+\subsection*{計センの机をどう並べるか}
+
+机の配置は，\textbf{競技者の流れと，計センの中の情報の流れが交差しないように}決めます。
+交差すると，読み取り待ちの列がペナチェックの説明の邪魔になり，両方が遅くなります。
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm,every node/.style={font=\sffamily\scriptsize}]
+  % 外枠（テント／計センエリア）
+  \draw[rulec,dashed,rounded corners=3pt] (-6,10) rectangle (152,-62);
+  \node[anchor=north west,font=\sffamily\tiny,text=rulec] at (-5,9) {計センエリア（テント等）};
+
+  % 机
+  \draw[boxln,fill=figbg,line width=0.6pt] (4,0) rectangle (44,-16);
+  \node[align=center] at (24,-8) {\textbf{① 読み取り机}\\\tiny PC ＋ 読み取り機 ×2\\\tiny 予備の読み取り機};
+  \draw[boxln,fill=figbg,line width=0.6pt] (54,0) rectangle (94,-16);
+  \node[align=center] at (74,-8) {\textbf{② ペナチェック机}\\\tiny PC ＋ 全ポ図 ＋ コース図\\\tiny 競技者と向かい合う};
+  \draw[boxln,fill=figbg,line width=0.6pt] (104,0) rectangle (144,-16);
+  \node[align=center] at (124,-8) {\textbf{③ 印刷・遊撃机}\\\tiny プリンタ専用 PC\\\tiny 当日申込入力};
+
+  % サーバ・電源
+  \draw[boxln,fill=white,line width=0.5pt] (4,-26) rectangle (44,-38);
+  \node[align=center] at (24,-32) {\textbf{④ サーバ PC ／ ルータ}\\\tiny 人が触らない位置に置く};
+  \draw[boxln,fill=white,line width=0.5pt] (54,-26) rectangle (94,-38);
+  \node[align=center] at (74,-32) {\textbf{⑤ 電源・延長コード}\\\tiny 足元を通さない。養生テープで固定};
+  \draw[boxln,fill=white,line width=0.5pt] (104,-26) rectangle (144,-38);
+  \node[align=center] at (124,-32) {\textbf{⑥ レンタル回収かご}\\\tiny カード番号順に並べる};
+
+  % 競技者の流れ
+  \draw[ar,line width=1pt] (24,18) -- (24,2);
+  \node[anchor=south,font=\sffamily\bfseries\scriptsize] at (24,18) {フィニッシュから来る競技者};
+  \draw[ar,line width=1pt] (44,-8) -- (54,-8);
+  \node[lbl,above] at (49,-8) {ペナのみ};
+  \draw[ar,line width=1pt,rounded corners=2pt]
+       (94,-8) -- (99,-8) -- (99,-44) -- (124,-44) -- (124,-38);
+  \node[anchor=north,font=\sffamily\bfseries\scriptsize] at (60,-44) {レンタルカードを返して退出};
+
+  % 注意書き
+  \node[anchor=north west,align=left,font=\sffamily\tiny,text width=140mm] at (-4,-56)
+   {※ ①は列ができる。②は 1 人あたり数分かかるので，①の列と重ならない向きに置く。
+      ③は紙とインクを扱うので，雨がかからない位置に。④は競技中に誰も触らない場所に隔離する。};
+\end{tikzpicture}
+\figcap{計センの机の配置（競技者の流れと作業の流れを交差させない）}
+\end{Fig}
+
+\begin{Done}
+Mulka2 のメインウィンドウが開き，読み取り機に接続でき，
+全 PC が同じイベントを見ている。机の配置が決まり，配線が足元を通っていない。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{ネットワークを組む}{\tALL}
+
+\begin{Goal}
+複数の PC で同じイベントデータを共有し，同時に作業できる状態にする。
+\end{Goal}
+
+\subsection*{構成は 3 通り}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{28mm}P{34mm}P{80mm}@{}}
+\toprule
+\hd{構成} & \hd{使う場面} & \hd{必要なもの} \\
+\midrule
+(A) 1 台運用 & 参加者 100 名以下・当日申込なし・練習会 & PC 1 台と読み取り機だけ \\
+(B) ローカル LAN & 参加者 100 名超，計センを複数名で分担 & ルータ（\textbf{有線推奨}） \\
+(C) クラウド経由 & 会場とフィニッシュが離れている，スタート地区と情報共有したい
+  & インターネット接続（モバイル Wi-Fi 等）と\textbf{ライセンス} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{(A) 1 台運用}
+
+Mulka2 を\textbf{サーバモード}で起動し，イベントを選ぶだけです。
+参加者が 100 名を超えると，\textbf{1 台では追いつかなくなります}。
+読み取りとペナチェックと印刷を 1 台でやると，フィニッシュに行列ができます。
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm,every node/.style={font=\sffamily\scriptsize}]
+  \node[blkd,minimum width=34mm,minimum height=15mm] (pc) at (0,0) {PC 1 台\\\textbf{サーバモード}};
+  \node[blk,minimum width=28mm,minimum height=11mm] (rd) at (-52,0) {読み取り機\\\scriptsize \tSI\ メインステーション\\\scriptsize \tEMIT\ リーディングユニット};
+  \node[blk,minimum width=28mm,minimum height=11mm] (pr) at (52,0) {プリンタ};
+  \node[blk,minimum width=28mm,minimum height=9mm] (pw) at (0,-26) {電源／モバイルバッテリー};
+  \node[blk,minimum width=28mm,minimum height=9mm] (sp) at (-52,-26) {予備の読み取り機\\\scriptsize つながずに置いておく};
+
+  \draw[ar] (rd) -- node[lbl,above]{USB} node[lbl,below]{\tEMIT\ 変換アダプタ経由} (pc);
+  \draw[ar] (pc) -- node[lbl,above]{USB} (pr);
+  \draw[ar] (pw) -- (pc);
+
+  \node[anchor=north west,align=left,font=\sffamily\tiny,text width=120mm] at (-58,-36)
+   {※ ネットワークもインターネットも不要。この構成でも Mulka2 は「サーバモード」で起動する。\\
+     ※ 予備の読み取り機は\textbf{必ず持つ}。これが壊れると，この構成では大会が止まる。};
+\end{tikzpicture}
+\figcap{1 台運用の配線（練習会・小規模大会）}
+\end{Fig}
+
+\subsection*{(B) ローカル LAN}
+
+\begin{Fig}
+\begin{tikzpicture}[node distance=8mm]
+  \node[blk,minimum width=22mm] (r) {ルータ\\\scriptsize（有線推奨）};
+  \node[blkd,minimum width=30mm,left=18mm of r] (s) {メイン PC\\\textbf{サーバモード}\\\scriptsize イベントデータの本体};
+  \node[blk,minimum width=26mm,above right=6mm and 18mm of r] (c1) {サブ PC 1\\\scriptsize クライアントモード\\\scriptsize 読み取り};
+  \node[blk,minimum width=26mm,right=18mm of r] (c2) {サブ PC 2\\\scriptsize クライアントモード\\\scriptsize 印刷};
+  \node[blk,minimum width=26mm,below right=6mm and 18mm of r] (c3) {サブ PC 3\\\scriptsize クライアントモード\\\scriptsize 当日申込入力};
+  \draw[ar] (s)--(r); \draw[ar] (r)--(c1); \draw[ar] (r)--(c2); \draw[ar] (r)--(c3);
+  \node[blk,minimum width=18mm,left=8mm of s] (rd) {読み取り機};
+  \draw[ar] (rd)--(s);
+  \node[blk,below=16mm of s,minimum width=120mm,align=left,font=\sffamily\scriptsize,anchor=north west]
+   at ([shift={(-20mm,-16mm)}]s.south west)
+   {\textbf{接続手順}\\
+    1. 全 PC を同じルータに接続\\
+    2. メイン PC：【通信マネージャ】→【サーバモード】→ 大会データを選択\\
+    3. メイン PC の IP アドレスを調べる（コマンドプロンプトで \texttt{ipconfig}）\\
+    4. サブ PC：【通信マネージャ】→【クライアントモード】→ IP アドレスを入力して接続\\
+    5. ネットワークツリーに全 PC が並べば成功};
+\end{tikzpicture}
+\figcap{ローカル LAN による複数 PC 構成}
+\end{Fig}
+
+\begin{Note}[ポート番号について]
+Mulka2 は既定で\textbf{ポート 2035}を使います。
+他のソフトがこのポートを使っていて接続できない場合は，
+サーバ起動時に「標準のポートを使用する」のチェックを外し，
+1025〜65535 の適当な番号に変更できます。
+その場合，クライアント側は\textbf{「IP アドレス:ポート番号」}のように，
+コロンに続けてポート番号も入力します。
+つながらないときは，\textbf{Windows のファイアウォールが Mulka2 を
+ブロックしていないか}も確認します。
+\end{Note}
+
+\begin{Note}[有線か無線か]
+\textbf{規模の大きい大会では有線 LAN を推奨します。}
+無線 LAN は不安定になりやすく，接続台数の上限に達して
+「あと 1 台だけつながらない」ということも起こります。
+ファイル共有もプリンタ共有も不要で，
+\textbf{ただつながっていればよい}ので，安いルータで十分です。
+\end{Note}
+
+\subsection*{(C) クラウド経由}
+
+会場とフィニッシュが離れている場合，スタート地区で出走確認をしたい場合に使います。
+\textbf{Mulka2 のライセンスが必要}です。
+
+\begin{Fig}
+\begin{tikzpicture}[node distance=7mm]
+  \node[blk,minimum width=26mm,minimum height=10mm] (cl) {クラウドサーバ};
+  \node[blkd,minimum width=30mm,left=26mm of cl] (s) {フィニッシュ計セン\\\textbf{サーバモード}};
+  \node[blk,minimum width=30mm,right=26mm of cl,yshift=14mm] (v) {会場計セン PC\\\scriptsize クライアントモード};
+  \node[blk,minimum width=30mm,right=26mm of cl] (p1) {スタート係のスマホ\\\scriptsize ブラウザで出走確認};
+  \node[blk,minimum width=30mm,right=26mm of cl,yshift=-14mm] (p2) {救護・表彰のスマホ\\\scriptsize 未帰還者・リザルト閲覧};
+  \draw[ar] (s)--node[lbl]{インターネット}(cl);
+  \draw[ar] (cl)--(v); \draw[ar] (cl)--(p1); \draw[ar] (cl)--(p2);
+  \node[blk,below=26mm of cl,minimum width=140mm,align=left,font=\sffamily\scriptsize]
+   {\textbf{起動手順（計センチーフのみ）}\\
+    1. メイン PC で【通信マネージャ】→【クラウドマネージャ】→【サーバモード】→ 大会データを選択\\
+    2. \textbf{ライセンス}を選ぶ（事前にライセンスファイルを Mulka2 のフォルダに置いておく）\\
+    3. \textbf{クラウドサーバ}を選ぶ：\ \textbf{準備・練習時はテスト用サーバ}／\textbf{当日は本番用サーバ}\\
+    4. 【接続】で起動。終了時は【切断】\\
+    5. \textbf{運営者用 URL} をコピーし，【表示】でパスワード（数字）を確認して，運営者に共有\\[3pt]
+    ※ 他の PC からクラウド経由で接続する場合は，【クライアントモード】でクラウドサーバのアドレスを入力し，\\
+    \hspace{2.2em}同じライセンスとパスワードを入力します。};
+\end{tikzpicture}
+\figcap{クラウド経由の構成}
+\end{Fig}
+
+\begin{Note}[クラウドでできること]
+\begin{itemize}
+\item \textbf{出走者チェック}：スタート地区でスタートリストを表示し，
+      出走／欠席をタップして共有できます。\textbf{レーン別スタートリストの印刷が不要になり，
+      スタート閉鎖後の欠席報告も不要}になります。
+\item \textbf{当日申込のリアルタイム共有}：当日申込者用のスタートリストを追加配達する手間が消えます。
+\item \textbf{未帰還者リスト・リザルトリストの共有}：救護・表彰が自分で見られます。
+\item \textbf{操作履歴}：誰が何を入力したかが残るので，入力ミスを追跡できます。
+\end{itemize}
+\end{Note}
+
+\subsection*{ネットワークが落ちたときの対応}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{34mm}P{50mm}P{60mm}@{}}
+\toprule
+\hd{症状} & \hd{起きていること} & \hd{その場での対応} \\
+\midrule
+サブ PC がサーバに接続できない
+  & IP アドレス違い／ポート／ファイアウォール
+  & IP を再確認。それでも駄目なら\textbf{サブ PC を単独運用に切り替え}，
+    読み取り済みデータは後で統合せず，\textbf{読み取りはサーバ PC に一本化}する \\
+クラウドが「オフライン」表示になる
+  & サーバ PC の電源またはインターネットが切れている。
+    \textbf{この間にクラウド側で入力した内容はすべて無効}
+  & 直ちに各パートに\textbf{「クラウドは使えない，紙で運用」}と連絡。
+    復旧後，紙の内容を計センが入力し直す \\
+モバイル Wi-Fi の電波が届かない
+  & 会場が圏外
+  & ローカル LAN（B）に切り替える。
+    クラウド前提の運用をしていた場合は\textbf{紙のスタートリストで代替} \\
+サーバ PC が落ちた
+  & ―― & 別 PC で\textbf{同じイベントデータ}（Step 19 で配布したもの）を開き，
+    サーバモードで起動。\textbf{落ちてから復旧までに読んだカードは，もう一度読み直す} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Fail}
+\textbf{起きること：}計セン側は正常に動いているので気づかないが，
+\textbf{クラウド接続だけが切れていた}。スタート地区の出走チェックがまったく反映されていない。\\
+\textbf{対処：}実際に起きた事故です。計センは
+\textbf{定期的にクラウドの接続状態を目視確認}します。
+また，スタートパートには\textbf{「反映されないと感じたら必ず計センに電話する」}
+と事前に伝えておきます。同時に，\textbf{紙のスタートリストで出走確認ができる準備}を
+常に残しておきます（Step 13）。
+\end{Fail}
+
+\begin{Done}
+全 PC がネットワークツリーに表示され，1 台で入力した内容が他の PC に反映される。
+クラウドを使う場合は，運営者用 URL とパスワードを各パートに共有済み。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{時計を合わせる}{\tALL\ \tSI}
+
+\begin{Goal}
+計セン・スタート・フィニッシュが，同じ時刻で動いている状態にする。
+\end{Goal}
+
+\subsection*{(1) PC の時計}
+
+\begin{enumerate}
+\item \textbf{基準を決めます。}時報（電話）またはアナログラジオの時報を使います。
+\item メイン PC の時計を合わせます。
+\item サブ PC は，Mulka2 の【ツール】→【ネットワーク時計・同期】から，
+      \textbf{メイン PC を選んで同期}します。\ver
+      \textbf{このとき，メイン PC 側は操作しません。}
+\item 差が大きい場合は再同期します。何度やっても安定しない場合は，そこで切り上げます。
+\end{enumerate}
+
+\mshot[0.40]{nettime.png}{ネットワーク時計。各 PC の時刻とメイン PC との差（ms）が並ぶ}{機能別の使用方法}
+
+\paragraph{Windows の「設定」から同期できないとき。}
+「設定」→「時刻と言語」→「日付と時刻」→\textbf{【今すぐ同期】}は，
+\textbf{押しても失敗することがあります}。
+既定の同期先（\texttt{time.windows.com}）につながらない，
+\texttt{Windows Time} サービスが止まっている，
+前回の同期からの間隔が短くて弾かれる，といった理由です。
+画面には「同期に失敗しました」としか出ないので，原因が分かりません。
+
+この場合は\textbf{コマンドで強制的に合わせます}。
+\textbf{管理者として実行}したコマンドプロンプト（または PowerShell）で，上から順に打ちます。
+
+\begin{center}
+\begin{tcolorbox}[colback=white,colframe=rulec,boxrule=0.4pt,arc=1pt,width=0.95\textwidth]
+\ttfamily\footnotesize
+net stop w32time\\
+net start w32time\\
+w32tm /config /manualpeerlist:"ntp.nict.jp" /syncfromflags:manual /update\\
+w32tm /resync /force\\
+w32tm /query /status
+\end{tcolorbox}
+\end{center}
+
+\begin{itemize}
+\item 3 行目で\textbf{同期先を \texttt{ntp.nict.jp}（情報通信研究機構）に変えています}。
+      日本標準時を決めている組織のサーバなので，既定の \texttt{time.windows.com} より確実です。
+\item 4 行目の \texttt{/force} で，\textbf{前回からの間隔を無視して}同期します。
+      「今すぐ同期」が弾かれるのは，ここが効いていないためです。
+\item 5 行目で結果を確認します。\texttt{Source} が \texttt{ntp.nict.jp} になっていれば成功です。
+\item ずれの大きさを数字で見たいときは
+      \texttt{w32tm /stripchart /computer:ntp.nict.jp /dataonly /samples:5} を打ちます。
+      1 行ずつ「サーバとの差」が秒で出ます。
+\end{itemize}
+
+\textbf{合っているかどうかは，ブラウザで次のページを開いて目で確かめます。}
+
+\begin{center}
+\small\url{https://www.nict.go.jp/JST/JST5.html}
+\end{center}
+
+このページは日本標準時と\textbf{その PC の内蔵時計を比べて}，
+「合っています」「○秒 進んでいます」「○秒 遅れています」と表示します。
+ページ自身が断っているとおり
+\textbf{「通信回線の速度、混雑状況によっては、大きな誤差を生ずる」}ので，
+1 秒未満のずれをこの表示で詰めることはできません。
+\textbf{「秒単位でずれていないこと」の確認}に使います。
+
+\begin{Note}[会場でインターネットにつながらない場合]
+上の方法はどれもネットワークが要ります。
+電波が届かない会場では，\textbf{出発前（自宅・部室など）に全 PC の時計を合わせておき}，
+会場では Mulka2 の【ネットワーク時計・同期】で\textbf{PC どうしを揃える}だけにします。
+このとき絶対時刻が多少ずれていても，
+\textbf{全 PC とステーションが同じ時刻で動いていれば記録は正しく出ます}。
+問題になるのは「PC ごとに時刻が違う」ことのほうです。
+\end{Note}
+
+\begin{Note}[電波時計・携帯の時報に注意]
+\begin{itemize}
+\item \textbf{電波時計}は，電波を受信した瞬間から先は普通の時計と同じです。
+      倉庫に保管していた電波時計は受信しておらず，強制受信させても
+      機種によってはなかなか受信しません。\textbf{基準には使いません}。
+\item \textbf{携帯電話の時報}は，回線によって 0.3〜0.5 秒程度遅れることがあります。
+      固定電話またはアナログラジオが安全です。
+\item \textbf{Windows の更新}でタイムゾーンが変わってしまった事例があります。
+      当日朝に「時刻がおかしい」と感じたら，タイムゾーン設定も見ます。
+\end{itemize}
+\end{Note}
+
+\subsection*{(2) \tSI\ ステーションの時計}
+
+\textbf{スタートとフィニッシュのステーションは，当日朝に必ず合わせます。}
+フィニッシュに複数台のステーションを置く場合，
+台ごとに時計がずれていると\textbf{どちらでパンチしたかで記録が変わります}（実例あり）。
+
+\begin{enumerate}
+\item PC の時計を合わせる（前項）。
+\item Config+ で【時刻を確認】→【時刻をセット】。
+\item 設定後は Service/OFF カードでスタンバイに戻す（すぐ設置する場合はカードでパンチして起動）。
+\end{enumerate}
+
+\subsection*{(3) \tEMIT\ EMIT の場合}
+
+ユニットの時計合わせは不要です。ただし，
+\textbf{読み取り PC の時計は正確に合わせておきます}。
+リフトアップスタート以外の運用をする場合，
+読み取り PC の時計がずれると\textbf{読み取る PC によって記録が変わる}という
+という事態が起こり得ます。
+
+\subsection*{(4) スタート地区の時計・チャイマー}
+
+計センの担当ではないことも多いですが，確認は計センがすべきです。
+
+\begin{itemize}
+\item スタート地区の時計とチャイマーが\textbf{一致しているか}。
+      0.1 秒のずれでも競技者は気づき，提訴の原因になります。
+\item レーンごとに時計を置く場合は，\textbf{時計どうしが合っているか}。
+\item クラウドを使っている場合は，
+      \textbf{【スタート時刻カウントダウン】画面でサーバ PC の現在時刻が見られる}ので，
+      これを基準に合わせられます。
+\end{itemize}
+
+\begin{Done}
+全 PC，\tSI\ 全ステーション（とくにスタート・フィニッシュ），
+スタート地区の時計とチャイマーが，同じ時刻を指している。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{ステーションを起動し，ポ確カードを読む}{\tALL\ \tSI\ \tSIAC\ \tEMIT}
+
+\begin{Goal}
+全コントロールが「正しい番号で・動作している」ことを確認し，競技開始を可能にする。
+\end{Goal}
+
+\begin{enumerate}
+\item \tSI\ 設置前に，\textbf{カードでパンチしてアクティブモードにします}。
+      裏の液晶に「番号」と「時刻」が交互に表示されれば起動しています。
+      \textbf{台座に固定すると液晶が見えなくなるので，固定前に目視します。}
+\item \tSIAC\ タッチフリー設定のステーションも，起動は\textbf{差し込みパンチ}で行います。
+\item コントロール確認者に，カードとピンパンチ用紙を渡します。
+      \tEMIT\ EMIT ならスタートユニットも渡し，出発前にアクティベートしてもらいます。
+\item 帰ってきたら\textbf{【試走カード読み取り】}モードで読みます。
+\item \textbf{確認者と一緒に}，番号と順番を照合します（Step 17 と同じ）。
+\item \tSIAC\ タッチフリーを使う場合は，全コントロールで
+      \textbf{タッチフリーのパンチも}試してもらいます。
+\item \tSIAC\ SIAC のバッテリーテストを行います。
+      \textbf{新品でも突然電圧が落ちることがある}ため，大会当日の朝に必ず実施します。
+      表示は OK／WARN／FAIL の 3 段階です。
+\item 全コントロール確認完了を，\textbf{競技責任者に報告}します。
+\end{enumerate}
+
+\begin{Fail}
+\textbf{起きること：}ステーションが起動していなかった。\\
+\textbf{対処：}起動していない（スタンバイの）ステーションは，
+\textbf{最初にパンチした人だけ反応が遅くなります}。
+競技としては成立しますが，公平性の問題になります。
+朝のパンチで必ず起動させ，動作時間（Step 8）を十分に取っておきます。
+\end{Fail}
+
+\begin{Done}
+全コントロールについて，番号・順番・動作を確認した。
+競技責任者に「競技開始可能」を伝えた。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{当日申込を入力する}{\tALL\ \tPRAC}
+
+\begin{Goal}
+受付から来た当日申込を，競技開始までに Mulka2 へ入れ切る。
+\end{Goal}
+
+\subsection*{役割分担を先に決める}
+
+\begin{itemize}
+\item \textbf{スタート時刻を決めるのは受付}です。計センは決めません。
+      受付が\textbf{機械的に}（用意された空き枠に順番に）割り当てます。
+\item \textbf{計センは，受付から来た紙をそのまま入力するだけ}にします。
+      これを守らないと，スタート地区と計センで内容が食い違います。
+\end{itemize}
+
+\subsection*{手順}
+
+\begin{enumerate}
+\item メインウィンドウ →【入力/編集】→【当日申込入力】を開く。\ver
+\item \textbf{ナンバー}（ゼッケン番号）を入力する。
+      Step 10 で当日申込用のブロックを確保してあるので，そこから使います。
+      複数人で入力する場合は，\textbf{人ごとに番号帯を分けます}
+      （例：A さんは 9001 から，B さんは 9101 から）。番号の衝突を防げます。
+\item クラス／スタート時刻／カード番号／氏名／\textbf{ふりがな}／所属を入力する。
+\item \textbf{ふりがなは省略しない。}スタート地区での呼び出しに使います。
+\end{enumerate}
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm]
+  \node[scr,minimum width=120mm,minimum height=48mm,anchor=north west] (w) at (0,0){};
+  \fill[band] (0,0) rectangle (120,-6);
+  \node[anchor=west,font=\sffamily\scriptsize\bfseries] at (2,-3) {当日申込入力\ \ver};
+  \foreach \y/\l/\v/\wq in {
+    -11/{ナンバー}/{9001}/16,
+    -18/{クラス}/{N}/16,
+    -25/{スタート時刻}/{13:20:00}/20,
+    -32/{カード番号}/{8100099}/22}{
+    \node[anchor=west,font=\sffamily\tiny] at (5,\y) {\l};
+    \node[fld,anchor=west,minimum width=\wq mm] at (32,\y) {\v};}
+  \foreach \y/\l/\v/\wq in {
+    -11/{氏名}/{田中 四郎}/30,
+    -18/{ふりがな}/{たなか しろう}/30,
+    -25/{所属}/{〇〇大学OLC}/30,
+    -32/{カード備考}/{レンタル}/22}{
+    \node[anchor=west,font=\sffamily\tiny] at (62,\y) {\l};
+    \node[fld,anchor=west,minimum width=\wq mm] at (82,\y) {\v};}
+  \node[btn,anchor=west] at (85,-42) {登録};
+  \node[btn,anchor=west] at (100,-42) {閉じる};
+  \node[anchor=west,font=\sffamily\tiny,text=failfr] at (5,-42) {← ふりがなを空欄にしないこと};
+\end{tikzpicture}
+\figcap{当日申込入力の画面（模式図）}
+\end{Fig}
+
+\begin{Done}
+受付から来た申込用紙の枚数と，入力した人数が一致している。
+用紙は捨てずに束ねて保管している。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}当日申込の入力が終わる前に，その人がフィニッシュしてくる。\\
+\textbf{対処：}読み取り時に\textbf{「未登録カード」}として出てきます。
+その場で\textbf{カードのデータと競技者を対応づけ}ます（Step 31）。
+記録は失われません。ただし，\textbf{当日申込の入力は競技開始前に終える}のが原則です。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{カード変更・クラス変更・代走・欠席を処理する}{\tALL}
+
+\begin{Goal}
+受付・スタートから来た変更を，正しい方法で Mulka2 に反映する。
+\end{Goal}
+
+すべて\textbf{【競技者情報】}画面から行います。
+メインウィンドウのスタートリスト／操作履歴／リザルトリストのいずれかで
+\textbf{該当者の行をクリック}すると開きます。
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm]
+  \node[scr,minimum width=130mm,minimum height=52mm,anchor=north west] (w) at (0,0){};
+  \fill[band] (0,0) rectangle (130,-6);
+  \node[anchor=west,font=\sffamily\scriptsize\bfseries] at (2,-3) {競技者情報　1101　山田 太郎（M21A）};
+  \node[btn,anchor=north west] at (3,-8)  {全般};
+  \node[btn,anchor=north west] at (18,-8) {ラップデータ};
+  \node[btn,anchor=north west] at (42,-8) {カード詳細・対応};
+  \draw[rulec] (3,-15) rectangle (127,-49);
+
+  \node[anchor=north west,font=\sffamily\tiny] at (6,-17) {クラス};
+  \node[fld,anchor=north west,minimum width=18mm] at (24,-16.5) {M21A};
+  \node[anchor=north west,font=\sffamily\tiny] at (50,-17) {スタート時刻};
+  \node[fld,anchor=north west,minimum width=18mm] at (72,-16.5) {11:00:00};
+  \node[anchor=north west,font=\sffamily\tiny] at (6,-24) {カード番号};
+  \node[fld,anchor=north west,minimum width=18mm] at (24,-23.5) {8100001};
+  \node[anchor=north west,font=\sffamily\tiny] at (50,-24) {カード備考};
+  \node[fld,anchor=north west,minimum width=18mm] at (72,-23.5) {マイカード};
+
+  \node[btn,anchor=north west,minimum width=24mm] at (6,-33)  {カード番号変更};
+  \node[btn,anchor=north west,minimum width=24mm] at (34,-33) {氏名・所属変更};
+  \node[btn,anchor=north west,minimum width=24mm] at (62,-33) {記録変更・遅刻対応};
+  \node[btn,anchor=north west,minimum width=24mm] at (90,-33) {欠席処理};
+  \node[btn,anchor=north west,minimum width=24mm] at (6,-41)  {クラス変更};
+  \node[btn,anchor=north west,minimum width=24mm] at (34,-41) {コース変更};
+  \node[btn,anchor=north west,minimum width=24mm] at (62,-41) {失格処理};
+\end{tikzpicture}
+\figcap{競技者情報の画面（模式図・ボタン名はバージョンにより異なる）}
+\end{Fig}
+
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{26mm}P{40mm}P{78mm}@{}}
+\toprule
+\hd{やりたいこと} & \hd{操作} & \hd{注意} \\
+\midrule
+カード番号の変更 & 【カード番号変更】 & レンタルに変わった場合は\textbf{カード備考も「レンタル」に}。
+  そうしないと回収漏れになります \\
+クラス変更 & 【クラス変更】 & \textbf{コースも変わるか}を確認。
+  クラスだけ変えてコースが元のままだと，全員 MP になります \\
+代走 & 【氏名・所属変更】で氏名・所属・カード番号を代走者のものに変え，
+  \textbf{【代走】にチェック} & 公認大会では代走の扱いが規則で決まっています。競技責任者に確認 \\
+欠席（DNS） & 【欠席処理】 & \textbf{スタート閉鎖後にまとめて}行います（Step 36） \\
+遅刻 & 【記録変更・遅刻対応】 & \textbf{システムによって処理が違います}。下の注意を必読 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{遅刻の扱い}
+
+遅刻は，\textbf{入力が要る場合と，入力してはいけない場合}があります。
+まずどちらかを判断します。
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{54mm}P{20mm}P{66mm}@{}}
+\toprule
+\hd{運用} & \hd{遅刻入力} & \hd{理由} \\
+\midrule
+\tEMIT\ \textbf{リフトアップスタート ＋ パンチングフィニッシュ}
+  & \textbf{必要} & カードに残る\textbf{所要時間}をそのまま記録に使うため。
+    実際に出た時刻から計られるので，遅れた分だけ記録が短くなる \\
+\tSI\ 時刻スタート（スタートを押さない） & \textbf{不要}
+  & フィニッシュ時刻と\textbf{正規のスタート時刻}の差で計算されるので，正しい記録になる \\
+パンチングフィニッシュでない（フィニッシュを計時する）運用 & \textbf{不要}
+  & 同上 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{不要な場合に入力すると，その分が記録に足されて間違った記録になります。}
+EMIT に慣れている人ほど，SI の時刻スタートでもつい入力しがちです。
+計センで気づいたら加算を取り消し，スタートにも伝えます。
+
+\subsection*{\tEMIT\ 遅刻を入力する手順}
+
+\begin{enumerate}
+\item メインウィンドウ左下の\textbf{検索ボックス}に，氏名の一部かゼッケン番号を入れて
+      【競技者情報】を開きます。
+      すでにフィニッシュしている場合は，\textbf{注意事項リストの該当行をダブルクリック}でも開けます。
+\item 右側の\textbf{【記録変更・遅刻対応】}をクリックします。
+\item \textbf{記録加算}の欄に，\textbf{遅刻スタートした時刻}または\textbf{遅れた時間}を入れます。
+      \texttt{hhmmss} や \texttt{mmss} の形式で，\textbf{コロンは省略できます}
+      （\texttt{130} と打てば 1 分 30 秒）。
+\end{enumerate}
+
+\begin{Fail}
+\textbf{起きること：}遅刻した人の\textbf{スタート時刻のほうを}書き換えてしまう。\\
+\textbf{対処：}スタート時刻を変更すると，Mulka2 は
+\textbf{「運営側の都合でその人のスタート時刻を変えた」}と解釈します。
+その場合\textbf{遅刻分は記録に加算されません}。
+
+遅刻は\textbf{【記録変更・遅刻対応】の記録加算}で入れます。
+スタート時刻を変えるのは，バスの遅延など\textbf{運営側の責任で出走時刻をずらしたとき}だけです。
+この 2 つは意味が違うので，どちらなのかを先に確かめてから操作します。
+\end{Fail}
+
+\begin{Note}[遅刻者を「00 秒」か「30 秒」に出してもらう]
+スタートパートと事前に決めておくと効く工夫です。
+遅刻者を任意の時刻ではなく\textbf{各分の 00 秒または 30 秒}に出してもらうと，
+\begin{itemize}
+\item スタート側は時刻を控えやすく，
+\item 計セン側は注意事項リストに遅刻警告が出たときに
+      「何分遅れか」をすぐ判断できます。
+\end{itemize}
+また，\textbf{誰がどう伝えるか}も決めておきます。
+クラウドを使うならスタート地区で【変更/遅刻】から入力できます。
+使わないなら，\textbf{遅刻者が出たら早めに計センへ電話}してもらいます。
+遅刻分は記録に直接効くので，後回しにすると成績が出せません。
+\end{Note}
+
+\begin{Done}
+受付・スタートから来た変更届の枚数と，処理した件数が一致している。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{当日版のリストを配る}{\tALL}
+
+\begin{Goal}
+当日申込・変更を反映したリストを，スタートとフィニッシュに届ける。
+\end{Goal}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{40mm}P{50mm}P{54mm}@{}}
+\toprule
+ & \hd{クラウドを使う場合} & \hd{クラウドを使わない場合} \\
+\midrule
+スタート用スタートリスト & \textbf{不要}（画面で共有される） & 当日版を印刷して配達 \\
+フィニッシュ用リスト & \textbf{不要} & 同上 \\
+カード変更の一覧 & \textbf{不要} & \textbf{最優先で}作って配達またはメッセージで共有 \\
+掲示用スタートリスト & 必要（参加者向け） & 必要 \\
+レンタルカードリスト & 当日申込分を手書きで追記 & 同左 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+掲示用は，メインウィンドウ →【印刷】→【スタートリスト】から印刷します。
+
+\begin{J2M}[当日版の公開用・役職用リストを作り直す]
+当日申込や欠場を反映した紙を配り直す場合は，
+\textbf{「エントリーリストの修正」モード}を使います（Step 13）。
+
+\begin{enumerate}
+\item 事前に作った \texttt{Startlist.csv} を読み込む。
+\item 当日申込者を追加し，欠場者を削除する。
+\item 全形式で出力し直す。
+\end{enumerate}
+
+\textbf{スタート時刻とゼッケン番号は枠として固定}されているので，
+人を足し引きしても既存の対応は崩れません。
+ただし\textbf{Mulka2 側にはすでに当日申込を入力済み}のはずなので，
+\textbf{ここで作り直した \texttt{Startlist.csv} を Mulka2 に取り込み直さないでください}。
+読み取り済みの記録と食い違います。
+当日の修正モードは\textbf{紙を作り直すためだけ}に使います。
+\end{J2M}
+会場担当に渡して掲示し，スタート地区にも配達して掲示します。
+
+\begin{Done}
+スタート・フィニッシュの手元に，最新版のリストがある（または，
+クラウドが動いていることを両パートが確認している）。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{コース設定を当日に変更する}{\tALL}
+
+\begin{Goal}
+ユニット番号の変更やコース設定の誤りを，競技中でも安全に直す。
+\end{Goal}
+
+競技が始まってしまうと，\textbf{イベントマネージャは開けません}。
+当日の変更は\textbf{メインウィンドウから}行います。
+
+\begin{enumerate}
+\item メインウィンドウ →【入力/編集】→\textbf{【コース設定変更】}。\ver
+\item 変更したいコース，またはコントロール番号を選ぶ。
+\item 番号を書き換える。\textbf{番号の一括変更}ができるので，
+      「31 番のステーションを 45 番に交換した」という場合は，全コースの 31 を 45 に置換できます。
+\item \textbf{パンチングスタート／パンチングフィニッシュの設定も，ここで変更できます。}
+\item 変更すると\textbf{再ペナチェック}の画面が出るので，実行します。
+      \textbf{読み取り済みの記録も再計算されます。}
+\end{enumerate}
+
+\begin{Note}[この変更はどこに残るか]
+メインウィンドウで行った変更は \texttt{Changes.dat} に記録され，
+\textbf{\texttt{Course.dat} には反映されません}。
+つまり，イベントデータを別 PC にコピーするときは
+\textbf{フォルダごとコピー}しないと，変更が伝わりません。
+\end{Note}
+
+\begin{Done}
+変更後に再ペナチェックを実行し，該当コースの競技者の判定が正しくなった。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{カードを読み取る}{\tALL\ \tSI\ \tEMIT\ \tSIAC}
+
+\begin{Goal}
+フィニッシュした競技者のカードを読み，記録を確定させる。
+\end{Goal}
+
+\subsection*{準備}
+
+\begin{enumerate}
+\item メインウィンドウ →【EMIT/SI】→
+      \tEMIT\ 【E カード読み取り】／\tSI\ 【SI カード読み取り】→
+      モード\textbf{【競技カード読み取り】}を選ぶ。\ver
+\item 読み取り機の COM 番号と使用機材を選んで【接続】。
+      \textbf{COM 番号は，選択肢の後ろに \texttt{USB} や \texttt{SPORT} などの
+      文字が付いているものを選びます}。
+\item \textbf{読み取り音を設定します。}画面右下の【読み取り音設定】で，
+      \textbf{カード備考が「レンタル」のときに別の音}が鳴るようにします。
+      これがレンタル回収漏れを防ぐのにいちばん効きます。
+      音は\textbf{大きめ}にしておくと作業が楽になります。
+\end{enumerate}
+
+\begin{Note}[接続できたことの確認]
+接続状態になると，読み取り画面のほかに\textbf{メインウィンドウ上にも接続中の表示}が出ます
+（\texttt{250} や \texttt{SI} などの文字）。
+この状態なら\textbf{読み取り画面を閉じてもカードは読めます}。
+画面が邪魔なときは閉じて構いません。
+\tSIAC\ SI では【SIAC radio readout モードを使用】というチェック欄が出ることがありますが，
+通常は使いません。
+\end{Note}
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm]
+  \node[scr,minimum width=150mm,minimum height=56mm,anchor=north west] (w) at (0,0){};
+  \fill[band] (0,0) rectangle (150,-6);
+  \node[anchor=west,font=\sffamily\scriptsize\bfseries] at (2,-3) {E カード読み取り};
+  \node[btn,anchor=north west] at (3,-8)  {モード：競技カード読み取り};
+  \node[btn,anchor=north west] at (44,-8) {COM3};
+  \node[btn,anchor=north west] at (58,-8) {接続};
+  \node[btn,anchor=north west] at (70,-8) {切断};
+  \node[btn,anchor=north west] at (130,-8) {設定};
+
+  \fill[band] (3,-15) rectangle (147,-20);
+  \foreach \x/\t in {5/時刻, 20/ゼッケン, 34/氏名, 62/クラス, 76/カード番号, 96/記録, 112/判定, 126/カード備考}{
+    \node[anchor=west,font=\sffamily\tiny\bfseries] at (\x,-17.5) {\t};}
+  \foreach \y/\a/\b/\c/\d/\e/\f/\g/\h in {
+    -24/12:31:05/1101/{山田 太郎}/M21A/8100001/1:02:45/OK/{マイカード},
+    -29/12:33:40/2301/{佐藤 次郎}/W21A/8100015/1:15:02/OK/{レンタル},
+    -34/12:35:12/1103/{齋藤 五郎}/M21A/8100003/{--}/{MP\ (5)}/{レンタル},
+    -39/12:36:58/3401/{高橋 三郎}/MB/8100027/0:48:10/OK/{レンタル},
+    -44/12:38:20/{--}/{（未登録カード）}/{--}/8100777/{--}/{要対応}/{}}{
+    \foreach \x/\t in {5/\a, 20/\b, 34/\c, 62/\d, 76/\e, 96/\f, 126/\h}{
+      \node[anchor=west,font=\sffamily\tiny] at (\x,\y) {\t};}
+    \node[anchor=west,font=\sffamily\tiny\bfseries] at (112,\y) {\g};
+    \draw[rulec,line width=0.2pt] (3,\y-2.5)--(147,\y-2.5);}
+  \node[anchor=north west,font=\sffamily\tiny] at (3,-50)
+    {※ 判定が OK 以外の行は，ペナチェック係へ回す。「レンタル」表示のカードは回収する。};
+\end{tikzpicture}
+\figcap{カード読み取り画面（模式図）}
+\end{Fig}
+
+\mshot[0.30]{comport.png}{COM ポートの選択。\texttt{SPORT} や \texttt{USB} が付いているものを選ぶ}{e-card/SI-Card の読み取り}
+
+\mshot[0.62]{readsound.png}{読み取り音設定。いちばん下の「カード備考がある場合」に
+\texttt{レンタル} を入れると，レンタルカードだけ別の音になる}{e-card/SI-Card の読み取り}
+
+\subsection*{読み取ったときの分岐}
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm,every node/.style={font=\sffamily\scriptsize}]
+  \node[blkd,minimum width=32mm,minimum height=7mm] (r) at (0,0) {カードを読む};
+  \node[dec,aspect=2.6,minimum width=34mm] (d) at (0,-13) {読み取り結果は？};
+
+  % 横のバス
+  \draw[draw=boxln,line width=0.5pt] (0,-19.5) -- (0,-25);
+  \draw[draw=boxln,line width=0.5pt] (-62,-25) -- (62,-25);
+
+  \foreach \x/\ttl/\sub/\lab in {
+    -62/{OK}/{そのまま通す}/{正解},
+    -31/{DNF}/{そのまま通す}/{途中棄権},
+      0/{MP / DISQ}/{ペナチェックへ（Step 31）}/{ペナ},
+     31/{未登録カード}/{競技者と対応づける（Step 32）}/{番号が無い},
+     62/{反応しない}/{チーフへ報告（Step 32）}/{読めない}}{
+    \node[blk,minimum width=29mm,minimum height=12mm,anchor=north,inner sep=2pt] at (\x,-31)
+      {\textbf{\ttl}\\[1pt]\tiny \sub};
+    \draw[ar] (\x,-25) -- (\x,-31);
+    \node[lbl] at (\x,-28) {\lab};
+  }
+
+  \node[blk,minimum width=112mm,align=left,anchor=north] at (0,-48)
+    {\textbf{どの分岐でも共通}\quad
+     ・カード備考が「レンタル」なら回収
+     ・レンタルカードリストにチェック
+     ・\tEMIT\ BUL は外して処分};
+\end{tikzpicture}
+\figcap{カードを読んだあとの分岐}
+\end{Fig}
+
+\begin{Note}[\tEMIT\ EMIT 特有の注意]
+\begin{itemize}
+\item リーディングユニットは RS-232C 接続のため，\textbf{USB 変換アダプタとドライバ}が必要です。
+\item \textbf{MTR でも読み取れます。}MTR は本体にデータを記録でき，
+      読み取りと同時に印刷もできます。PC へのデータ移行という点では
+      リーディングユニットと同じです。\textbf{MTR は電源ボタンの長押しが必要}なので，
+      「つないだのに反応しない」ときは電源を疑います。
+\item 読み取ると\textbf{カードの時計が止まります}。
+\end{itemize}
+\end{Note}
+
+\begin{Note}[\tSIAC\ SIAC 特有の注意]
+\begin{itemize}
+\item フィニッシュのパンチで\textbf{SIAC の電源が切れます}。
+      切れていない SIAC は，撤収時に SIAC OFF ステーションで切ります。
+\item タッチフリーのフィニッシュを走り抜ける方式にしている場合，
+      \textbf{差し込みフィニッシュのステーションを別に置くと，
+      間違って差し込む競技者が出ます}。走り抜けであることを事前に周知します。
+\end{itemize}
+\end{Note}
+
+\begin{Done}
+読み取った人数と，フィニッシュから戻ってきた人数がおおむね一致している。
+判定が OK 以外の行は，すべてペナチェック係に回っている。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{ペナチェックをする}{\tALL}
+
+\begin{Goal}
+ペナルティ判定が出た競技者に対して，
+「どこを通っていないか」を根拠を持って説明し，判定を確定させる。
+\end{Goal}
+
+\subsection*{判断の手順}
+
+\begin{Fig}
+\begin{tikzpicture}[node distance=5mm]
+  \node[blkd,minimum width=42mm] (a) {判定が OK でない行が出た};
+  \node[dec,below=6mm of a,minimum width=44mm,text width=32mm] (d1) {競技者に\\自覚があるか};
+  \node[blk,right=22mm of d1,minimum width=34mm] (b1) {\textbf{あり}\\\scriptsize 本人に確認して DISQ 確定};
+  \node[blk,below=8mm of d1,minimum width=44mm] (c1) {全ポ図・コース図で\\「通っていない番号」を示す};
+  \node[dec,below=6mm of c1,minimum width=44mm,text width=32mm] (d2) {走ったコースと\\画面のコースは一致？};
+  \node[blk,left=20mm of d2,minimum width=30mm] (b2) {\textbf{違う}\\\scriptsize 正しいコースに変更\\\scriptsize →再ペナチェック};
+  \node[blk,below=8mm of d2,minimum width=44mm] (c2) {バックアップ（BUL／ピンパンチ）を確認};
+  \node[dec,below=6mm of c2,minimum width=46mm,text width=34mm] (d3) {バックアップに\\通過の証拠は？};
+  \node[blk,left=20mm of d3,minimum width=30mm] (b3) {\textbf{あり}\\\scriptsize 失格取消（Step 32）};
+  \node[blk,below=8mm of d3,minimum width=44mm] (c3) {\textbf{DISQ で確定}\\\scriptsize 本人に説明して終了};
+  \draw[ar] (a)--(d1);
+  \draw[ar] (d1)--node[lbl]{あり}(b1);
+  \draw[ar] (d1)--node[lbl]{なし}(c1);
+  \draw[ar] (c1)--(d2);
+  \draw[ar] (d2)--node[lbl]{違う}(b2);
+  \draw[ar] (d2)--node[lbl]{一致}(c2);
+  \draw[ar] (c2)--(d3);
+  \draw[ar] (d3)--node[lbl]{あり}(b3);
+  \draw[ar] (d3)--node[lbl]{なし}(c3);
+\end{tikzpicture}
+\figcap{ペナルティ判定のフロー}
+\end{Fig}
+
+\subsection*{その場の段取り}
+
+ペナが出ると，通常とは違う読み取り音が鳴って画面にも内容が表示されます。
+
+\begin{enumerate}
+\item \textbf{読み取り係とは別の人が対応します。}
+      競技者を別の場所へ誘導し，読み取りの列を止めないようにします。
+\item \tEMIT\ 競技者のカードから\textbf{バックアップラベルを外し}，
+      印刷されたペナレポートに貼り付けます。
+      \textbf{ペナレポートには「正解なら穴がどう開いているか」が印刷されている}ので，
+      実物と並べて照合できます。
+\item 説明が終わったペナレポートは，\textbf{まとめて袋に入れて保管}します。
+      あとから問い合わせが来たときの根拠になります。
+\item そのため，読み取り場所には\textbf{テープとビニール袋}を用意しておきます。
+\end{enumerate}
+
+ペナレポートを印刷しない場合や，印刷を待っている間でも，
+画面のペナ理由や\textbf{【バックアップラベル表示】}の内容で説明できます。
+手動で印刷したいときは，【競技者情報】の右下の\textbf{【印刷】}を使います。
+
+\mshot[0.72]{penareport.png}{ペナレポートの例。左が通過記録，右が
+バックアップラベルの穴の位置。数字が「正解なら開く場所」，
+黒丸が「その人の結果として実際に開いている場所」}{e-card/SI-Card の読み取り}
+
+\subsection*{具体的な操作}
+
+\begin{enumerate}
+\item 該当者の【競技者情報】→\textbf{【カード詳細・対応】}または\textbf{【ラップデータ】}を開く。
+      印刷したペナレポートを見てもかまいません。
+\item \textbf{何番のコントロールを通っていないか}を特定します。
+\item \textbf{全ポ図とコース図を使って，口頭で説明します。}
+      「1 番から 2 番へ行くところで，こちらの 45 番を押しています」のように具体的に。
+\item \textbf{走ったコースと画面のコースが違っていないか確認します。}
+      ほとんどコントロールを通れていない場合，
+      \textbf{Mulka2 が別のコースを選んでしまうことがあります}（次項）。
+      違っていたら正しいコースに変更します。
+\item 納得が得られない場合は，バックアップを確認します（次項）。
+\end{enumerate}
+
+\subsection*{コースはどう決まっているのか}
+
+「別のコースとして判定されている」が起きる理由は，コースの決まり方にあります。
+Mulka2 は次の順で，その競技者のコースを決めています。
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm,every node/.style={font=\sffamily\scriptsize}]
+  \node[blkd,minimum width=52mm,minimum height=9mm,anchor=north] (a) at (0,0)
+    {\textbf{1．選手ごとのコース指定}\\\tiny \texttt{Startlist.dat} にコース列があるか};
+  \node[blkg,minimum width=52mm,minimum height=9mm,anchor=north] (b) at (0,-16)
+    {\textbf{2．クラスごとのコース指定}\\\tiny \texttt{Class.dat} にコースが入っているか};
+  \node[blk,minimum width=52mm,minimum height=11mm,anchor=north] (c) at (0,-32)
+    {\textbf{3．カードの中身から自動判定}\\\tiny どちらも無いときだけ。\\
+     \tiny \textbf{ペナ数がいちばん少なくなるコース}が選ばれる};
+  \draw[ar] (0,-9) -- (0,-16); \node[lbl] at (0,-12.5) {無ければ};
+  \draw[ar] (0,-25) -- (0,-32); \node[lbl] at (0,-28.5) {無ければ};
+  \node[blk,anchor=west,minimum width=58mm,align=left] at (30,-32)
+    {\textbf{ここが誤判定の原因}\\
+     ほとんど回れていない人は，\\
+     本来のコースより\textbf{ペナが少なく見える}\\
+     別のコースが選ばれてしまう};
+  \draw[ar] (26,-37) -- (30,-37);
+\end{tikzpicture}
+\figcap{コースの決まり方。3 の自動判定だけが「推測」になる}
+\end{Fig}
+
+\begin{itemize}
+\item \textbf{クラスとコースを対応づけてあれば，自動判定は働きません}（2 で決まるため）。
+      通常の大会ではここまでで決まります。
+\item 自動判定が使われるのは，\textbf{どの地図を取って走ってもよい練習会}のように，
+      事前にコースを指定できない場合です。\tPRAC
+\item 自動判定は\textbf{最初にカードを読んだときに 1 回だけ}行われます。
+\end{itemize}
+
+\subsection*{バックアップによる救済}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{18mm}P{58mm}P{64mm}@{}}
+\toprule
+ & \hd{\tEMIT} & \hd{\tSI} \\
+\midrule
+確認するもの & \textbf{バックアップラベル（BUL）}の穴の位置 &
+  地図リザーブ欄の\textbf{ピンパンチ}／
+  \textbf{ステーションのバックアップメモリ} \\
+判断 & 正しいコースを回ったときの穴の並びと，実際の BUL を照合する &
+  ピンパンチのパターンを対応表と照合する \\
+救済の考え方 & 通過が証明できれば失格を取り消す &
+  同左。\textbf{ステーション側にエラーのないパンチ記録があれば，
+  正しくパンチしたとみなす}のが現在の考え方
+  （\tSIAC\ タッチフリーは対象外） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Note}[ステーションのバックアップメモリについて \tSI]
+競技者から「自分は確かに押した」と申し出があった場合，
+所定の手続きを経て，主催者がコントロールのバックアップメモリを読み取り，
+判断できます。
+\textbf{エラーのない完全なパンチ記録があれば，通過したとみなして失格を取り消します。}
+逆に，不完全なパンチとして記録されている場合は失格のままです。
+バックアップメモリは Config+ の【バックアップ】から読め，
+テキストファイルに保存できます。\textbf{トラブル対応時は保存しておきます}。
+\end{Note}
+
+\begin{Note}[\tSI\ クリア忘れは「見逃される」ことがある]
+SI では，カードに残った\textbf{前の大会のデータも正解チェックに使われます}。
+そのため，クリアを忘れた競技者が，実際にはコントロールを 1 つ飛ばしていても
+\textbf{OK と判定されてしまう}ことがあります
+（前回のデータにその番号が入っているため）。
+ラップデータが明らかに不自然な場合は，この可能性を疑います。
+逆に，OK なのに失格と判定されることはありません。
+\end{Note}
+
+\subsection*{Mulka2 が OK にするが，本来は失格のケース}
+
+正解チェックは「必要な番号が順番どおりに並んでいるか」を見ています。
+そのため，\textbf{フィニッシュしたあとのパンチも判定に使われます}。
+次の 2 つは，画面上は OK と出るのに，競技としては成立していないケースです。
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{44mm}P{46mm}P{54mm}@{}}
+\toprule
+\hd{競技者の動き} & \hd{Mulka2 の判定} & \hd{気づき方} \\
+\midrule
+ラスポを忘れてフィニッシュ →
+戻ってラスポをパンチ（フィニッシュはそのまま）
+  & \textbf{OK になる}
+  & \textbf{ラスポ→フィニッシュのラップが計算されない}。
+    時刻が逆転しているため \\
+フィニッシュ後にコントロールをパンチ
+  & \textbf{OK になる}。所要時間も計算される
+  & ラップの並びが不自然になる。
+    フィニッシュより後の通過時刻が混ざる \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item 現場を見ていないと気づきにくいので，
+      \textbf{フィニッシュ後にコントロールをパンチしない動線}にしておくのが第一の対策です。
+\item 読み取り時にラップを本人に渡す運用にしていると，
+      競技者側から「おかしい」と言ってくることがあります。
+\item 判定を変えるかどうかは\textbf{競技責任者の判断}です。計センは事実を示す役に回ります。
+\end{itemize}
+
+\begin{Note}[同じところを 2 回パンチしたときの記録]
+競技者から「押し直したが大丈夫か」と聞かれることがあります。記録は次のようになります。
+\begin{center}
+\small
+\begin{tabular}{@{}P{30mm}P{54mm}P{56mm}@{}}
+\toprule
+ & \hd{短い間隔で 2 回} & \hd{間隔をあけて 2 回} \\
+\midrule
+コントロール & 最初のパンチだけ記録される（差し込みで約 8 秒以内，
+  \tSIAC\ タッチフリーはもう少し長い） & 2 つとも記録される \\
+フィニッシュ & 最初のパンチが有効 & \textbf{最後のパンチが有効}になる \\
+スタート & \multicolumn{2}{l}{間隔によらず\textbf{最後のパンチ}が有効} \\
+\bottomrule
+\end{tabular}
+\end{center}
+ステーションが 2 台置いてあるコントロールで別々の台にパンチした場合は，
+間隔によらず両方が記録されます。
+コントロールの記録数に上限があるので，
+無駄なパンチが増えると記録数の少ないカードでは影響が出ます。
+\end{Note}
+
+\begin{Done}
+判定が OK 以外だった全員について，本人への説明が終わり，
+最終判定（OK／MP／DISQ／DNF）が確定している。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}パンチ欄（リザーブ欄）に穴がないのに，
+「押したはずだ」という主張に押されて OK にしてしまう。\\
+\textbf{対処：}\textbf{判断基準を事前に決め，全員で共有しておきます。}
+たとえば「パンチ欄に穴がない場合は DISQ」と決めておけば，
+その場で迷いません。判断が難しいものは\textbf{競技責任者に上げます}。
+計センが独断で規則の解釈を変えることは避けます。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{読めないカード・遅刻・未登録カードを処理する}{\tALL}
+
+\begin{Goal}
+自動処理できなかった競技者の記録を，手動で確定させる。
+\end{Goal}
+
+\subsection*{(1) 通過は証明できたので失格を取り消す}
+
+【競技者情報】→【記録変更・遅刻対応】→\textbf{【手動変更】}で
+失格を取り消します。\ver
+
+\subsection*{(2) カードがまったく反応しない}
+
+\begin{enumerate}
+\item まず\textbf{他のカードが読めるか}を試します。
+      \begin{itemize}
+      \item \textbf{他も読めない}場合 → 読み取り機側の問題です。
+            COM ポート番号の指定違い（Bluetooth プリンタなど別の機器を選んでいないか），
+            USB ケーブルの断線，ドライバの不具合を疑います。
+            \tEMIT\ EMIT ならプリンタの USB ケーブルで代用できることがあります。
+            \textbf{予備の読み取り機に交換}するのが最も速い解決です。
+      \item \textbf{そのカードだけ読めない}場合 → カードの故障です。次へ進みます。
+      \end{itemize}
+\item \textbf{通過の証明}をバックアップ（BUL／ピンパンチ）で行います。
+\item \textbf{フィニッシュ時刻を照会}します。
+      フィニッシュに「カード番号 〇〇の人の時刻がほしい」と連絡します
+      （着順シールを使っている場合は，シールの番号を伝えます）。
+\item 【競技者情報】→【記録変更・遅刻対応】→【手動変更】で\textbf{フィニッシュ時刻を入力}します。
+      時間表記は【自動判別】にしておくと入力しやすいです。
+\end{enumerate}
+
+\subsection*{(3) 遅刻}
+
+Step 27 の注意と合わせて読みます。\textbf{システムと運用方式によって処理が違います}。
+
+\subsection*{(4) 未登録カード}
+
+スタートリストに無いカード番号が読まれたときです。
+
+\begin{enumerate}
+\item 画面に出る対応メニューから，\textbf{記録と競技者を対応づけます}。
+\item 当日申込の入力が済んでいないだけなら，先に入力してから読み直しても構いません。
+\end{enumerate}
+
+\subsection*{(4-2) \tEMIT\ 「NO ACTIVATE」と出たとき}
+
+EMIT で，ペナと同じ音が鳴って \textbf{NO ACTIVATE} と表示されることがあります。
+原因は 2 つあり，どちらも\textbf{カード内の通過時刻が正常でない}（途中で 0 に戻る，
+減っている）ことを示しています。
+
+\begin{itemize}
+\item 競技者がアクティベートせずに出走した
+\item 競技中に\textbf{どこかのレッグで 2 時間以上かかり，カードの時計が止まった}（つぼった場合）
+\end{itemize}
+
+対応は次のとおりです。
+
+\begin{enumerate}
+\item 読み取り画面右側の\textbf{【バックアップラベル表示】}でカードデータ詳細を開く。
+\item 画面中央の\textbf{カードに記録されている通過記録}を下までスクロールし，
+      1 番からフィニッシュまで自分のコースを回っているかを確認する。
+\item 左側のラップに $\times$ が無いかを見る。
+      \textbf{$\times$ があっても，通過記録で通過が確認できれば OK} と判断します。
+\item 全部通過していれば\textbf{【ペナチェック結果を OK にする】}，
+      不通過があれば\textbf{【ペナチェック結果を DISQ にする】}をクリックする。
+\end{enumerate}
+
+OK にした場合，\textbf{タイムは自動的に計算されて入ります}。手入力は要りません。
+
+\mshot[0.86]{noactivate.png}{NO ACTIVATE が出たときのカードデータ詳細。
+左のラップに $\times$ があっても，中央の通過記録で全部回っていれば
+右上の\textbf{【ペナチェック結果を OK にする】}を押す}{e-card/SI-Card の読み取り}
+
+\begin{Note}[\tRELAY\ リレーで起きやすい形]
+リレーでは，フィニッシュ後・読み取り前に，
+次走者が誤ってカードをアクティベートしてしまうことがあります。
+この場合，カードのデータは失われるので，
+「カードが読めない場合」と同じ扱い（バックアップで通過証明＋時刻を照会して手入力）になります。
+チェンジオーバー付近でのカードの扱いを，フィニッシュ・スタート双方に伝えておきます。
+\end{Note}
+
+\subsection*{(5) 「既存データあり」と出たとき}
+
+そのカード番号の記録がすでに Mulka2 に入っている状態で，
+中身の違うデータを読んだときに出ます。
+\textbf{選択を間違えると，先に読んだ人の記録が消えます}。
+落ち着いて，どれに当たるかを確認してから選びます。\ver
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{50mm}P{94mm}@{}}
+\toprule
+\hd{選択肢の意味} & \hd{どういうときに選ぶか} \\
+\midrule
+新しく読んだデータを有効にする
+  & 同じ人の記録を読み直す場合。
+    最初の読み取りに問題があって取り消したいとき \\
+別のスタートナンバーの記録として扱う
+  & \textbf{カードを使い回している}場合。
+    午前と午後で同じカードを別の人が使った，など \\
+新しく競技者を入力して対応づける
+  & 使い回しで，相手がまだスタートリストに無い場合 \\
+後回しにする
+  & その場で判断できないとき。
+    \tRELAY\ ただしリレーでは後回しにしません（第 5 部） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+判断がつかないときは，\textbf{カードに貼ったラベルとゼッケン番号を実物で確認}してから決めます。
+
+\begin{Note}[上書きしてしまったあとの戻し方]
+上書きされた側のデータは，次の手順で追えます。
+\begin{enumerate}
+\item 上書きした人の【競技者情報】→ 左下の\textbf{【履歴】}で，
+      元々どの番号のカードが読み込まれていたかが分かります。
+\item メインウィンドウの【表示】→\textbf{【読み取り済みカードリスト】}で
+      未処理のカードだけを表示すると，行き場を失ったカードが出てきます。
+      ダブルクリックすると読み取り時刻などを確認できます。
+\item 本来の使用者が分かったら，その人の【競技者情報】→【カード詳細・対応】→
+      \textbf{【特別対応】}→\textbf{【カード登録】}でカードを結び付けます。
+\end{enumerate}
+逆に，\textbf{間違った人に読み込ませてしまった}場合は，同じ【特別対応】画面の
+\textbf{【読み取り解除】}で取り消してから，カードを読み直します。
+\end{Note}
+
+\subsection*{(6) 使用者を選ぶ画面が出たとき}
+
+同じカードを使うことになっている人が複数いると，どちらか決められないため選択画面が出ます。
+\textbf{同じ人が同じカードで 2 つのコースを走る}場合と，
+\textbf{別の人が同じカードで走る}場合があります。
+競技者に氏名とコースを聞いて選びます。
+
+\begin{Note}[1 枚のカードで 2 回走る場合]
+午前と午後で同じカードを使うような場合は，
+\textbf{スタートリストの段階で 1 回目と 2 回目を別の行として作っておきます}。
+これをしないと，2 回目の読み取りで 1 回目のデータが上書きされます。
+当日になって 2 回走ることが決まった場合は，\textbf{当日申込入力で 2 回目用の行を作ります}。
+\end{Note}
+
+\subsection*{(7) その他の場面}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{40mm}P{106mm}@{}}
+\toprule
+\hd{場面} & \hd{対応} \\
+\midrule
+棄権して，カードだけが計センに届いた
+  & \textbf{そのまま普通に読み取ります}。判定は DNF などになります。
+    \textbf{読み取らないと未帰還者として残る}ので，必ず読みます \\
+競技者が「違うカードを使った」と申告してきた
+  & \textbf{読み取る前に}【競技者情報】→【カード番号変更】で直します \\
+競技者がカードを紛失した
+  & 記録を手入力で DISQ にします \\
+読み込み中の表示は出るが読み終わらない
+  & \tEMIT\ \textbf{MTR ならデータを読める場合があります}。
+    MTR とプリンタを用意しておき，読めたら記録とラップを手入力します \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Note}[注意事項リスト]
+読み取りを進めていくと，メインウィンドウの右側に\textbf{注意事項}が出ることがあります。
+遅刻・早発の疑い，カードの取り違えの疑いなどが，ここにたまっていきます。
+その場で対応できずに後回しにしたものも残るので，
+\textbf{競技中に何度か開いて，未処理が残っていないかを見ます}。
+\end{Note}
+
+\begin{Note}[遅刻・早発の警告が出たとき]
+リフトアップ／パンチングスタートで，スタート時刻も指定している場合に出ます。
+\begin{itemize}
+\item 本当に遅刻・早発なら，スタートから報告が来ているはずです。まず確認します。
+\item \textbf{複数人に同じずれ幅で警告が出ている}場合は，
+      \textbf{カードの取り違え}を疑います（ラベルの貼り間違い，クラブ内で別のカードを持ってきた等）。
+\item \tSI\ パンチングスタートのステーションの時計がずれている可能性もあります。
+      この場合は対応手段がないので，無視します。
+\end{itemize}
+\end{Note}
+
+\begin{Done}
+判定が確定していない競技者が 0 人になっている。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{各種の印刷をする}{\tALL}
+
+\begin{Goal}
+競技者と会場に，必要な紙を必要なタイミングで出す。
+\end{Goal}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{32mm}P{48mm}P{62mm}@{}}
+\toprule
+\hd{印刷物} & \hd{操作} & \hd{設定・注意} \\
+\midrule
+ペナレポート（自動） & 【ツール】→【ペナレポート自動印刷】
+  & スタイルで「ペナレポート」を選び，プリンタを指定して【開始】。
+    \textbf{ペナのときだけ印刷される}ので効率がよい \\
+個人成績速報（自動） & 【ツール】→【個人別ラップ/完走証自動印刷】
+  & タイミングを「カード読み取り時」にする。
+    全員に渡す運用は行列ができやすいので，
+    \textbf{ライブ速報を併用するなら省略してもよい} \\
+リザルトリスト & 【印刷】→【リザルトリスト】
+  & 行の高さは 7 mm 程度が読みやすい。
+    \textbf{クラス単位で印刷}できるので，帰還が進んだクラスから順に掲示する \\
+掲示用スタートリスト & 【印刷】→【スタートリスト】 & 会場とスタート地区に掲示 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Note}[印刷専用の PC を作る]
+プリンタは 1 台の PC に固定し，\textbf{その PC を印刷専門にします}。
+読み取り用の PC で印刷をすると，紙詰まりのたびに読み取りが止まります。
+\end{Note}
+
+\begin{Note}[スタイル（書式）を差し替えたいとき]
+印刷のレイアウトは\textbf{スタイルシート}で決まっています。
+既定のもの以外を使いたい場合は，
+\textbf{Mulka2 のスタイルシート用フォルダにファイルを置く}と，
+【スタイル】のプルダウンに出てきます。
+フォルダの場所は，起動メニューの【環境設定】で確認できます。\ver
+配布されている速報用の書式を使う場合も，置き場所は同じです。
+\textbf{当日の朝に置いても間に合いません}（プルダウンの確認まで含めて前日までに済ませます）。
+\end{Note}
+
+\begin{Done}
+ペナが出たときにレポートが自動で出る。
+リザルトリストがクラス単位で掲示されている。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{レンタルカードを回収する}{\tALL\ \tSI\ \tEMIT}
+
+\begin{Goal}
+貸し出したカードを全部回収し，枚数を合わせる。
+\end{Goal}
+
+\begin{enumerate}
+\item 読み取り時に\textbf{カード備考が「レンタル」と表示された（警告音が鳴った）}カードを回収します。
+\item \textbf{カード番号を見ながら}，レンタルカードリストにチェックを入れます。
+\item \tEMIT\ バックアップラベルは外して処分します。
+\item \tSIAC\ SIAC の電源が入ったままなら，SIAC OFF ステーションで切ります。
+\item カードは袋にまとめます。ラベルは，問題がなくなった時点ではがします。
+\item \textbf{ポ確・試走で使った予備カードも回収します。}忘れがちです。
+\item 撤収時に\textbf{枚数を数えて}，貸出枚数と一致することを確認します。
+\end{enumerate}
+
+\begin{Done}
+レンタルカードリストの全行にチェックが入り，実物の枚数が一致した。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}当日申込者のレンタルカードだけ回収漏れになる。\\
+\textbf{対処：}当日申込入力ではカード備考を入れられない場合があります。
+\textbf{当日申込用のカードは番号帯を分けておく}（Step 14）と，
+番号を見ただけで回収対象だと分かります。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{表彰対象を報告する}{\tALL\ \tRANK}
+
+\begin{Goal}
+順位が確定したクラスから順に，表彰担当へ正確な情報を渡す。
+\end{Goal}
+
+\begin{enumerate}
+\item \textbf{そのクラスの全員がフィニッシュしたか}を確認します。
+      まだ山にいる人がいると，順位は確定していません。
+      スタート時刻とここまでの記録から\textbf{逆転の可能性がないか}を判断します。
+\item 確定したクラスから，\textbf{クラス名・順位・氏名・ふりがな・所属}を
+      実行委員長または表彰担当に報告します。
+\item \textbf{ふりがなを添えます。}表彰状に振り仮名を書く場合と，
+      呼び上げのために必要です。
+\end{enumerate}
+
+\begin{Note}[クラウドを使っている場合]
+表彰担当が自分でリザルトリストを見られるので，
+計センは\textbf{「このクラスは確定しました」と伝えるだけ}で済みます。
+ふりがなも，ゼッケン番号から辿って確認できます。
+\end{Note}
+
+\begin{Done}
+全クラスについて，確定を伝え終えた。
+\end{Done}
+
+% ---------------------------------------------------------------------
+\Step{未出走（DNS）を入力し，未帰還者を確認する}{\tALL}
+
+\begin{Goal}
+「まだ山にいる人」を正確に特定し，救護・フィニッシュと共有する。
+\end{Goal}
+
+\subsection*{(1) スタート閉鎖後：未出走者の入力}
+
+入力の方法は 3 通りあります。使える手段が違うだけで，結果は同じです。
+
+\paragraph{方法 A：クラウドを使っている場合（計センでの作業は不要）}
+
+スタート地区で，出走した人は\textbf{出走}欄を，
+定時に出走しなかった人は\textbf{欠席／遅刻}欄をタップしてもらいます。
+それがそのまま Mulka2 に反映されるので，計センでの入力はありません。
+
+\paragraph{方法 B：\tSI\ チェックステーションから自動で判定する}
+
+スタート枠に入るときのクリア・チェックの記録を使って，
+\textbf{出走者と欠席者を Mulka2 に判定させる}方法です。
+
+\begin{enumerate}
+\item \textbf{事前}：チェックステーションのメモリを消去しておきます（Step 8）。
+\item スタートが終わったら，チェックステーションを計センへ運びます。
+\item チェックステーションを \textbf{Service Mode}（Service/OFF カードでパンチ）にします。
+\item メインウィンドウ →【EMIT/SI】→\textbf{【出走管理・欠席処理】}を開きます。\ver
+\item \textbf{「チェックステーションからの読み取り」タブ}を開き，
+      メインステーションの上にチェックステーションを置いて\textbf{【読み出し】}。
+      不要なデータがあれば削除します。ステーションが複数あれば繰り返します。
+\item \textbf{「欠席チェック」タブ}に切り替えると，
+      読み込んだ出走データと，そこから推定された\textbf{欠席者のリスト}が出ます。
+\item 内容を確認して\textbf{【処理実行】}。
+\end{enumerate}
+
+\paragraph{方法 C：紙のチェックリストから入力する}
+
+スタート役員に，\textbf{出走の有無をチェックした紙}を計センへ持ってきてもらいます。
+\textbf{「何時に・誰が・誰に渡すか」を事前に決めておきます}。
+決めていないと，当日うやむやになって届かないことが起こります。
+
+\begin{itemize}
+\item \textbf{ゼッケン番号が分かる場合}：メインウィンドウ →【入力】→\textbf{【欠席】}で
+      欠席入力画面を開きます（左側のショートカットボタンからも開けます）。
+      \textbf{番号を入力して Enter}を繰り返すだけなので，キーボードだけで速く入れられます。
+\item \textbf{番号が分からない場合}：未帰還者リストから該当者をダブルクリックして
+      【競技者情報】を開き，右下の\textbf{【欠席処理】}。
+\end{itemize}
+
+欠席を取り消したいときは，\textbf{【記録変更】で DNS を消去}します。
+
+\begin{Fail}
+\textbf{起きること：}遅刻してスタートした人を，欠席として入力してしまう。\\
+\textbf{対処：}「スタート時刻に来なかったので欠席にしたが，実は後から遅刻スタートしていた」
+という食い違いは，よく起きます。
+\textbf{入力の前に，出走チェックリストと遅刻者情報をすりあわせます。}
+
+食い違っていた場合，Mulka2 は次のどちらかで教えてくれます。
+\begin{itemize}
+\item \textbf{すでにフィニッシュしている人}を欠席入力しようとすると，警告が出て入力できません。
+\item \textbf{欠席入力したあとにその人がフィニッシュ}すると，
+      「欠席が取り消された」という注意情報が出ます。
+\end{itemize}
+どちらの場合も，出走チェックリストと遅刻者情報のどこが違ったかを，
+\textbf{スタート役員と一緒に確認}します。
+\end{Fail}
+
+\subsection*{(2) 未帰還者リストの作成と共有}
+
+\begin{enumerate}
+\item メインウィンドウ →【ツール】→\textbf{【未帰還者リスト】}を開きます。\ver
+\item \textbf{救護所などで棄権した人をリストから除きます。}
+      救護から情報が来ていない場合は，こちらから問い合わせます。
+\item \textbf{フィニッシュ閉鎖の 30 分前}に，1 回目を共有します。
+\item \textbf{フィニッシュ閉鎖の直後}に，2 回目を共有します。
+\item フィニッシュパートと\textbf{人数を突き合わせます}。
+      数が合わない場合は，\textbf{計センを通らずに帰った人がいる可能性}があるので，
+      会場で呼びかけます。
+\end{enumerate}
+
+\begin{Fig}
+\begin{tikzpicture}[node distance=6mm]
+  \node[blkd,minimum width=36mm] (a) {未帰還者リストを表示};
+  \node[blk,below=of a,minimum width=36mm] (b) {DNS 処理済みの人を除外};
+  \node[blk,below=of b,minimum width=36mm] (c) {救護・パトロールでの\\棄権者を除外};
+  \node[blk,below=of c,minimum width=36mm] (d) {フィニッシュと人数を照合};
+  \node[dec,below=9mm of d,minimum width=36mm,text width=24mm] (e) {人数は\\合ったか};
+  \node[blk,right=24mm of e,minimum width=40mm] (f) {\textbf{合わない}\\\scriptsize 会場で呼びかけ\\\scriptsize（計セン未通過の可能性）};
+  \node[blk,below=13mm of e,minimum width=40mm] (g) {\textbf{合った}\\\scriptsize 残った人数＝本当に山にいる人\\\scriptsize 救護・競技責任者へ報告};
+  \foreach \x/\y in {a/b,b/c,c/d,d/e}{\draw[ar] (\x)--(\y);}
+  \draw[ar] (e)--(f); \draw[ar] (e)--(g);
+\end{tikzpicture}
+\figcap{未帰還者の確定手順}
+\end{Fig}
+
+\begin{Done}
+未帰還者の人数について，計センとフィニッシュの認識が一致している。
+救護・競技責任者に伝えた。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}未帰還者リストに残っている人が，
+実は朝から欠席だった／救護所で棄権していた。\\
+\textbf{対処：}\textbf{データ側の未処理}と\textbf{本当に山にいる人}が
+混ざると，無駄な捜索が始まります。
+だからこそ，(1) スタート閉鎖後の DNS 入力，(2) 救護からの棄権情報の収集を，
+\textbf{フィニッシュ閉鎖前に済ませておく}ことになります。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{当日トラブル対応一覧}{\tALL\ \tSI\ \tEMIT\ \tSIAC}
+
+\begin{Goal}
+起きたことに対して，探さずにその場で対応する。
+\end{Goal}
+
+\begin{center}
+\footnotesize
+\begin{longtable}{@{}P{32mm}P{12mm}P{46mm}P{50mm}@{}}
+\toprule
+\hd{症状} & \hd{系統} & \hd{原因として多いもの} & \hd{その場での対応} \\
+\midrule
+\endfirsthead
+\toprule
+\hd{症状} & \hd{系統} & \hd{原因として多いもの} & \hd{その場での対応} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+
+カードが 1 枚だけ読めない & 共通 & そのカードの故障
+  & バックアップで通過証明。フィニッシュ時刻を照会して手動入力（Step 32） \\
+
+カードが 1 枚も読めない & 共通 & COM 番号違い／USB ケーブル断線／ドライバ／
+  読み取り機の動作モード違い & ポート再選択 → ケーブル交換 → ドライバ再インストール →
+  \textbf{予備の読み取り機に交換}。\tEMIT\ MTR で代替可（電源長押し） \\
+
+読んだら他人の名前が出る & 共通 & スタートリストの行ずれ，
+  カードラベルの貼り間違い & その場では\textbf{カード番号を実物で確認}し，
+  正しい競技者に対応づける。原因追及は競技後 \\
+
+「記録を計算できません」 & 共通 & パンチングフィニッシュの設定漏れ
+  & 【入力/編集】→【コース設定変更】で設定し，再ペナチェック \\
+
+フィニッシュのデータだけ無い & 共通 & フィニッシュ機材の故障，
+  番号の設定違い（→DNF になる） & 予備機材に交換。番号違いなら
+  【コース設定変更】で修正 \\
+
+全員が MP になる & 共通 & クラスとコースの対応間違い，
+  コースデータの番号違い & 【コース設定変更】で修正 → 再ペナチェック \\
+
+コントロールのデータが全部消えている & \tSI &
+  そのコントロールが\textbf{クリア設定}になっていた & 直ちに正常な機材と交換。
+  撤収後にバックアップメモリから復元を試みる \\
+
+クリア忘れで OK になってしまう & \tSI & 前回のデータが正解チェックに使われた
+  & ラップデータの不自然さで気づく。スタート地区でのクリア徹底を依頼 \\
+
+SIAC がタッチフリーで反応しない & \tSIAC & 電源 OFF のまま／電池電圧低下
+  & クリア→チェックで ON にする。SIAC TEST で確認。
+  駄目なら\textbf{差し込みパンチで競技可能}であることを伝える \\
+
+S--1 のラップと総タイムがおかしい & \tEMIT & スタートユニットの故障
+  （枠入口のアクティベート時刻が使われている疑い）
+  & スタートユニットを予備に交換。該当者は個別に補正を検討 \\
+
+E カードの時計が止まっている & \tEMIT & 最後のパンチから 2〜5 時間経過
+  & 読み取りを早めに行う運用に変える \\
+
+ステーションの反応が遅い & \tSI & 動作時間切れでスタンバイに戻っている
+  & 動作時間を長く再設定。次回から余裕を 2 時間取る \\
+
+タイムが全体的に数分ずれる & 共通 & \tEMIT\ スタートユニットの不調。
+  \tSI\ フィニッシュのステーションの時計ずれ
+  & \tEMIT\ 予備のスタートユニットに交換。
+    \tSI\ Config+ で時刻を確認し，ずれ幅を記録して競技責任者と対応を相談 \\
+
+フィニッシュのステーションによってタイムが違う & \tSI &
+  複数台の時計が合っていない
+  & 当日朝の時計合わせを全台にやり直す。すでに出た記録は，
+    ずれ幅が分かれば補正の可否を競技責任者と相談 \\
+
+BUL が入っていない・読めない & \tEMIT & カードにラベルを挟み忘れた，雨で潰れた
+  & フィニッシュ側の予備計時（時刻）と，ステーション側に残る記録で判断。
+    ラベルの有無は\textbf{カードを配る時点で確認}しておく \\
+
+BUL の穴とコントロール番号が対応しない & \tEMIT &
+  対応表を作っていない，設置と対応表が食い違う
+  & 設置者に確認。以後はポ確と同時に対応表を作る（Step 18） \\
+
+サブ PC がつながらない & 共通 & IP／ポート／ファイアウォール
+  & Step 23 の表を参照 \\
+
+クラウドが「オフライン」 & 共通 & サーバ PC またはインターネットの切断
+  & 各パートに\textbf{紙運用へ切替}を連絡。復旧後に手入力で反映 \\
+
+プリンタが動かない & 共通 & ドライバ未インストール／紙・インク切れ
+  & 別 PC から印刷。最悪，画面を見せて口頭で説明 \\
+
+PC が開かない & 共通 & 持ち主が山にいてパスワード不明
+  & 事前に控える（Step 21）。当日発生したら\textbf{その PC は諦める} \\
+\end{longtable}
+\end{center}
+
+\begin{Note}[トラブル時に共通してやること]
+\begin{enumerate}
+\item \textbf{記録より先に「その競技者を待たせない」}。
+      判断に時間がかかる場合は，カードと氏名を控えて先に帰し，あとで連絡します。
+\item \textbf{原因の追及は競技後にする。}競技中は「記録が出る状態」に戻すことだけを考えます。
+\item \textbf{何が起きたかを紙に書いておく。}あとで事後処理・引継ぎに使います。
+\end{enumerate}
+\end{Note}

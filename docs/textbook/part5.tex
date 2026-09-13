@@ -1,0 +1,497 @@
+% =====================================================================
+\chapter{用途別の運営パターン}
+% =====================================================================
+
+ここまでの Step 1〜42 が\textbf{標準の流れ}です。
+この部では，大会の種類ごとに\textbf{標準とどこが違うか}だけを書きます。
+書かれていない Step は，標準どおりに進めます。
+
+% =====================================================================
+\section{ランキング大会（公認・固定スタート時刻）}
+\tRANK
+
+\begin{GoalC}
+規則を満たしたうえで，公式成績表を出せる状態まで持っていく。
+\end{GoalC}
+
+\subsection*{標準との違い}
+
+\begin{PatTable}
+Step 9 & 競技者登録番号 & \textbf{必須}。公式成績表に載せる項目なので，
+  エントリー段階で確実に収集し，空欄が無いことを確認する \\
+Step 10 & ゼッケン番号 & \textbf{必須}。ナンバーカードを着用するので，
+  桁の設計（Step 10）の効果が最も大きいのがこの形態 \\
+Step 12 & シャッフル & \textbf{競技責任者の立会いが必要}。
+  恣意性を排除した手続きであることを説明できるようにしておく \\
+Step 6 & スタート方式 & \textbf{時刻スタート}が基本。
+  \tSI\ パンチングスタートは原則使わない（決められた時刻から計時するのが原則のため） \\
+Step 27 & 遅刻処理 & \tSI\ 時刻スタートでは\textbf{遅刻時間を加算しない}。
+  規定のスタート時刻のまま処理する（Step 27 の注意を再読） \\
+Step 13 & 役職用スタートリスト & \textbf{必須}。参加者が多く，テレインが広いため，
+  紙だけで判断する場面が出てくる \\
+Step 18 & バックアップ計時 & \textbf{必須}。ビデオ＋フィニッシュ側の時刻記録の二重化を推奨 \\
+Step 31 & ペナ判定 & 判定基準を事前に文書化し，競技責任者と共有する。
+  \textbf{計センが独断で規則を解釈しない} \\
+Step 40 & 公式成績表 & \textbf{必要}。大会後 1 週間以内を目標に \\
+\end{PatTable}
+
+\subsection*{追加でやること}
+
+\begin{itemize}
+\item \tSIAC\ タッチフリーを使う場合，\textbf{最終コントロールには到達距離の長いステーションを
+      使うことが望ましい}とされています。使用機材について，
+      \textbf{大会案内（ブリテン）に記載}します。
+\item 参加者向けの案内に，次を明記します。
+      \begin{itemize}
+      \item \tSI\ クリアとチェックは競技者の責任で行うこと，クリアには数秒かかること
+      \item パンチしたときに音か光を確認すること
+      \item 反応が無い場合は\textbf{ピンパンチで地図のリザーブ欄にパンチ}すること
+      \item カードに記録できるコントロール数の上限（\textbf{マイカードは特に注意}）
+      \item \tSIAC\ 電池の扱い，電源の ON／OFF，反応しない場合の対応
+      \end{itemize}
+\item 大人数クラスの分割は，\textbf{実力が近い者どうしが同じ組になるように}
+      ランキング順で交互配分します（Step 12）。
+\end{itemize}
+
+% =====================================================================
+\section{練習会・フリースタート}
+\tPRAC
+
+\begin{GoalC}
+最小の人手と機材で，記録が出る状態を作る。
+\end{GoalC}
+
+\subsection*{標準との違い}
+
+\begin{PatTable}
+Step 6 & スタート方式 & \textbf{パンチングスタート（\tEMIT\ リフトアップスタート）にする}。
+  これが最大の違い。スタート時刻を事前に決める必要がなくなる \\
+Step 11・10 & レーン割・シャッフル & \textbf{不要}。スタート時刻は入れなくてよい
+  （入れておいても，パンチングスタートなら無視される） \\
+Step 10 & ゼッケン番号 & 簡易でよい。ただし\textbf{カード番号と氏名の対応表}だけは作る \\
+Step 9 & 競技者登録番号 & 不要 \\
+Step 13 & スタートリスト & 公開用は不要。\textbf{救護用のベースリストだけは作る}
+  （安全管理は練習会でも省略できない） \\
+Step 23 & ネットワーク & \textbf{1 台運用で十分}。ルータもクラウドも不要 \\
+Step 26 & 当日申込 & \textbf{当日申込が主}になる。入力を分担できるようにしておく \\
+Step 39 & 公開 & 内部限定の共有で足りることが多い \\
+Step 40 & 公式成績表 & 不要 \\
+\end{PatTable}
+
+\begin{J2M}[練習会モード]
+Step 9 の\textbf{出力モード}で\textbf{【練習会モード】}にチェックを入れると，次のように変わります。
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{30mm}P{46mm}P{54mm}@{}}
+\toprule
+ & \hd{通常} & \hd{練習会モード} \\
+\midrule
+スタート時刻 & レーンの開始時刻と間隔から自動割り当て & \textbf{割り当てない}（空欄） \\
+並び順 & シャッフル＋所属分散 & \textbf{エントリーの入力順のまま} \\
+ゼッケン番号 & 時刻とレーンから計算 & \textbf{1 からの連番}（オフにもできる） \\
+レーン割（Step 11） & 必要 & \textbf{不要} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+この状態で出した \texttt{Startlist.csv} を Mulka2 に取り込み，
+コース設定を\textbf{パンチングスタート}にすれば練習会が回ります。
+
+\textbf{練習会モードでもスタートリストは出力されます。}
+時刻が入らないだけなので，\textbf{救護用のベースリスト}としてそのまま使えます（Step 13）。
+\end{J2M}
+
+\subsection*{フリースタートで気をつけること}
+
+\begin{Note}[パンチングスタートの落とし穴]
+\begin{itemize}
+\item \textbf{コース設定でパンチングスタートを「する」にしていないと，
+      パンチしても採用されません。}スタートリストの時刻が使われてしまいます。
+      当日に気づいたら【入力/編集】→【コース設定変更】で直せます（Step 29）。
+\item 逆に，\textbf{パンチングスタートの設定にしているのに競技者がスタートを押し忘れた}場合は，
+      スタートリストの時刻が使われます。
+      スタートリストに時刻が入っていないと\textbf{所要時間が計算できず失格}になります。
+      \textbf{保険として，全員に仮のスタート時刻を入れておく}と安全です。
+\item \tSI\ スタートステーションに連続してパンチした場合は，
+      \textbf{最後のパンチが採用}されます。
+      早く押しすぎた競技者には，正規の時刻にもう一度押してもらえば済みます。
+\end{itemize}
+\end{Note}
+
+\subsection*{最小構成の例}
+
+\begin{Fig}
+\begin{tikzpicture}[node distance=7mm]
+  \node[blkg,minimum width=30mm,minimum height=12mm] (s) {スタート地区\\\scriptsize クリア・チェック\\\scriptsize ・スタート};
+  \node[blkg,minimum width=30mm,minimum height=12mm,right=14mm of s] (c) {コントロール};
+  \node[blkg,minimum width=30mm,minimum height=12mm,right=14mm of c] (f) {フィニッシュ};
+  \node[blkd,minimum width=30mm,minimum height=12mm,right=14mm of f] (k) {計セン\\\scriptsize PC 1 台＋読み取り機};
+  \draw[ar] (s)--(c); \draw[ar] (c)--(f); \draw[ar] (f)--(k);
+  \node[blk,below=10mm of c,minimum width=76mm,align=left,font=\sffamily\scriptsize]
+   {\textbf{練習会の最小機材}\\
+    ・PC 1 台，読み取り機 1 台（＋予備があれば理想）\\
+    ・コントロール用 ＋ クリア・チェック・スタート・フィニッシュ\\
+    ・カードと氏名の対応表（紙 1 枚）\\
+    ・救護用のベースリスト（紙 1 枚）};
+\end{tikzpicture}
+\figcap{練習会・フリースタートの最小構成}
+\end{Fig}
+
+% =====================================================================
+\section{リレー}
+\tRELAY
+
+\begin{GoalC}
+チーム・走順・カード番号を正しく保ったまま，リレーの記録を出す。
+\end{GoalC}
+
+リレーは，個人戦とは\textbf{データの作り方も，当日の扱い方も違います}。
+前提になる原則が 1 つあるので，先に書きます。
+
+\begin{Fail}
+\textbf{リレーでは，エントリーの変更（メンバー・走順・カード番号）を
+Mulka2 の画面上では直しません。}\\
+\textbf{必ず「取り込む元の生データ（CSV）を編集 → 取り込み直す → 確認」の順で行います。}
+\end{Fail}
+
+\subsection*{なぜ画面上で直してはいけないのか}
+
+リレーのデータは，\textbf{3 つのファイルが互いに参照し合う構造}になっています。
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm,every node/.style={font=\sffamily\scriptsize}]
+  \node[blkg,minimum width=36mm,minimum height=15mm,anchor=north] (rc) at (-56,0)
+    {\texttt{RelayClass.csv}\\[1pt]\tiny リレークラス名／走者数／\\\tiny スタート時刻／繰り上げ設定};
+  \node[blkg,minimum width=36mm,minimum height=15mm,anchor=north] (rt) at (0,0)
+    {\texttt{RelayTeam.csv}\\[1pt]\tiny クラス名／チーム番号／\\\tiny チーム名／所属／\\\tiny 各走のスタートナンバー};
+  \node[blkg,minimum width=36mm,minimum height=15mm,anchor=north] (sl) at (56,0)
+    {\texttt{Startlist.csv}\\[1pt]\tiny スタートナンバー／クラス／\\\tiny 氏名／コース／カード番号};
+
+  \draw[ar] (-38,-7.5) -- (-18,-7.5);
+  \node[font=\sffamily\tiny,anchor=south] at (-28,-6.5) {クラス名で参照};
+  \draw[ar] ( 18,-7.5) -- ( 38,-7.5);
+  \node[font=\sffamily\tiny,anchor=south] at ( 28,-6.5) {ナンバーで参照};
+
+  % 3 ファイルは下のバスへ
+  \foreach \x in {-56,0,56}{\draw[draw=boxln,line width=0.5pt] (\x,-15) -- (\x,-22);}
+  \draw[draw=boxln,line width=0.5pt] (-56,-22) -- (56,-22);
+  \draw[ar] (0,-22) -- (0,-30);
+
+  \node[blkd,minimum width=44mm,minimum height=9mm,anchor=north] (m) at (0,-30)
+    {Mulka2 イベントマネージャ};
+
+  % Course.csv は独立
+  \node[blk,minimum width=34mm,minimum height=9mm,anchor=north] (co) at (-58,-30)
+    {\texttt{Course.csv}\\[1pt]\tiny 通常どおり（リレー固有の項目なし）};
+  \draw[ar] (-41,-34.5) -- (-22,-34.5);
+
+  \node[blk,anchor=north west,minimum width=52mm,align=left] at (28,-44)
+   {\textbf{ドロップする順番が決まっている}\\[2pt]
+    \texttt{RelayClass} → \texttt{RelayTeam} → \texttt{Startlist}\\
+    この順でないとエラーになります。};
+\end{tikzpicture}
+\figcap{リレーで必要な 4 つのファイルと，その参照関係}
+\end{Fig}
+
+この構造のため，次のことが起きます。
+
+\begin{enumerate}
+\item \textbf{Mulka2 の画面で走者を差し替えても，
+      \texttt{RelayTeam.csv} と \texttt{Startlist.csv} の対応関係は
+      元データ側では変わりません。}
+      当日の変更は \texttt{Changes.dat} に追記されるだけで，元ファイルは書き換わりません。
+      あとから元データを再取り込みすると，\textbf{変更が消えるか，矛盾してエラーになります}。
+\item \textbf{個人戦と違い，リレーは「1 人の変更」が「チームの構造」を変えます。}
+      走順を入れ替えると，走者とスタートナンバーの対応，
+      つまり\textbf{コースの割り当てまで変わります}。
+      画面上で名前だけ入れ替えると，コースが元のままになり，
+      その走者は全員 MP になります。
+\item \textbf{Mulka2 内でメンバーを交換すると，カード番号も一緒に入れ替わります。}
+      「名前だけ入れ替えたつもり」が，カード番号まで入れ替わっていた，という事故が起きます。
+\item \textbf{2 走のスタート時刻は，1 走のフィニッシュ時刻です。}
+      データ上の走順が実際と食い違うと，
+      \textbf{2 走が 1 走より先にスタートしたことになり，計算が破綻します}。
+\end{enumerate}
+
+つまり，リレーでは\textbf{「元データが唯一の正しい姿」}であり，
+Mulka2 の画面はその表示にすぎません。
+表示側だけ直すと，元データと食い違い，あとで矛盾が出ます。
+
+\subsection*{正しい変更のやり方}
+
+\begin{Fig}
+\begin{tikzpicture}[node distance=6mm]
+  \node[blkd,minimum width=40mm] (a) {変更の依頼が来る\\\scriptsize（メンバー交代・走順変更・カード変更）};
+  \node[blk,below=of a,minimum width=40mm] (b) {\textbf{1．紙で受け取る}\\\scriptsize リレーオーダー変更届。口頭で受けない};
+  \node[blk,below=of b,minimum width=40mm] (c) {\textbf{2．元データ（CSV）を編集}\\\scriptsize \texttt{RelayTeam} / \texttt{Startlist} を直す};
+  \node[blk,below=of c,minimum width=40mm] (d) {\textbf{3．整合を確認}\\\scriptsize クラス名の表記／チーム数／ナンバーの重複};
+  \node[blk,below=of d,minimum width=40mm] (e) {\textbf{4．取り込み直す}\\\scriptsize 3 ファイルを決まった順にドロップ};
+  \node[blk,below=of e,minimum width=40mm] (f) {\textbf{5．メインウィンドウで確認}\\\scriptsize チーム数・走順・カード番号};
+  \foreach \x/\y in {a/b,b/c,c/d,d/e,e/f}{\draw[ar] (\x)--(\y);}
+
+  \node[blk,right=14mm of c,minimum width=64mm,align=left,font=\sffamily\scriptsize,anchor=west]
+   {\textbf{編集するのはこの 2 ファイル}\\[2pt]
+    \texttt{RelayTeam.csv}：チームに属するスタートナンバー\\
+    \hspace{1.2em}（走順を変える＝ナンバーの並びを変える）\\
+    \texttt{Startlist.csv}：そのナンバーの氏名・所属・カード番号・コース\\[4pt]
+    \textbf{走順を変えるときの考え方}\\
+    「ナンバーに走順とコースが紐づいている」ので，\\
+    \textbf{ナンバーはそのままにして，氏名とカード番号を入れ替える}\\
+    のが最も安全です。};
+
+  \node[blk,right=14mm of f,minimum width=64mm,align=left,font=\sffamily\scriptsize,anchor=west]
+   {\textbf{取り込みでエラーが出たら}\\[2pt]
+    古いファイルとの矛盾が原因です。\\
+    イベントマネージャの【直接編集】でデータフォルダを開き，\\
+    \textbf{\texttt{Event.dat} 以外の \texttt{.dat} をすべて削除}してから\\
+    もう一度 3 ファイルをドロップし直します。};
+\end{tikzpicture}
+\figcap{リレーの変更は「元データを直して取り込み直す」}
+\end{Fig}
+
+\subsection*{ファイルの中身}
+
+\paragraph{\texttt{RelayClass.csv}}
+\begin{center}
+\small
+\begin{tabular}{@{}lllllll@{}}
+\toprule
+リレークラス名 & 走者数 & スタート時刻 & タッチ禁止:2 & リスタート:2 & タッチ禁止:3 & リスタート:3 \\
+\midrule
+Relay & 3 & 13:30 & 16:00 & 16:00 & 16:00 & 16:00 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{タッチ禁止}・\textbf{リスタート}の列で，走順ごとの繰り上げスタート時刻を設定します。
+
+\paragraph{\texttt{RelayTeam.csv}}
+\begin{center}
+\small
+\begin{tabular}{@{}lllllll@{}}
+\toprule
+リレークラス名 & チームナンバー & チーム名 & 所属 & \multicolumn{3}{c}{スタートナンバー} \\
+ & & & & :1 & :2 & :3 \\
+\midrule
+Relay & 1 & 〇〇大学A & 〇〇大学OLC & 101 & 102 & 103 \\
+Relay & 2 & 〇〇大学B & 〇〇大学OLC & 201 & 202 & 203 \\
+Relay & 3 & △△クラブ & △△OLC & 301 & 302 & 303 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Note}[ここでもゼッケン番号の設計が効く]
+上の例では「チーム番号 $\times$ 100 ＋ 走順」でナンバーを作っています。
+\textbf{101 を見れば「1 チームの 1 走」だと即座に分かります}。
+チームが 10 を超えたら，桁が増えないように
+\textbf{111, 112, 113}（10 チーム目）のように詰めるか，
+最初から 4 桁（\textbf{1001, 1002, 1003}）で設計します。
+\textbf{桁数は最後まで統一}します（Step 10）。
+\end{Note}
+
+\paragraph{\texttt{Startlist.csv}（リレー用）}
+個人戦とは列が違います。
+
+\begin{center}
+\small
+\begin{tabular}{@{}llllllll@{}}
+\toprule
+スタートナンバー & クラス & スタート時刻 & 氏名 & 所属 & コース & カード番号 & カード備考 \\
+\midrule
+101 & Relay1走 & 13:30 & 山田 太郎 & 〇〇大学OLC & a & 8100001 & マイカード \\
+102 & Relay2走 & & 鈴木 花子 & 〇〇大学OLC & b & 8100002 & レンタル \\
+103 & Relay3走 & & 佐藤 次郎 & 〇〇大学OLC & c & 8100003 & レンタル \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item \textbf{スタート時刻は 1 走にだけ}入れます。2 走以降は空欄です
+      （前走者のフィニッシュ時刻が使われるため）。
+\item \textbf{コース列}で，各走者が走るバリエーション（\texttt{a}／\texttt{b}／\texttt{c}）を指定します。
+\end{itemize}
+
+\textbf{リレー 3 ファイル（＋コースデータ）のサンプル一式}：\\
+\url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka/tree/main/sample/relay}
+
+\subsection*{個人クラスを併設する場合}
+
+\begin{itemize}
+\item \texttt{RelayClass.csv} と \texttt{RelayTeam.csv} には\textbf{リレーのデータだけ}を書きます。
+\item \texttt{Startlist.csv} に\textbf{リレーと個人クラスをまとめて}書きます。
+\item 個人クラス用の \texttt{Class.csv} をわざわざ作る必要はありません。
+      \texttt{Startlist.csv} に合わせて Mulka2 が自動でクラスを追加します。
+\end{itemize}
+
+\subsection*{当日オーダー入力}
+
+当日にチームを組んだり，走順を変更したりする機能があります。
+メインウィンドウ →【リレー】→\textbf{【オーダー入力】}。\ver
+
+\begin{Note}[当日オーダー入力を使うための準備]
+この機能を使うには，\textbf{イベントデータ作成の段階で
+「名前が空欄のスタートリスト」と「チームリスト」を人数分用意しておく}必要があります。
+\textbf{メインウィンドウからチームや走者を新規に追加することはできません。}
+当日オーダー入力を使う予定があるなら，\textbf{空き枠を事前に作っておきます}。
+
+なお，チームと走者の所属が同じ場合はクラブ員名簿から選べます。
+ただし\textbf{カード番号も一緒に入れ替わる}ので，確認します。
+\end{Note}
+
+\subsection*{カード読み取り時の注意（リレー最大の落とし穴）}
+
+\begin{Fail}
+\textbf{2 走のスタート時刻は，1 走のフィニッシュ時刻です。}\\
+したがって，\textbf{1 走のカードを読む前に 2 走のカードを読んではいけません。}
+読んでしまうと，2 走のスタート時刻が確定できず，記録が計算できません。
+\end{Fail}
+
+これを避けるために，次を守ります。
+
+\begin{enumerate}
+\item \textbf{未登録カードの処理を後回しにしない。}
+      「あとでやろう」と横に置くと，その走者が 1 走だった場合に，
+      後続の走者が全員止まります。
+\item \textbf{データに反映せずに走順を変えない。}
+      現場で勝手に走順を入れ替えると，
+      データ上は「2 走が 1 走より先にスタートした」ことになります。
+\item \textbf{読み取りは走順を意識して行う。}
+      チェンジオーバー付近では，1 走のカードを優先して読みます。
+\end{enumerate}
+
+\subsection*{繰り上げスタート（リスタート）}
+
+\begin{enumerate}
+\item \texttt{RelayClass.csv} の\textbf{【タッチ禁止】【リスタート】}欄で，
+      走順ごとの繰り上げ時刻を設定しておきます。
+\item 当日は，メインウィンドウ →【リレー】→\textbf{【リスタート処理】}で
+      対象選手の一覧を確認できます。\ver
+\item 【設定】で時刻を変更できます。
+\item \textbf{【対象検索】→【実行】}で，対象選手を繰り上げスタートに設定変更します。
+      これにより，その走者のスタート時刻が
+      「前走者のフィニッシュ時刻」から「繰り上げスタートの時刻」に変わります。
+\end{enumerate}
+
+\subsection*{リレーで変わる Step の一覧}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{22mm}P{122mm}@{}}
+\toprule
+\hd{該当 Step} & \hd{リレーでの違い} \\
+\midrule
+Step 9 & \texttt{Startlist.csv} の列が個人戦と違う。
+  \texttt{RelayClass} \texttt{RelayTeam} も作る \\
+Step 10 & ナンバーは「チーム番号＋走順」で設計する。桁数を統一する \\
+Step 27 & \textbf{変更は元データを直して取り込み直す}。画面上で直さない \\
+Step 30 & \textbf{1 走から順に読む}。未登録カードを後回しにしない \\
+Step 36 & 未帰還は\textbf{チーム単位}でも把握する（どのチームの何走が残っているか） \\
+（追加） & 当日オーダー入力用の空き枠を事前に用意する \\
+（追加） & 繰り上げスタート（リスタート）の設定と実行 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+\section{スプリント（走り抜けフィニッシュ・タッチフリー）}
+\tSIAC\ \tSI
+
+\begin{GoalC}
+高精度の計時で，混雑せずにフィニッシュを処理する。
+\end{GoalC}
+
+\begin{PatTable}
+Step 8 & 動作時間 & \textbf{タッチフリー設定は 12 時間}が標準。
+  タッチフリーのパンチでは動作時間が更新されないため \\
+Step 8 & 電力 & タッチフリー設定は通常の\textbf{約 10 倍}の電力を消費する。
+  撤収後ただちにスタンバイへ戻す \\
+Step 8 & クリアの番号 & \textbf{コード番号 1 に設定}する。
+  SIAC がクリアで音と光を出さなくなり，すぐにチェックできて電源 ON が確実になる \\
+Step 25 & 朝の確認 & \textbf{SIAC のバッテリーテストを実施}。
+  新品でも突然電圧が落ちることがある \\
+Step 25 & タッチフリー確認 & 起動は\textbf{差し込みパンチ}。
+  そのうえで全コントロールを\textbf{タッチフリーでも}パンチして確認 \\
+Step 30 & フィニッシュ & 走り抜けフィニッシュではループアンテナ付きの機材を使う。
+  レーン幅はアンテナ長より余裕を取る \\
+（追加） & 会場・スタート & \textbf{SIAC TEST ステーション}を設置し，
+  競技者が自分でタッチフリーの動作を確認できるようにする。
+  \textbf{タッチフリーでだけ反応しない異常カードは，これでしか見つかりません} \\
+（追加） & コース設計 & \textbf{コースがフィニッシュのそばを通らないようにする}。
+  途中でフィニッシュに反応すると SIAC の電源が切れる \\
+（追加） & 参加者への案内 & 走り抜けであることを徹底する。
+  差し込み用のフィニッシュを併設すると，誤って差し込む競技者が出る \\
+\end{PatTable}
+
+\begin{Note}[SIAC が競技中に反応しなくなったら]
+タッチフリーで反応しなくなっても，\textbf{差し込みパンチは可能}です。
+このことを大会案内に書いておくと，競技不成立を防げます。
+\end{Note}
+
+% =====================================================================
+\section{複数日大会}
+\tALL
+
+\begin{GoalC}
+日ごとに独立したデータを保ちつつ，総合成績を出す。
+\end{GoalC}
+
+\begin{PatTable}
+Step 4 & イベント & \textbf{日ごとに別のイベントを作る}。1 つにまとめない \\
+Step 10 & ゼッケン番号 & \textbf{日をまたいで同じ番号にするか，日ごとに変えるかを先に決める}。
+  \begin{itemize}[leftmargin=3mm,topsep=1pt]
+  \item 同じにする：参加者が覚えやすい。ゼッケンを 1 枚で済ませられる
+  \item 日ごとに変える：桁に「日」を入れられる（Step 10 の第 2 桁）。
+        レーン割が日ごとに大きく変わる場合に有利
+  \end{itemize}
+  \textbf{どちらでもよいが，各パートに周知する}。
+  「Day1 と Day2 でゼッケンは同じですか？」は毎回出る質問です \\
+Step 8 & 機材 & 日ごとに\textbf{ステーションの時計合わせをやり直す} \\
+Step 8 & 電池 & 2 日目の朝に\textbf{電池残量を再確認}する。
+  \tSIAC\ タッチフリー設定は消費が激しい \\
+Step 19 & データ & \textbf{Day1 のデータを Day2 の前に確定・保存}しておく。
+  総合成績は日ごとのデータをもとに計算される \\
+Step 41 & アーカイブ & 日ごとにフォルダを分けて保存 \\
+（追加） & 総合成績 & 複数日大会用のデータフォルダに，
+  日ごとのデータを置いて計算する。\ver
+  \textbf{Day1 の判定が確定していないと総合成績が出ません} \\
+\end{PatTable}
+
+\begin{Fail}
+\textbf{起きること：}Day1 の DISQ 判定を保留したまま Day2 に入り，
+総合成績が出せない。\\
+\textbf{対処：}\textbf{Day1 の夜に判定を確定させます}。
+翌日になると，本人にも運営にも記憶が残っておらず，判断できなくなります。
+\end{Fail}
+
+% =====================================================================
+\section{ゴール（フィニッシュ）計セン}
+\tALL
+
+フィニッシュと会場が離れている場合は，計センを 2 か所に分ける方法があります。
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{28mm}P{54mm}P{62mm}@{}}
+\toprule
+ & \hd{フィニッシュ計セン} & \hd{会場計セン} \\
+\midrule
+主な仕事 & カード読み取り，ペナチェック，個人速報の印刷 & 当日申込入力，各種変更，掲示 \\
+機材 & プリンタ，電源（発電機またはバッテリー） & プリンタ，読み取り機（途中棄権者用） \\
+Mulka2 & \textbf{サーバモード} & クライアントモード（クラウド経由またはローカル） \\
+競技中 & 印刷物をスタート・フィニッシュへ配達できる & 未帰還者リスト・表彰者リストの共有 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Note}[スマートフォンでの読み取り]
+Android 端末を USB 変換アダプタで読み取り機につなぐと，
+専用アプリで\textbf{スマートフォンでもカードを読み取れます}
+（クラウドへの接続が前提）。フィニッシュパートの負担が軽くなります。
+
+ただし，これは\textbf{帰還チェックの延長}として使うものです。
+ペナチェックや速報の受け渡しは，会場の計センで行います。
+\textbf{自動印刷を設定している場合，スマートフォンで読み取った瞬間に
+会場側で印刷される}ので，
+\textbf{参加者には「会場でペナチェックと速報の受け取りをすること」を周知}します。
+なお，読み取り機に接続している間はスマートフォンを充電できません。
+\end{Note}

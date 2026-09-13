@@ -1,0 +1,469 @@
+% =====================================================================
+\chapter{チェックリスト集}
+% =====================================================================
+
+このページ以降は，\textbf{そのまま印刷して持ち歩く}ためのものです。
+チェックリストはすべて新しいページから始まるので，
+\textbf{必要なものだけを抜き出して印刷}できます。
+末尾に担当者・実施日・確認者の記入欄があります。
+
+\newcommand{\clhead}[2]{%
+  \par\vspace{2mm}%
+  \noindent\begin{tikzpicture}
+    \node[fill=boxln,text=white,inner xsep=7pt,inner ysep=4pt,rounded corners=2pt,
+          font=\sffamily\bfseries\large,minimum width=150mm,align=left,anchor=west] at (0,0)
+      {#1};
+  \end{tikzpicture}\par
+  \vspace{1mm}\noindent{\sffamily\small #2}\par\vspace{3mm}}
+
+\newenvironment{cklist}{\begin{list}{\ck}{\leftmargin=8mm\itemsep=3.5pt\parsep=0pt\topsep=2pt}}{\end{list}}
+
+\newcommand{\cksec}[1]{\par\vspace{3mm}\noindent{\sffamily\bfseries\small ■ #1}\par\vspace{1mm}}
+
+\newcommand{\ckfoot}{\par\vfill\noindent\textcolor{rulec}{\rule{\textwidth}{0.4pt}}\par
+  \vspace{1mm}\noindent{\sffamily\footnotesize
+  担当者：\rule{30mm}{0.4pt}\quad 実施日：\rule{30mm}{0.4pt}\quad
+  確認者：\rule{30mm}{0.4pt}}\par}
+
+% ---------------------------------------------------------------------
+\clearpage
+\section*{CL-1　事前準備（1〜2 週間前）}
+\addcontentsline{toc}{section}{CL-1　事前準備（1〜2 週間前）}
+\clhead{CL-1　事前準備チェックリスト}{該当：Step 1〜15　／　完了目標：前週準備まで}
+
+\cksec{体制}
+\begin{cklist}
+\item 計センの人数（3 名以上）と役割（読み取り／ペナチェック／遊撃）が決まっている
+\item チーフ以外に，イベントデータを開ける人が 1 人以上いる
+\item 各パートチーフの連絡先を控えた
+\end{cklist}
+
+\cksec{ソフトウェア}
+\begin{cklist}
+\item Mulka2 を全 PC にインストールし，\textbf{バージョンをそろえた}
+\item \tSI\ SI Config+ をインストールし，USB ドライバも入れた
+\item ドライバのインストーラを PC 内に保存した（当日の再インストール用）
+\item エントリー変換ツール（JOY2Mulka）が動く
+\end{cklist}
+
+\cksec{イベントデータ}
+\begin{cklist}
+\item イベントを新規作成した（大会名・日付・テレイン名）
+\item コースデータを取り込んだ。フィニッシュの番号を実際の番号に直した
+\item クラスデータを入れた。\textbf{競技時間}を入れた。入賞人数を入れた
+\item 全クラスにコースが割り当たっている
+\item スタート方式（時刻／パンチング／リフトアップ）を設定した
+\item \textbf{パンチングフィニッシュにチェックを入れた}
+\item エントリーを取り込んだ。人数がエントリー数と一致した
+\item ふりがなの列が空になっていない
+\item \tRANK\ 競技者登録番号が入っている
+\item メインウィンドウが正常に開く
+\end{cklist}
+
+\cksec{ゼッケン番号・スタートリスト}
+\begin{cklist}
+\item ゼッケン番号の桁設計を決めた（コース／レーン／連番）
+\item \textbf{当日申込用の空き番号}を確保した
+\item レーン割を作り，競技責任者・スタートチーフの確認を得た
+\item \tRANK\ 競技責任者立会いのもとでシャッフルを実施した
+\item 同一所属の連続がない
+\item 原本ファイルが 1 つに確定している（ファイル名に日時とバージョン）
+\end{cklist}
+
+\cksec{カード}
+\begin{cklist}
+\item レンタルカードを割り当てた（備考「レンタル」を設定）
+\item カードにラベルを貼り，ゼッケン番号順に整理した
+\item \textbf{実機照合}をした（画面表示とラベルが一致）
+\item レンタルカードリスト（カード番号順）を作った
+\item 当日申込用・予備用のカードリストを作った
+\end{cklist}
+
+\cksec{機材設定}
+\begin{cklist}
+\item \tSI\ 全ステーションの役割・番号・動作時間を確認した
+\item \tSI\ 動作時間を計算して設定した（条件 1／条件 2 ＋ 余裕 2 時間）
+\item \tSI\ 電池電圧 3.28 V 以上・残量 50 \% 以上のものを選んだ
+\item \tSI\ バックアップメモリを消去した（チェックステーションを含む）
+\item \tSIAC\ タッチフリー設定の動作時間を 12 時間にした
+\item \tEMIT\ スタートユニットの動作を確認した
+\item \tEMIT\ リーディングユニットの予備（または MTR）を確保した
+\end{cklist}
+
+\cksec{練習（Step 16）}
+\begin{cklist}
+\item 複製したイベントデータで，読み取り画面に OK とペナの両方を出した
+\item ペナの原因を画面上で特定できた
+\item 再現テストツールで過去大会を再生してみた（機材が無い場合）
+\item クラウドを使う場合：\textbf{テスト用サーバ}でスタートパートに操作してもらった
+\item クラウドが落ちたときの紙運用への切り替えを，各パートと確認した
+\end{cklist}
+
+\ckfoot
+
+% ---------------------------------------------------------------------
+\clearpage
+\section*{CL-2　機材リスト}
+\addcontentsline{toc}{section}{CL-2　機材リスト}
+\clhead{CL-2　機材チェックリスト}{該当：Step 2　／　積み込み時にもう一度使う}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{6mm}P{56mm}P{14mm}P{14mm}P{50mm}@{}}
+\toprule
+ & \hd{品目} & \hd{予定数} & \hd{実数} & \hd{備考} \\
+\midrule
+\endhead
+\ck & PC（Windows） & 3 & & パスワードを控えたか \\
+\ck & PC 電源・延長コード & 各 1 & & \\
+\ck & ポータブルバッテリー／発電機 & 1 & & 屋外計センの場合 \\
+\ck & プリンタ & 1〜2 & & ドライバ確認済 \\
+\ck & 印刷用紙・インク & & & 余分に \\
+\ck & ルータ／モバイル Wi-Fi & 1 & & 通信テスト済 \\
+\ck & USB ケーブル（予備込み） & & & 断線に注意 \\
+\midrule
+\ck & \tSI\ メインステーション（読み取り） & 2 & & \textbf{予備必須} \\
+\ck & \tSI\ SI マスタ & 1 & & \\
+\ck & \tSI\ 連結棒 & 1 & & \\
+\ck & \tSI\ Service/OFF カード & 2 & & \\
+\ck & \tSI\ 予備ステーション & 2 & & ラベル未記入 \\
+\ck & \tSIAC\ SIAC TEST & 2 & & 会場・スタート \\
+\ck & \tSIAC\ SIAC Battery test & 1 & & \\
+\ck & \tSIAC\ SIAC OFF & 1 & & 撤収用 \\
+\midrule
+\ck & \tEMIT\ リーディングユニット & 2 & & \textbf{予備必須} \\
+\ck & \tEMIT\ MTR & 1 & & 代替手段。電源長押し \\
+\ck & \tEMIT\ RS-232C→USB 変換アダプタ & 2 & & ドライバ確認済 \\
+\ck & \tEMIT\ 予備ユニット & 2 & & \\
+\ck & \tEMIT\ スタートユニット & & & スタートへ渡す分 \\
+\midrule
+\ck & レンタルカード & & & 枚数を数える \\
+\ck & 予備カード & 5〜10 & & \\
+\ck & 試走・ポ確用カード & & & 競技用と分ける \\
+\midrule
+\ck & 運営用全ポ図 & 3 & & \textbf{ペナチェックで必須} \\
+\ck & 各コース図 & 3 & & \\
+\ck & ピンパンチ対応表（用紙） & 1 & & 当日朝に作る場合も \\
+\ck & 役職用スタートリスト（3 種） & & & 配布先ごとに束ねる \\
+\ck & 公開用スタートリスト & & & 掲示用 \\
+\ck & レンタルカードリスト & & & \\
+\ck & カード変更届の用紙 & & & 受付へ渡す \\
+\ck & カード返却用かご & 3 & & スタート・フィニッシュ・計セン \\
+\ck & 筆記用具・養生テープ・ビニールテープ & & & \\
+\ck & 「計セン」看板 & 1 & & \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\ckfoot
+
+% ---------------------------------------------------------------------
+\clearpage
+\section*{CL-3　前日}
+\addcontentsline{toc}{section}{CL-3　前日}
+\clhead{CL-3　前日チェックリスト}{該当：Step 17〜20}
+
+\cksec{試走・ポ確}
+\begin{cklist}
+\item 試走者に専用カードを渡した（\tEMIT\ スタートユニットも）
+\item ピンパンチ用の紙を渡した
+\item 試走カードを\textbf{【試走カード読み取り】}モードで読んだ
+\item \textbf{回ってきた本人と一緒に}，番号と順番を照合した
+\item \textbf{フィニッシュのパンチが記録されている}ことを確認した
+\item \tSIAC\ 全コントロールでタッチフリーのパンチも確認した
+\item \tEMIT\ 電池警告が出ていないことを確認した
+\item 機材を交換した場合，番号の対応を記録し，掲示で周知する準備をした
+\item 競技責任者に報告した
+\end{cklist}
+
+\cksec{バックアップ計時}
+\begin{cklist}
+\item \tSI\ ピンパンチ対応表を作った（または当日朝に作る段取りを決めた）
+\item フィニッシュ側の予備計時の方法と担当者が決まっている
+\item \tEMIT\ カードにバックアップラベルが入っている
+\end{cklist}
+
+\cksec{データ}
+\begin{cklist}
+\item イベントデータを zip にして全メンバーに配った
+\item 全 PC で開いて，メインウィンドウが起動することを確認した
+\item ファイル名に改訂日時が入っている
+\end{cklist}
+
+\cksec{印刷物}
+\begin{cklist}
+\item 救護用スタートリスト（ゼッケン番号順・コース列あり）
+\item スタート用スタートリスト（レーン別・時刻順・ふりがな強調）　レーン数 $\times$ 2 部
+\item フィニッシュ用リスト（ゼッケン番号強調・帰還チェック欄）
+\item 公開用スタートリスト（掲示用）
+\item レンタルカードリスト
+\item 当日申込用の空き枠一覧
+\item 運営用全ポ図・各コース図
+\item カード変更届の用紙
+\item \textbf{すべての紙に版数と発行時刻が入っている}
+\end{cklist}
+
+\cksec{積み込み}
+\begin{cklist}
+\item 機材リスト（CL-2）で実物を数えた
+\item モバイル Wi-Fi の通信を試した（\textbf{テスト用サーバで}）
+\item PC を全台充電した
+\item プリンタで試し刷りをした
+\item 連絡用グループを作った。\textbf{各パートチーフの電話番号を控えた}
+\item \textbf{各 PC のログインパスワードを紙で預かった}
+\end{cklist}
+
+\ckfoot
+
+% ---------------------------------------------------------------------
+\clearpage
+\section*{CL-4　当日：開場前}
+\addcontentsline{toc}{section}{CL-4　当日：開場前}
+\clhead{CL-4　当日 開場前チェックリスト}{該当：Step 22〜24　／　\textbf{開場までに必ず終える}}
+
+\begin{cklist}
+\item[1.] \ck\ 電源を確保して PC を並べた
+\item[2.] \ck\ \textbf{PC の時計を合わせた}（時報またはアナログラジオ。\textbf{電波時計は使わない}）
+\item[3.] \ck\ 読み取り機を接続し，認識した。\textbf{COM 番号を控えた}（\rule{16mm}{0.4pt}）
+\item[4.] \ck\ ネットワークを組んだ（サーバ → クライアントの順）
+\item[5.] \ck\ 全 PC がネットワークツリーに表示された
+\item[6.] \ck\ クラウドを使う場合：接続し，URL とパスワードを各パートに共有した
+\item[7.] \ck\ Mulka2 の時刻同期を実行した
+\item[8.] \ck\ \tSI\ ステーションの時計を合わせた（\textbf{スタート・フィニッシュを最優先}）
+\item[9.] \ck\ \textbf{全 PC でエントリー人数を突き合わせた}（版のずれがないか）
+\item[10.] \ck\ 読み取り音を設定した（\textbf{カード備考「レンタル」で警告音}）
+\item[11.] \ck\ ペナレポート／個人成績速報の自動印刷を設定した
+\item[12.] \ck\ スタートへ機材を渡した（クリア・チェック・\tEMIT\ スタートユニット・予備カード）
+\item[13.] \ck\ 受付へ機材を渡した（予備カード・クリア・チェック・マイカード所持者リスト・変更届用紙）
+\item[14.] \ck\ \tSI\ 設置前のステーションを起動し，\textbf{液晶で役割と番号を目視確認した}
+\item[15.] \ck\ ポ確者からカードを回収し，\textbf{【試走カード読み取り】}で読んだ
+\item[16.] \ck\ \textbf{確認者と一緒に}番号と順番を照合した
+\item[17.] \ck\ \tSIAC\ SIAC のバッテリーテストを実施した
+\item[18.] \ck\ ピンパンチ対応表を設置者から回収した
+\item[19.] \ck\ \textbf{競技責任者に「競技開始可能」を報告した}
+\end{cklist}
+
+\vspace{4mm}
+\noindent\begin{tcolorbox}[colback=failbg,colframe=failfr,boxrule=0.6pt,arc=2pt]
+{\sffamily\bfseries 間に合わないときの優先順位}\par\vspace{1mm}
+\textbf{1. 時計合わせ（PC・ステーション）}　→　\textbf{2. ポ確カードの読み取り}　→　3. ネットワーク\par
+\vspace{1mm}時計合わせだけは，あとから取り返しがつきません。
+\end{tcolorbox}
+
+\ckfoot
+
+% ---------------------------------------------------------------------
+\clearpage
+\section*{CL-5　当日：受付〜競技中}
+\addcontentsline{toc}{section}{CL-5　当日：受付〜競技中}
+\clhead{CL-5　当日 受付〜競技中チェックリスト}{該当：Step 26〜35}
+
+\cksec{受付中（競技開始まで）}
+\begin{cklist}
+\item 当日申込を入力した。\textbf{用紙の枚数と入力件数が一致}
+\item \textbf{ふりがなを全員分入力した}
+\item カード番号の変更を反映した。\textbf{レンタルなら備考も変更}
+\item クラス変更を反映した。\textbf{コースも変わるか確認した}
+\item 代走を処理した
+\item クラウドを使わない場合：当日版のリストを配達した
+\item 掲示用スタートリストを印刷し，会場とスタート地区に掲示した
+\item レンタルカードリストに当日申込分を追記した
+\end{cklist}
+
+\cksec{競技中（繰り返し）}
+\begin{cklist}
+\item \textbf{【競技カード読み取り】}モードで接続している
+\item 判定 OK 以外の行を，ペナチェック係に回している
+\item ペナチェックで\textbf{全ポ図・コース図を使って説明}している
+\item 走ったコースと画面のコースが一致しているか確認している
+\item レンタルカードを回収し，リストにチェックを入れている
+\item \tEMIT\ バックアップラベルを外して処分している
+\item リザルトリストをクラス単位で印刷し，掲示している
+\item 順位が確定したクラスを表彰担当に報告している（\textbf{ふりがな付き}）
+\item クラウドの接続状態を定期的に目視確認している
+\end{cklist}
+
+\cksec{スタート閉鎖後}
+\begin{cklist}
+\item スタートから未出走者のリストを受け取った
+\item Mulka2 に欠席（DNS）を入力した
+\item \textbf{スタートの紙と件数を突き合わせた}
+\end{cklist}
+
+\cksec{フィニッシュ閉鎖 30 分前}
+\begin{cklist}
+\item 未帰還者リストを表示した
+\item DNS 処理済みの人を除外した
+\item 救護・パトロールでの棄権者を確認して除外した
+\item \textbf{未帰還者リストを共有した（1 回目）}
+\end{cklist}
+
+\cksec{フィニッシュ閉鎖直後}
+\begin{cklist}
+\item \textbf{未帰還者リストを共有した（2 回目）}
+\item フィニッシュと\textbf{人数を突き合わせた}
+\item 数が合わない場合，会場で呼びかけた
+\item 救護・競技責任者に最終的な未帰還者を報告した
+\end{cklist}
+
+\ckfoot
+
+% ---------------------------------------------------------------------
+\clearpage
+\section*{CL-6　当日：撤収}
+\addcontentsline{toc}{section}{CL-6　当日：撤収}
+\clhead{CL-6　撤収チェックリスト}{該当：Step 34・41}
+
+\begin{cklist}
+\item 全競技者の判定が確定している（保留 0 件）
+\item リザルトリストの人数がエントリー数と一致している
+\item \textbf{レンタルカードの枚数が貸出枚数と一致した}
+\item ポ確・試走で使った予備カードを回収した
+\item \tEMIT\ バックアップラベルをすべて処分した
+\item \tSIAC\ 電源が入ったままの SIAC を SIAC OFF で切った
+\item \tSI\ 全ステーションを\textbf{Service/OFF カードでスタンバイに戻した}
+\item \tSI\ \textbf{タッチフリー設定の機材を最優先で}スタンバイに戻した
+\item \tSI\ 番号や設定を変更した機材を記録した（戻せない場合はメモを添える）
+\item \tSI\ トラブルがあったステーションのバックアップメモリをテキスト保存した
+\item イベントデータを\textbf{フォルダごと}バックアップした（複数人の手元に）
+\item 当日の申込用紙・変更届を回収してまとめた
+\item トラブルの内容と対応をメモした
+\item PC・プリンタ・ケーブル・機材を回収した（CL-2 で照合）
+\item 借用機材の返却先と返却方法を確認した
+\end{cklist}
+
+\vspace{4mm}
+\noindent\begin{tcolorbox}[colback=notebg,colframe=notefr,boxrule=0.6pt,arc=2pt]
+{\sffamily\bfseries 撤収前に必ず声に出して確認すること}\par\vspace{1mm}
+「\textbf{未帰還者はゼロですか？}」――
+計センのデータ上ゼロでも，フィニッシュ・救護と口頭で一致を取ってから撤収します。
+\end{tcolorbox}
+
+\ckfoot
+
+% ---------------------------------------------------------------------
+\clearpage
+\section*{CL-7　事後処理}
+\addcontentsline{toc}{section}{CL-7　事後処理}
+\clhead{CL-7　事後処理チェックリスト}{該当：Step 38〜42}
+
+\cksec{当日〜翌日}
+\begin{cklist}
+\item 全判定を確定した（DISQ／DNS／DNF を検索窓で確認）
+\item ラップを Lap Center に掲載した
+\item 内部限定の公開が必要な場合，その方法で共有した
+\end{cklist}
+
+\cksec{1 週間以内}
+\begin{cklist}
+\item \tRANK\ 公式成績表を作った（順位／記録／氏名／所属／競技者登録番号）
+\item \tRANK\ アドバイザの確認を受けた
+\item \tRANK\ 所定の提出先に提出し，大会サイトに掲載した
+\item イベントデータ一式をアーカイブした（\texttt{Changes.dat} を含めてフォルダごと）
+\item 元のエントリーデータ・変換設定・スタートリスト全 4 種を保存した
+\item 機材を清掃して返却した。\textbf{設定を元に戻した}
+\item 使用枚数・台数を備品担当に報告した
+\item 振り返り（トラブルと対応／足りなかったもの／次回への数字）を書いた
+\item パートマニュアルを更新して次期担当者に渡した
+\end{cklist}
+
+\ckfoot
+
+% ---------------------------------------------------------------------
+\clearpage
+\section*{CL-8　トラブル初動カード}
+\addcontentsline{toc}{section}{CL-8　トラブル初動カード}
+\clhead{CL-8　トラブル初動カード}{机の上に置いておく 1 枚}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{46mm}P{100mm}@{}}
+\toprule
+\hd{起きたこと} & \hd{まずやること} \\
+\midrule
+カードが 1 枚だけ読めない
+  & (1) バックアップ（BUL／ピンパンチ）で通過を証明
+    (2) フィニッシュに時刻を照会
+    (3)【記録変更】→【手動変更】で入力 \\
+\midrule
+カードが 1 枚も読めない
+  & (1) COM 番号を選び直す
+    (2) USB ケーブルを替える
+    (3) ドライバを再インストール
+    (4) \textbf{予備の読み取り機に交換} \\
+\midrule
+他人の名前が出る
+  & その場は\textbf{実物のカード番号で照合}して対応づける。原因追及は競技後 \\
+\midrule
+「記録を計算できません」
+  & パンチングフィニッシュ未設定。
+    【入力/編集】→【コース設定変更】→ 再ペナチェック \\
+\midrule
+全員が MP になる
+  & クラスとコースの対応，またはコースの番号が違う。
+    【コース設定変更】→ 再ペナチェック \\
+\midrule
+未登録カード
+  & 画面の対応メニューから競技者に対応づける。
+    使い回しの場合は\textbf{どちらのデータを残すか確認してから}選ぶ \\
+\midrule
+クラウドが「オフライン」
+  & 各パートに\textbf{「紙で運用」}を即連絡。復旧後に手入力で反映 \\
+\midrule
+サーバ PC が落ちた
+  & 別 PC で同じイベントデータをサーバモードで起動。
+    \textbf{落ちてから復旧までのカードを読み直す} \\
+\midrule
+\tEMIT\ S--1 のラップと総タイムがおかしい
+  & スタートユニットの故障を疑う。予備に交換 \\
+\midrule
+\tSIAC\ タッチフリーで反応しない
+  & クリア→チェックで電源 ON。SIAC TEST で確認。
+    \textbf{差し込みパンチなら競技可能}と伝える \\
+\midrule
+\tSI\ コントロールのデータが消えている
+  & そのステーションがクリア設定になっていた可能性。直ちに交換。
+    撤収後にバックアップメモリから復元を試みる \\
+\midrule
+タイムが全体的に数分ずれる
+  & \tEMIT\ スタートユニットを予備に交換。
+    \tSI\ フィニッシュのステーションの時計を確認し，ずれ幅を記録して競技責任者に相談 \\
+\midrule
+判定は OK だがラップが不自然
+  & ラスポ忘れ・フィニッシュ後のパンチ・クリア忘れの可能性。
+    ラップの並びと時刻の逆転を見る \\
+\midrule
+出走したか欠席かが確定しない
+  & \tSI\ スタート地区のチェックステーションを回収し，バックアップメモリを読む
+    （大会前に消去してある場合） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{4mm}
+\noindent\begin{tcolorbox}[colback=goalbg,colframe=goalfr,boxrule=0.6pt,arc=2pt]
+{\sffamily\bfseries トラブル時の 3 原則}\par\vspace{1mm}
+\textbf{1.}　競技者を待たせない（カードと氏名を控えて先に帰し，あとで連絡する）\par
+\textbf{2.}　競技中は「記録が出る状態に戻す」ことだけを考える（原因追及は競技後）\par
+\textbf{3.}　何が起きたかを紙に書いておく\par
+\end{tcolorbox}
+
+\vspace{4mm}
+\noindent{\sffamily\small\textbf{連絡先}}\par
+\vspace{2mm}
+\begin{center}
+\small
+\begin{tabular}{@{}P{34mm}P{40mm}P{40mm}@{}}
+\toprule
+\hd{パート} & \hd{担当者} & \hd{電話番号} \\
+\midrule
+競技責任者 & \rule{34mm}{0.4pt} & \rule{34mm}{0.4pt} \\
+運営責任者 & \rule{34mm}{0.4pt} & \rule{34mm}{0.4pt} \\
+受付・会場 & \rule{34mm}{0.4pt} & \rule{34mm}{0.4pt} \\
+スタート & \rule{34mm}{0.4pt} & \rule{34mm}{0.4pt} \\
+フィニッシュ & \rule{34mm}{0.4pt} & \rule{34mm}{0.4pt} \\
+救護 & \rule{34mm}{0.4pt} & \rule{34mm}{0.4pt} \\
+表彰 & \rule{34mm}{0.4pt} & \rule{34mm}{0.4pt} \\
+\bottomrule
+\end{tabular}
+\end{center}

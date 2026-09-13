@@ -1,0 +1,123 @@
+\chapter{逆引き：やりたいこと・起きたことから探す}
+
+「何をしたいか」「何が起きたか」から Step を引くための索引です。
+
+\section*{準備でやりたいこと}
+\addcontentsline{toc}{section}{準備でやりたいこと}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{86mm}P{22mm}P{34mm}@{}}
+\toprule
+\hd{やりたいこと} & \hd{Step} & \hd{補足} \\
+\midrule
+\endhead
+コースデータを OCAD から取り込みたい & Step 5 & \\
+OCAD の番号と実際のユニット番号が違う & Step 5 & 変換用ファイルを使う \\
+コース数が多く，画面入力が大変 & Step 7 & \texttt{.dat} を直接編集 \\
+道路横断の区間を記録から外したい & Step 6 & 番号の頭に \texttt{*} \\
+クラスとコースを一括で対応づけたい & Step 6 & 一括入力ボタン \\
+競技時間・入賞人数を入れたい & Step 6 & 入賞者リストの印刷に使う \\
+競技者登録番号の空欄を埋めたい & Step 9 & \tRANK \\
+ランキングで組分けしたい & Step 9・12 & \tRANK\ 種別で取得先が違う \\
+ゼッケン番号に意味を持たせたい & Step 10 & \\
+同じ所属が連続しないようにしたい & Step 12 & \\
+救護・スタート・フィニッシュに配る紙を作りたい & Step 13 & \\
+レンタルカードを一括で割り当てたい & Step 14 & 読み取り機で自動入力 \\
+本番前に操作を練習したい & Step 16 & 再現テストツール \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{当日やりたいこと}
+\addcontentsline{toc}{section}{当日やりたいこと}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{86mm}P{22mm}P{34mm}@{}}
+\toprule
+\hd{やりたいこと} & \hd{Step} & \hd{補足} \\
+\midrule
+\endhead
+複数の PC で作業したい & Step 23 & ポート 2035 \\
+スタート地区と情報を共有したい & Step 23 & クラウド \\
+PC どうしの時計を合わせたい & Step 24 & ネットワーク時計 \\
+レンタルカードだけ音を変えたい & Step 30 & 読み取り音設定 \\
+ペナのときだけ紙を出したい & Step 33 & ペナレポート自動印刷 \\
+速報の書式を変えたい & Step 33 & スタイルシート \\
+ユニット番号を競技中に変えたい & Step 29 & コース設定変更 \\
+パンチングフィニッシュの設定を忘れた & Step 29 & 同上。読み取り済みも再計算される \\
+出走したか欠席かを確定したい & Step 36 & \tSI\ チェックステーションから自動判定 \\
+欠席を速く入力したい & Step 36 & 【入力】→【欠席】で番号＋Enter \\
+表彰対象を報告したい & Step 35 & ふりがなを添える \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{起きたことから探す}
+\addcontentsline{toc}{section}{起きたことから探す}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{86mm}P{22mm}P{34mm}@{}}
+\toprule
+\hd{起きたこと} & \hd{Step} & \hd{補足} \\
+\midrule
+\endhead
+カードが 1 枚だけ読めない & Step 32・37 & バックアップ計時 \\
+カードが 1 枚も読めない & Step 37 & 予備の読み取り機へ \\
+読んだら他人の名前が出る & Step 32・37 & スタートリストの行ずれ \\
+「記録を計算できません」 & Step 29・37 & パンチングフィニッシュ未設定 \\
+全員がミスパンチになる & Step 29・37 & クラスとコースの対応 \\
+判定は OK だがラップが不自然 & Step 31 & フィニッシュ後のパンチ／クリア忘れ \\
+別のコースとして判定されている & Step 31 & 自動判定はペナ最小のコースを選ぶ \\
+未登録カードと出る & Step 32 & 当日申込の入力漏れ \\
+「既存データあり」と出る & Step 32 & 選択を間違えると前の記録が消える \\
+使用者を選ぶ画面が出る & Step 32 & カードの使い回し \\
+ナンバーを間違えて登録した & Step 32 & 特別対応→読み取り解除 \\
+\tEMIT\ NO ACTIVATE と出る & Step 32 & 通過記録を見て OK/DISQ を決める \\
+\tEMIT\ S--1 のラップと総タイムがおかしい & Step 37 & スタートユニットの故障 \\
+遅刻・早発の警告が出る & Step 32 & 複数人同じずれ幅ならカード取り違え \\
+タイムが全体的に数分ずれる & Step 37 & \tEMIT\ スタートユニット／\tSI\ 時計ずれ \\
+\tSI\ コントロールのデータが消えている & Step 37 & クリア設定になっていた可能性 \\
+\tSIAC\ タッチフリーで反応しない & Step 37 & 差し込みパンチなら競技可能 \\
+クラウドが「オフライン」 & Step 23 & 紙運用に切り替え \\
+サブ PC がつながらない & Step 23 & IP／ポート／ファイアウォール \\
+棄権した人のカードだけ届いた & Step 32 & 読まないと未帰還に残る \\
+未帰還者が減らない & Step 36 & DNS と救護所棄権を先に処理 \\
+Lap Center にアップロードできない & Step 39 & 紛らわしい文字の打ち直し \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{システム別に確認したいこと}
+\addcontentsline{toc}{section}{システム別に確認したいこと}
+
+\begin{center}
+\small
+\begin{longtable}{@{}P{26mm}P{74mm}P{40mm}@{}}
+\toprule
+\hd{システム} & \hd{その日だけ必要になること} & \hd{Step} \\
+\midrule
+\endhead
+\tEMIT & スタートユニットを渡す・動作を確認する & Step 8・22・25 \\
+\tEMIT & リーディングユニットの予備（MTR でも可）を用意する & Step 2 \\
+\tEMIT & バックアップラベルがカードに入っているか確認する & Step 18 \\
+\tEMIT & リフトアップスタートなら遅刻を記録加算で入れる & Step 32 \\
+\tEMIT & NO ACTIVATE の対応 & Step 32 \\
+\midrule
+\tSI & ステーションの時計を当日朝に合わせる & Step 24 \\
+\tSI & 動作時間を計算して設定する & Step 8 \\
+\tSI & バックアップメモリを消去する & Step 8 \\
+\tSI & ピンパンチ対応表を作る & Step 18 \\
+\tSI & チェックステーションから出走者を確定する & Step 36 \\
+\midrule
+\tSIAC & 動作時間を 12 時間にする & Step 8 \\
+\tSIAC & クリアのコード番号を 1 にする & Step 8 \\
+\tSIAC & 当日朝にバッテリーテストをする & Step 25 \\
+\tSIAC & SIAC TEST を会場とスタートに置く & Step 2・25 \\
+\tSIAC & 撤収後すぐスタンバイに戻す（電力消費が大きい） & Step 42 \\
+\tSIAC & コースがフィニッシュのそばを通らないようにする & 第 0 部・第 5 部 \\
+\bottomrule
+\end{longtable}
+\end{center}

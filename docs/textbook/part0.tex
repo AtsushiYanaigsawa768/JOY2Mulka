@@ -1,0 +1,328 @@
+% =====================================================================
+\chapter{計センとは}
+% =====================================================================
+
+\section{計センの仕事}
+
+計算センター（計セン）の仕事は，一文にするとこうなります。
+
+\begin{Key}{計センの仕事}
+\textbf{「誰が」「どのコースを」「何分何秒で」回ったかを確定し，
+表彰と公開に間に合うタイミングで渡す。}
+\end{Key}
+
+計センが持っている情報が一つ狂うと，その競技者の記録は出せなくなります。
+やり直しのきかないデータを預かる部署だ，という点が他パートとの違いです。
+
+記録が出るために必要な情報は 3 種類です。
+
+\vspace{3pt}
+\begin{center}
+\begin{tabular}{@{}P{30mm}P{60mm}P{62mm}@{}}
+\toprule
+\hd{情報の種類} & \hd{中身} & \hd{どこから来るか} \\
+\midrule
+エントリー情報 & 氏名・ふりがな・所属・クラス・スタート時刻・カード番号・（公認大会なら）競技者登録番号
+  & エントリーサイト（JOY）＋当日受付 \\
+競技情報 & クラスとコースの対応，コースごとのコントロール（ユニット／ステーション）番号の並び
+  & コース設計者（OCAD 等） \\
+結果情報 & カード番号・スタート時刻・通過記録・フィニッシュ時刻
+  & 競技者が持ち帰る E カード／SI カード \\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{3pt}
+
+この 3 つが正しければ，成績は Mulka2 が計算します。
+当日に起きるトラブルの大半は，3 つのうちどれかがズレていることが原因です。
+本書の Step は，そのズレを潰していく順番に並んでいます。
+
+\begin{Note}[電子パンチでは，データが目に見えない]
+紙のコントロールカードなら，書かれている内容がその場で目に入ります。
+電子パンチは処理が速い代わりに，データが画面の中にしかありません。
+入力ミスに誰も気づかないまま競技が終わることが起こり得ます。
+計センで「読み取る前に実物と照合する」（Step 15・Step 25）作業を繰り返すのは，
+このためです。
+\end{Note}
+
+\section{計センが他パートに渡すもの・もらうもの}
+
+計センは単独では成立しません。下の図が，大会当日の情報の流れです。
+矢印が 1 本切れると記録が出なくなるので，矢印ごとに
+「誰が」「何で（口頭／紙／クラウド）」連絡するかを事前に決めておきます。
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm,every node/.style={font=\sffamily\scriptsize}]
+  \node[blkd,minimum width=30mm,minimum height=16mm] (kei) at (0,0) {計セン\\\scriptsize（Mulka2 サーバ）};
+
+  \node[blkg,minimum width=26mm,minimum height=8mm] (uke) at (-52, 26) {受付・会場};
+  \node[blkg,minimum width=26mm,minimum height=8mm] (sta) at (-52,  4) {スタート};
+  \node[blkg,minimum width=26mm,minimum height=8mm] (fin) at (-52,-22) {フィニッシュ};
+  \node[blkg,minimum width=26mm,minimum height=8mm] (kyu) at ( 52, 26) {救護};
+  \node[blkg,minimum width=26mm,minimum height=8mm] (hyo) at ( 52,  4) {表彰};
+  \node[blkg,minimum width=26mm,minimum height=8mm] (kou) at ( 52,-22) {公開・広報};
+
+  % 受け取る（左 → 計セン）
+  \draw[ar] (uke.east) -- node[lbl,above,pos=0.52]{当日申込用紙・カード変更届} (kei.north west);
+  \draw[ar] (sta.east) -- node[lbl,above,pos=0.52]{出走・欠席・遅刻の実出走時刻} (kei.west);
+  \draw[ar] (fin.east) -- node[lbl,below,pos=0.52]{読めないカードのフィニッシュ時刻} (kei.south west);
+
+  % 渡す（計セン → 右）
+  \draw[ar] (kei.north east) -- node[lbl,above,pos=0.48]{未帰還者リスト} (kyu.west);
+  \draw[ar] (kei.east) -- node[lbl,above,pos=0.48]{クラス別の確定順位} (hyo.west);
+  \draw[ar] (kei.south east) -- node[lbl,below,pos=0.48]{速報・リザルト・ラップ} (kou.west);
+
+  % 渡す（計セン → 左）：本線と重ならないよう外周を回す
+  \draw[ard] (kei.north) -- (0,40) -- node[lbl,above,pos=0.55]{当日版スタートリスト} (-52,40) -- (sta.north);
+  \draw[ard] (kei.south) -- (0,-38) -- node[lbl,below,pos=0.55]{帰還確認用リスト} (-52,-38) -- (fin.south);
+\end{tikzpicture}
+\figcap{計センと各パートのあいだで受け渡す情報（実線＝受け取る／右向き・破線＝計センが渡す）}
+\end{Fig}
+
+\subsection*{もらうもの（これが来ないと記録が出ない）}
+
+\begin{center}
+\begin{tabular}{@{}P{20mm}P{68mm}P{62mm}@{}}
+\toprule
+\hd{相手} & \hd{もらう情報} & \hd{もらえないとどうなるか} \\
+\midrule
+受付 & 当日申込（クラス・スタート時刻・カード番号・氏名・ふりがな），
+       カード番号の変更届，クラス変更 & その人の記録が「未登録カード」になり，読み取り時に手が止まる \\
+スタート & 未出走者（欠席）の確定，遅刻者の実出走時刻，
+           スタート地区でのカード交換 & 欠席者が「未帰還」に残り，フィニッシュ閉鎖後に捜索が発生する \\
+フィニッシュ & カードが読めなかった競技者のフィニッシュ時刻（予備計時）
+              & その競技者の記録が出せない \\
+救護・パトロール & 途中棄権してそのまま帰った人の情報 & 同上（未帰還者として残る） \\
+コース設計 & コースデータ（コントロール番号の並び），当日のユニット交換の連絡
+            & 全員がミスパンチ（MP）判定になる \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{渡すもの（渡す締切を先に決めておく）}
+
+\begin{center}
+\begin{tabular}{@{}P{20mm}P{58mm}P{72mm}@{}}
+\toprule
+\hd{相手} & \hd{渡す情報} & \hd{いつ渡すか（推奨）} \\
+\midrule
+救護 & 全員分の基準スタートリスト（クラス・コース・カード番号・スタート時刻入り），
+       格子入りの全ポ図 & 前日まで。紙で渡す。当日の追加は手書きで追記 \\
+スタート & レーン別・時刻順のスタートリスト & 前日まで。当日申込分は開場後に追送 \\
+フィニッシュ & ゼッケン番号順（またはカード番号順）の帰還確認用リスト & 前日まで \\
+表彰 & クラスごとの確定順位（氏名・ふりがな・所属） & 順位が確定したクラスから順次 \\
+救護・フィニッシュ & 未帰還者リスト & フィニッシュ閉鎖の 30 分前と，閉鎖直後の 2 回 \\
+広報・会場 & 掲示用リザルトリスト，個人成績速報 & 競技中随時 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Note}[未帰還者リストを 2 回出す理由]
+フィニッシュ閉鎖の 30 分前に一度出すのは，捜索を始めなくてよい段階で人数を合わせるためです。
+閉鎖直後に初めて突き合わせると，「朝から欠席だった」「救護所で棄権していた」といった
+データ側の未処理と，本当に山にいる人の区別がつきません。
+その状態から捜索を始めると，人手も時間も無駄になります。
+\end{Note}
+
+\begin{Note}[救護に渡す地図に格子を入れておく]
+救護・パトロール・警察・消防に渡す全ポ図には，
+300 m 程度の間隔で格子を引き，縦横に記号と番号を振っておくと，
+「B4 の区画の道沿いにけが人 1 名」のように位置を伝えられます。
+オリエンティア同士なら地形の説明で通じますが，
+外部の人に口頭で場所を伝えるのは難しく，格子があるとその差が出ます。
+作成は計センの担当ではないことも多いのですが，
+救護用スタートリスト（Step 13）と一緒に渡すものなので，
+用意されているかは計センから確認しておきます。
+\end{Note}
+
+\section{EMIT・SI・SIAC の違い}
+\tALL\ \tSI\ \tEMIT\ \tSIAC
+
+日本の大会で使われる電子パンチは 3 種類ですが，\textbf{対等な 3 つではありません}。
+まずこの関係を押さえます。
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm,every node/.style={font=\sffamily\scriptsize}]
+  % EMIT 側
+  \draw[boxln,line width=0.7pt,rounded corners=3pt] (-76,4) rectangle (-14,-40);
+  \node[anchor=north,font=\sffamily\bfseries\small] at (-45,2) {EMIT};
+  \node[anchor=north,font=\sffamily\tiny] at (-45,-4) {ノルウェーのメーカー};
+  \node[blkg,minimum width=48mm,minimum height=9mm,anchor=north] at (-45,-10)
+    {\textbf{E カード}\\\tiny 電池と時計を内蔵};
+  \node[blkg,minimum width=48mm,minimum height=9mm,anchor=north] at (-45,-22)
+    {\textbf{ユニット}\\\tiny スタート／コントロール};
+  \node[anchor=north,font=\sffamily\tiny,align=center] at (-45,-33)
+    {組み合わせは 1 通り};
+
+  % SPORTident 側
+  \draw[boxln,line width=0.7pt,rounded corners=3pt] (-6,4) rectangle (76,-40);
+  \node[anchor=north,font=\sffamily\bfseries\small] at (35,2) {SPORTident（SI）};
+  \node[anchor=north,font=\sffamily\tiny] at (35,-4) {ドイツのメーカー};
+  \node[blkg,minimum width=32mm,minimum height=9mm,anchor=north] at (16,-10)
+    {\textbf{SI カード}\\\tiny 差し込みのみ};
+  \node[blkg,minimum width=32mm,minimum height=9mm,anchor=north] at (54,-10)
+    {\textbf{SIAC}\\\tiny 差し込み＋タッチフリー};
+  \node[blkd,minimum width=60mm,minimum height=9mm,anchor=north] at (35,-22)
+    {\textbf{ステーション（共通）}\\\tiny 設定を変えるだけで両方に使える};
+  \draw[ar] (16,-19) -- (16,-22);
+  \draw[ar] (54,-19) -- (54,-22);
+  \node[anchor=north,font=\sffamily\tiny,align=center] at (35,-33)
+    {\textbf{同じ大会で 2 種類のカードを混在できる}};
+
+  % 中央の壁
+  \node[anchor=center,font=\sffamily\bfseries\scriptsize,rotate=90] at (-10,-18) {互換性なし};
+\end{tikzpicture}
+\figcap{3 つの関係。SIAC は SPORTident の中の 1 つで，SI カードとステーションを共有する}
+\end{Fig}
+
+\begin{Key}{関係を一文でいうと}
+\textbf{EMIT と SPORTident は別のシステム}で，機材に互換性はありません。\\
+\textbf{SIAC は SPORTident の「カードの一種」}で，ステーションは SI カードと共通です。
+\end{Key}
+
+\subsection*{呼び方の注意}
+
+\begin{itemize}
+\item 「\textbf{SI}」は，SPORTident のシステム全体を指すことも，
+      差し込み専用のカードを指すこともあります。
+      本書では，\textbf{システム全体を指すときは \tSI}，
+      \textbf{タッチフリー特有の話は \tSIAC} を付けています。
+\item 「\textbf{E カード}」は EMIT のカードのことです。SI カードとは別物です。
+\item 「\textbf{ユニット}」は EMIT，「\textbf{ステーション}」は SPORTident の呼び方です。
+      本書もこの呼び分けに従っています。
+\end{itemize}
+
+\subsection*{計センから見た違い}
+
+違いの根っこは\textbf{「時刻をどこが持っているか」}です。ここから他の違いが派生します。
+
+\begin{Fig}
+\begin{tikzpicture}[node distance=5mm]
+  % EMIT
+  \node[font=\sffamily\bfseries\small] (te) at (0,0) {\tEMIT{}　時計はカードの中};
+  \node[blk,minimum width=24mm,below=5mm of te.west,anchor=west] (e1) {スタートユニット\\\scriptsize カードを起動＝0 秒から計測開始};
+  \node[blk,minimum width=24mm,right=6mm of e1] (e2) {コントロール\\ユニット\\\scriptsize 「番号＋経過時間」を記録};
+  \node[blk,minimum width=24mm,right=6mm of e2] (e3) {フィニッシュ\\\scriptsize 通常のコントロールユニット};
+  \node[blk,minimum width=24mm,right=6mm of e3] (e4) {リーディング\\ユニット / MTR\\\scriptsize 読み取り＝時計停止};
+  \draw[ar] (e1)--(e2); \draw[ar] (e2)--(e3); \draw[ar] (e3)--(e4);
+  \node[font=\sffamily\tiny,below=1.5mm of e2.south,anchor=north,align=center]
+    {カードに記録されるのは\textbf{経過時間だけ}。絶対時刻は入っていない};
+
+  % SI
+  \node[font=\sffamily\bfseries\small,below=20mm of te.west,anchor=west] (ts) {\tSI\ \tSIAC{}　時計はステーションの中};
+  \node[blk,minimum width=24mm,below=5mm of ts.west,anchor=west] (s1) {クリア→チェック\\\scriptsize 前の大会のデータを消去};
+  \node[blk,minimum width=24mm,right=6mm of s1] (s2) {（スタート）\\\scriptsize 押さない運用が普通};
+  \node[blk,minimum width=24mm,right=6mm of s2] (s3) {コントロール\\ステーション\\\scriptsize 「番号＋通過時刻」を記録};
+  \node[blk,minimum width=24mm,right=6mm of s3] (s4) {フィニッシュ\\\scriptsize フィニッシュ時刻を記録};
+  \draw[ar] (s1)--(s2); \draw[ar] (s2)--(s3); \draw[ar] (s3)--(s4);
+  \node[font=\sffamily\tiny,below=1.5mm of s3.south,anchor=north,align=center]
+    {カードに記録されるのは\textbf{絶対時刻}。所要時間は「フィニッシュ時刻 $-$ スタート時刻」で計算};
+\end{tikzpicture}
+\figcap{EMIT と SI／SIAC で「時刻を持っている場所」が違う}
+\end{Fig}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{26mm}P{40mm}P{36mm}P{36mm}@{}}
+\toprule
+ & \hd{\tEMIT\ E カード} & \hd{\tSI\ SI カード} & \hd{\tSIAC\ SIAC} \\
+\midrule
+メーカー & EMIT & \multicolumn{2}{c}{SPORTident} \\
+時計の場所 & カードの中 & \multicolumn{2}{c}{ステーションの中} \\
+カードの電池 & あり & \textbf{なし} & あり（内蔵） \\
+記録される内容 & 番号＋\textbf{経過時間} & \multicolumn{2}{c}{番号＋\textbf{通過時刻}} \\
+パンチの方法 & 差し込み & 差し込み & \textbf{差し込み＋タッチフリー} \\
+スタート運用 & \textbf{リフトアップスタート} & \multicolumn{2}{c}{スタートは押さないのが基本} \\
+事前の消去 & スタートユニットが自動で行う & \multicolumn{2}{c}{競技者が\textbf{クリア→チェック}} \\
+電源の ON/OFF & なし & なし & \textbf{あり}（チェックで ON，フィニッシュで OFF） \\
+バックアップ計時 & \textbf{バックアップラベル} & \multicolumn{2}{c}{地図リザーブ欄への\textbf{ピンパンチ}} \\
+記録できる数 & 最大 50（実質 47 前後） & 種類により 30〜128 & 128 \\
+計セン側の機材 & リーディングユニット／MTR & \multicolumn{2}{c}{メインステーション（Mini Reader）} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{\tSI\ と \tSIAC\ は何が変わるのか}
+
+同じ SPORTident なので\textbf{ステーションは共用}できます。
+違うのは\textbf{カードと，ステーションの設定}だけです。
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{30mm}P{52mm}P{58mm}@{}}
+\toprule
+ & \hd{差し込みだけで行う} & \hd{タッチフリーを使う} \\
+\midrule
+競技者のカード & SI カード & \textbf{SIAC}（差し込みも可） \\
+ステーションの設定 & 通常のコントロール設定 & \textbf{タッチフリー用に設定を変える} \\
+動作時間 & 実測から計算（Step 8） & \textbf{12 時間}が標準。
+  タッチフリーのパンチでは動作時間が更新されないため \\
+電池の減り & 通常 & \textbf{約 10 倍}。撤収後はすぐスタンバイに戻す \\
+当日朝の追加作業 & なし & \textbf{SIAC のバッテリーテスト}。
+  会場とスタートに \textbf{SIAC TEST} を設置 \\
+競技者への周知 & 音と光の確認 & 電源の ON/OFF，
+  反応しないときは差し込みでよいこと \\
+コース設計 & 制約なし & \textbf{フィニッシュのそばを通らない}
+  （通るとその場で電源が切れる） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Note}[混ぜて使える]
+同じ大会で\textbf{「選手権クラスは SIAC，一般クラスは SI カード」}という運用ができます。
+タッチフリー設定のステーションは，通常の差し込みパンチも受け付けるからです。
+SI カードのパンチがタッチフリーの妨げになることもありません。
+
+逆にいうと，\textbf{SIAC を使う大会では，全ステーションをタッチフリー設定にしておけば，
+どちらのカードの人も走れます}。
+\end{Note}
+
+\begin{Note}[押さえておきたい 3 点]
+\begin{itemize}
+\item \tEMIT\ ステーションの時計合わせは不要。そのかわり\textbf{スタートユニットの故障}が
+      全員のタイムに効く。
+\item \tSI\ ステーションの時計合わせは当日の朝に行う。とくにスタートとフィニッシュ。
+\item \tSIAC\ フィニッシュをパンチすると SIAC の電源が切れる。
+      そのため，コースがフィニッシュのそばを通らないように設計する。
+\end{itemize}
+\end{Note}
+
+\begin{Note}[どのくらいの精度で計れていればよいか]
+1 秒単位で成績を出すには，0.5 秒以上の精度で計れている必要があります。
+スプリントなどで 0.1 秒単位を出すなら 0.05 秒の精度が要り，
+これは \tSIAC\ タッチフリーや光電管を使わないと届きません。
+通常の大会では，
+\textbf{スタート地区の時計・チャイマー・\tSI\ フィニッシュのステーション}が
+そろっていれば 1 秒単位で問題のない精度になります。
+逆に，この 3 つのどれかがずれていると，競技者から見て分かる差が出ます（Step 24）。
+\end{Note}
+
+\section{当日のタイムライン（全体像）}
+\tALL
+
+第 3 部の Step は，このタイムラインに沿って並んでいます。
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm]
+  \draw[line width=1pt,rulec] (0,0)--(160,0);
+  \foreach \x/\t/\d in {
+     4/開場前/{ネットワーク接続\\時計合わせ\\ポ確カード読み取り},
+     40/開場〜受付/{当日申込入力\\カード変更\\当日版リスト配達},
+     78/競技中/{カード読み取り\\ペナチェック\\印刷・速報},
+    116/スタート閉鎖後/{欠席（DNS）入力\\表彰対象の報告},
+    146/閉鎖・撤収/{未帰還者確認\\レンタル回収}}{
+    \fill[boxln] (\x,0) circle (1.1);
+    \node[font=\sffamily\bfseries\scriptsize,above=1.5mm of {(\x,0)},anchor=south] {\t};
+    \node[font=\sffamily\tiny,below=2mm of {(\x,0)},anchor=north,align=center] {\d};
+  }
+\end{tikzpicture}
+\figcap{大会当日に計センがやることの流れ}
+\end{Fig}
+
+\begin{Fail}
+\textbf{起きること：}「開場前」の作業を，開場後に始めることになる。\\
+\textbf{対処：}会場が開くと，参加者対応・当日申込・受付からの届出が同時に来ます。
+落ち着いて作業できるのは開場前だけなので，
+ネットワーク・時計合わせ・ポ確の 3 つはここで終わらせる前提で朝の時間を組みます。
+間に合わないときは時計合わせを先にします。あとから直せないのはこれだけです。
+\end{Fail}
