@@ -9,7 +9,7 @@
 
 \usepackage{luatexja-ruby}
 \usepackage{graphicx}
-\graphicspath{{img/}}
+\graphicspath{{../image/}}
 \usepackage{amsmath,amssymb}
 \usepackage{array}
 \usepackage{longtable}
@@ -149,9 +149,9 @@
 
 % Mulka2 の画面キャプチャ枠。
 % \mshot[幅]{ファイル}{説明}{出典ページ名}
-% img/mulka2/<ファイル> があれば貼り込み，無ければ「撮影してここに置く」枠を出す。
+% ../image/mulka2/<ファイル> があれば貼り込み，無ければ「撮影してここに置く」枠を出す。
 \newcommand{\mshot}[4][0.86]{%
-  \IfFileExists{img/mulka2/#2}{%
+  \IfFileExists{../image/mulka2/#2}{%
     \begin{Fig}%
     \fcolorbox{rulec}{white}{\includegraphics[width=#1\textwidth]{mulka2/#2}}%
     \par\vspace{2pt}\centering{\sffamily\footnotesize
@@ -165,7 +165,7 @@
     \fcolorbox{rulec}{figbg}{\parbox[c][24mm][c]{#1\textwidth}{\centering
       {\sffamily\footnotesize\color{rulec}
        画面キャプチャの差し込み位置\\[3pt]
-       \texttt{img/mulka2/#2}\\[3pt]
+       \texttt{image/mulka2/#2}\\[3pt]
        #3}}}%
     \setlength{\fboxsep}{2pt}%
     \figcap{#3（キャプチャ未挿入）}%

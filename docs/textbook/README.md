@@ -3,6 +3,40 @@
 `Mulka2 / JOY2Mulka による計算センター運営テキストブック`（日本語・A4・119 ページ）の
 LaTeX ソースです。
 
+## フォルダ構成
+
+```
+docs/textbook/
+├── main.pdf          本編（119 ページ）
+├── practice.pdf      練習会版（24 ページ）
+├── minimal.pdf       練習会 最小手順シート（A4 表裏 1 枚）
+├── tex/              LaTeX ソース
+├── image/            画像
+└── tmp/              ビルドの中間ファイル（.aux / .log / .out / .toc）
+```
+
+PDF は 3 つとも textbook 直下に置く。ソースは `tex/`、画像は `image/`、
+`.aux` などの中間ファイルは `tmp/` に出す（`tmp/` は追跡対象外）。
+
+### `tex/`
+
+| ファイル | 内容 |
+|---|---|
+| `main.tex` | 本編。プリアンブル（体裁・ボックス・タグ・TikZ スタイル）と各部の読み込み |
+| `map.tex` | 巻頭「全 Step 早見表」 |
+| `lookup.tex` | 巻末「逆引き」（やりたいこと・起きたことから Step を引く） |
+| `part0.tex` 〜 `part7.tex` | 本編の本文 |
+| `practice.tex` | 練習会版（自己完結。プリアンブルも持つ） |
+| `minimal.tex` | 最小手順シート（自己完結） |
+
+### `image/`
+
+| フォルダ | 内容 | 追跡 |
+|---|---|---|
+| `image/joy2mulka/` | JOY2Mulka の画面 13 点 | する |
+| `image/mulka2/` | Mulka2 公式マニュアルからの引用 6 点 | **しない** |
+| `image/siconfig/` | SI Config+ のマニュアルからの引用 5 点 | **しない** |
+
 ## 成果物
 
 3 段階に分かれています。用途に応じて使い分けます。
@@ -10,12 +44,8 @@ LaTeX ソースです。
 | ファイル | 内容 |
 |---|---|
 | `main.pdf` | 本編・完成版 PDF（119 ページ） |
-| `practice.pdf` | **練習会特化の短縮版**（11 ページ）。`practice.tex` から生成 |
-| `minimal.pdf` | **練習会 最小手順シート**（A4 表裏 1 枚）。`minimal.tex` から生成。当日持ち歩き用 |
-| `main.tex` | プリアンブル（体裁・ボックス・タグ・TikZ スタイル）と各部の読み込み |
-| `map.tex` | 巻頭「全 Step 早見表」 |
-| `lookup.tex` | 巻末「逆引き」（やりたいこと・起きたことから Step を引く） |
-| `part0.tex` 〜 `part7.tex` | 本文 |
+| `practice.pdf` | **練習会版**（24 ページ）。本編と同じ粒度で、練習会に必要な範囲だけを書いたもの |
+| `minimal.pdf` | **練習会 最小手順シート**（A4 表裏 1 枚）。当日持ち歩き用 |
 
 ## 構成
 
@@ -49,12 +79,20 @@ LaTeX ソースです。
 
 LuaLaTeX が必要です（`ltjsbook` / `luatexja-ruby` / `tikz` / `tcolorbox` / `longtable` / `booktabs`）。
 
+**`tex/` の中で実行し、出力先を `../tmp` にする。** できた PDF を textbook 直下へコピーする。
+
 ```bash
-lualatex main.tex
-lualatex main.tex   # 目次・相互参照のため 2 回
-lualatex practice.tex
-lualatex minimal.tex
+cd docs/textbook/tex
+lualatex -output-directory=../tmp main.tex
+lualatex -output-directory=../tmp main.tex   # 目次・相互参照のため 2 回
+lualatex -output-directory=../tmp practice.tex
+lualatex -output-directory=../tmp minimal.tex
+cp ../tmp/main.pdf ../tmp/practice.pdf ../tmp/minimal.pdf ..
 ```
+
+`tex/` から実行するのは、`\input{part0}` と `\graphicspath{{../image/}}` が
+カレントディレクトリ基準で解決されるため。textbook 直下から
+`lualatex tex/main.tex` を実行すると `\input` が見つからない。
 
 ## 編集するときの約束
 
@@ -128,13 +166,13 @@ SI システム運営マニュアル・JOY2Mulka・JOA 競技者番号／ラン�
 
 ### JOY2Mulka
 
-`img/joy2mulka/` に実画面のキャプチャ 13 点。
+`image/joy2mulka/` に実画面のキャプチャ 13 点。
 `docs/manual/img/` から複製したもので、写っているのは
 `sample/Startlist_anonymous.csv` の匿名サンプルデータ（テストクラブ／サンプルOLC／デモOLK など）。
 
 ### Mulka2 の画面キャプチャ
 
-`img/mulka2/` に 6 点。**Mulka2 公式マニュアル（wiki）から取得したもの**で、
+`image/mulka2/` に 6 点。**Mulka2 公式マニュアル（wiki）から取得したもの**で、
 各図の下と巻末に出典 URL を表示している。
 
 | ファイル名 | 画面 | 掲載箇所 |
@@ -156,7 +194,7 @@ GIF は LaTeX で扱えないので PNG に変換してから置く。
 
 ### SI Config+ の画面キャプチャ
 
-`img/siconfig/` に 5 点。Step 8（SI Config+ の使い方）で使用。
+`image/siconfig/` に 5 点。Step 8（SI Config+ の使い方）で使用。
 
 | ファイル名 | 画面 |
 |---|---|
@@ -180,17 +218,28 @@ GIF は LaTeX で扱えないので PNG に変換してから置く。
 
 ### .gitignore
 
-`img/mulka2/` と `img/siconfig/` は**第三者著作物のため追跡対象外**。
+`image/mulka2/` と `image/siconfig/` は**第三者著作物のため追跡対象外**。
 クローン直後は画像が無く、`\mshot` は「差し込み位置」の枠を表示する
-（`\sishot` は何も出さない）。
+（`\sishot` は何も出さない）。`tmp/` も `.gitkeep` 以外は追跡しない。
 
-## 練習会版（`practice.tex`）
+## 練習会版（`tex/practice.tex`）
 
-練習会・フリースタート専用の短縮版（11 ページ）。
+練習会・フリースタート専用の版（24 ページ）。
 本編とは独立した自己完結の LaTeX ファイルで、プリアンブルも持っている。
 
 - 想定：参加者 100 名以下／PC 1 台／スタート時刻を決めない／当日申込が中心
-- 構成：やること 3 つ → 前日まで（P1〜P4）→ 当日（P5〜P10）→ トラブル初動カード → チェックリスト
-- 本編の Step 番号を参照しているので、詳しく知りたいときは `main.pdf` を引ける
+- **本編と同じ粒度**で書く。Step は P1〜P20 で、各 Step は
+  `Goal` → 手順 → `Done` → `Fail` の 4 ブロックをそろえる
+- 構成：やること 3 つ → 全 Step 早見表 → 前日まで（P1〜P8）→ 当日（P9〜P17）
+  → 終わったあと（P18〜P20）→ トラブル初動カード → 逆引き → チェックリスト
+- タグは `\tALL` `\tSI` `\tEMIT` `\tSIAC`。Step の書式は `\Step[タグ]{タイトル}`
+  （本編の `\Step{タイトル}{タグ}` とは引数の順が違う。タグ省略時は `\tALL`）
+- JOY2Mulka の操作は本編と同じく `J2M` ボックスに置く（P6・P8）
 
 本編の Step 番号を変更した場合は、`practice.tex` 内の参照も確認すること。
+
+## 最小手順シート（`tex/minimal.tex`）
+
+当日に机へ置く A4 表裏 1 枚。練習会版をさらに削ったもので、
+持っていくもの・前日まで・当日の手順・困ったときの初動だけを載せている。
+2 ページに収まっていることを、変更のたびに確かめること。

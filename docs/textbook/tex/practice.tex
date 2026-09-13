@@ -1,0 +1,1400 @@
+% !TEX program = lualatex
+% =====================================================================
+%  練習会の計セン ミニマニュアル（練習会・フリースタート専用の簡潔版）
+%  本編：main.tex（計算センター運営テキストブック）
+% =====================================================================
+\documentclass[a4paper,10pt]{ltjsarticle}
+
+\usepackage{geometry}
+\geometry{top=18mm,bottom=18mm,left=18mm,right=16mm,headsep=4mm,footskip=10mm}
+
+\usepackage{luatexja-ruby}
+\usepackage{graphicx}
+\graphicspath{{../image/}}
+\usepackage{array,longtable,booktabs,colortbl,xcolor,needspace,enumitem,fancyhdr}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,calc}
+\usepackage[hidelinks]{hyperref}
+
+% ---------------------------------------------------------------- 色
+\definecolor{cSI}{HTML}{1F5FA8}
+\definecolor{cEMIT}{HTML}{9C5A00}
+\definecolor{cSIAC}{HTML}{0E7A5F}
+\definecolor{cALL}{gray}{0.45}
+\definecolor{j2mbg}{HTML}{EDF0FB}
+\definecolor{j2mfr}{HTML}{3A49A8}
+\definecolor{goalbg}{HTML}{EAF1FA}
+\definecolor{goalfr}{HTML}{2E6DB4}
+\definecolor{donebg}{HTML}{EAF6EE}
+\definecolor{donefr}{HTML}{2E8B57}
+\definecolor{failbg}{HTML}{FCEEEA}
+\definecolor{failfr}{HTML}{B5502E}
+\definecolor{notebg}{HTML}{F4F4F0}
+\definecolor{notefr}{HTML}{888880}
+\definecolor{band}{gray}{0.90}
+\definecolor{rulec}{gray}{0.35}
+\definecolor{figbg}{HTML}{F7F7F4}
+\definecolor{boxln}{HTML}{444444}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small 練習会の計セン ミニマニュアル}
+\fancyhead[R]{\small\leftmark}
+\fancyfoot[C]{\small\thepage}
+\setlength{\headheight}{14pt}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+% ------------------------------------------------------------ タグ
+\setlength{\fboxsep}{2pt}
+\DeclareRobustCommand{\tg}[2]{{\colorbox{#1}{\color{white}\sffamily\bfseries\scriptsize\strut #2}}}
+\DeclareRobustCommand{\tSI}{\tg{cSI}{SI}}
+\DeclareRobustCommand{\tEMIT}{\tg{cEMIT}{EMIT}}
+\DeclareRobustCommand{\tSIAC}{\tg{cSIAC}{SIAC}}
+\DeclareRobustCommand{\tALL}{\tg{cALL}{共通}}
+\newcommand{\ver}{\textsf{\small（画面上の表記はバージョンにより異なる）}}
+
+% ------------------------------------------------------------ Step
+\newcounter{step}
+\newcommand{\Step}[2][\tALL]{%
+  \Needspace*{6\baselineskip}%
+  \refstepcounter{step}%
+  \par\vspace{7pt}%
+  \noindent\begin{tikzpicture}
+    \node[fill=boxln,text=white,inner xsep=5pt,inner ysep=2.5pt,rounded corners=2pt]
+      (s) {\sffamily\bfseries P\thestep};
+  \end{tikzpicture}\hspace{5pt}{\large\sffamily\bfseries #2}\hfill{#1}\par
+  \vspace{2pt}\noindent\textcolor{rulec}{\rule{\textwidth}{0.7pt}}\par\vspace{3pt}%
+  \addcontentsline{toc}{subsection}{P\thestep\quad #2}%
+}
+
+% ------------------------------------------------------------ ボックス
+\newtcolorbox{Goal}{enhanced,breakable,colback=goalbg,colframe=goalfr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=8pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize やること},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=goalfr,arc=1pt,boxrule=0pt}}
+\newtcolorbox{Done}{enhanced,breakable,colback=donebg,colframe=donefr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=8pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize できたかの確認},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=donefr,arc=1pt,boxrule=0pt}}
+\newtcolorbox{Fail}{enhanced,breakable,colback=failbg,colframe=failfr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=8pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize つまずきやすいところ},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=failfr,arc=1pt,boxrule=0pt}}
+\newtcolorbox{J2M}[1][JOY2Mulka を使う場合]{enhanced,breakable,
+  colback=j2mbg,colframe=j2mfr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=8pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize #1},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=j2mfr,arc=1pt,boxrule=0pt}}
+\newtcolorbox{Note}[1][メモ]{enhanced,breakable,colback=notebg,colframe=notefr,
+  boxrule=0.5pt,left=5pt,right=5pt,top=8pt,bottom=3pt,arc=2pt,
+  title={\sffamily\bfseries\footnotesize #1},
+  fonttitle=\normalfont,coltitle=white,attach boxed title to top left={xshift=6pt,yshift=-2pt},
+  boxed title style={colback=notefr,arc=1pt,boxrule=0pt}}
+
+% ------------------------------------------------------------ 図
+\newcounter{figno}
+\newcommand{\figcap}[1]{\par\vspace{2pt}\centering{\sffamily\footnotesize
+  \refstepcounter{figno}図 \thefigno\quad #1}\par\vspace{5pt}}
+\newenvironment{Fig}{\par\vspace{5pt}\begin{center}}{\end{center}\vspace{2pt}}
+\newcommand{\mshot}[4][0.72]{%
+  \IfFileExists{../image/mulka2/#2}{%
+    \begin{Fig}%
+    \fcolorbox{rulec}{white}{\includegraphics[width=#1\textwidth]{mulka2/#2}}%
+    \par\vspace{2pt}\centering{\sffamily\footnotesize
+      \refstepcounter{figno}図 \thefigno\quad #3}%
+    \par\vspace{1pt}{\sffamily\tiny\color{rulec}
+      出典：Mulka2 公式マニュアル「#4」\ \url{https://mulka2.com/mulka2/ja/index.php/Mulka2}}%
+    \par\vspace{5pt}%
+    \end{Fig}}{}}
+
+\newcommand{\shot}[3][0.72]{%
+  \IfFileExists{../image/#2}{%
+    \begin{Fig}%
+    \fcolorbox{rulec}{white}{\includegraphics[width=#1\textwidth]{#2}}%
+    \par\vspace{2pt}\centering{\sffamily\footnotesize
+      \refstepcounter{figno}図 \thefigno\quad #3}%
+    \par\vspace{5pt}%
+    \end{Fig}}{}}
+
+\setlist[enumerate]{itemsep=1pt,topsep=2pt,parsep=0pt,leftmargin=*}
+\setlist[itemize]{itemsep=1pt,topsep=2pt,parsep=0pt,leftmargin=*,label=\textbullet}
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\newcommand{\hd}[1]{\textbf{#1}}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\ck}{\tikz[baseline=-0.6ex]{\draw[boxln,line width=0.5pt] (0,0) rectangle (2.6mm,2.6mm);}}
+
+\tikzset{
+  blk/.style ={draw=boxln,line width=0.5pt,rounded corners=2pt,fill=white,
+               align=center,inner sep=4pt,font=\sffamily\scriptsize},
+  blkg/.style={blk,fill=figbg},
+  blkd/.style={blk,fill=boxln,text=white},
+  ar/.style  ={-{Stealth[length=4pt]},draw=boxln,line width=0.5pt},
+  lbl/.style ={font=\sffamily\tiny,inner sep=1.5pt,fill=white},
+}
+
+\begin{document}
+\gtfamily\sffamily
+
+% =====================================================================
+\begin{center}
+\vspace*{2mm}
+{\LARGE\bfseries 練習会の計セン ミニマニュアル}\\[3mm]
+{\normalsize フリースタート・当日申込中心・PC 1 台の練習会向け}\\[2mm]
+\textcolor{rulec}{\rule{0.9\textwidth}{0.8pt}}
+\end{center}
+
+\vspace{2mm}
+
+\begin{Note}[この冊子について]
+\textbf{練習会だけに絞った版}です。公認大会・ランキング大会の運営には，
+本編『計算センター運営テキストブック』（\texttt{main.pdf}）を使ってください。
+\begin{itemize}
+\item 想定：参加者 100 名以下／PC 1 台／スタート時刻は決めない（フリースタート）／当日申込が中心
+\item この冊子だけで，前日準備から結果公開まで通せます
+\item 各 Step は\textbf{「やること → 手順 → できたかの確認 → つまずきやすいところ」}の順で書いてあります
+\item \tSI\ \tEMIT\ \tSIAC\ の記号は，そのシステムを使う日だけ読む部分です。
+      \tALL\ はどのシステムでも共通です
+\end{itemize}
+当日に机の上へ置く 1 枚だけが欲しいときは，
+『練習会 最小手順シート』（\texttt{minimal.pdf}）を使ってください。
+\end{Note}
+
+% =====================================================================
+\section*{練習会の計センがやること}
+\markboth{練習会の計センがやること}{}
+
+やることは 3 つだけです。
+
+\begin{enumerate}
+\item 走る人とカード番号を\textbf{ひもづける}
+\item コースの\textbf{正解の並び}を Mulka2 に入れておく
+\item 帰ってきた\textbf{カードを読む}
+\end{enumerate}
+
+この 3 つがそろえば，記録は Mulka2 が計算します。
+逆にトラブルの大半は，この 3 つのどれかがズレていることが原因です。
+
+\subsection*{大会運営とのいちばん大きな違い}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{34mm}P{52mm}P{56mm}@{}}
+\toprule
+ & \hd{大会（本編）} & \hd{練習会（この冊子）} \\
+\midrule
+スタート時刻 & 事前に決めてリストを作る & \textbf{決めない}。走る人が好きな時に出る \\
+計時の始まり & スタートリストの時刻 & \textbf{スタートをパンチした時刻} \\
+レーン割・シャッフル & 必要 & \textbf{不要} \\
+ゼッケン番号 & 桁に意味を持たせて設計 & \textbf{不要}（カードと氏名の対応表があればよい） \\
+PC & 2〜3 台＋ネットワーク & \textbf{1 台}。ネットワークもクラウドも不要 \\
+プリンタ & 速報・リザルト用に 1〜2 台 & \textbf{不要}。紙は前日までに刷っておく \\
+役職用スタートリスト & 役職ごとに複数種類 & \textbf{救護用の 1 枚}だけ \\
+競技者登録番号 & 公式成績に必須 & 不要 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm,every node/.style={font=\sffamily\scriptsize}]
+  \node[blkg,minimum width=30mm,minimum height=12mm] (s) at (0,0)
+    {スタート地区\\クリア・チェック\\・スタート};
+  \node[blkg,minimum width=26mm,minimum height=12mm] (c) at (42,0) {コントロール};
+  \node[blkg,minimum width=26mm,minimum height=12mm] (f) at (82,0) {フィニッシュ};
+  \node[blkd,minimum width=32mm,minimum height=12mm] (k) at (126,0)
+    {計セン\\PC 1 台＋読み取り機};
+  \draw[ar] (15,0)--(29,0); \draw[ar] (55,0)--(69,0); \draw[ar] (95,0)--(110,0);
+  \node[blk,minimum width=100mm,align=left,anchor=north] at (52,-14)
+    {\textbf{最小機材}\quad PC 1 台／読み取り機 1 台（＋予備）／
+     コントロール用の機材 ＋ クリア・チェック・スタート・フィニッシュ\\
+     \textbf{紙}\quad カードと氏名の対応表 1 枚／救護用リスト 1 枚／全ポ図・コース図};
+\end{tikzpicture}
+\figcap{練習会の最小構成}
+\end{Fig}
+
+% =====================================================================
+\section*{全 Step 早見表}
+\markboth{全 Step 早見表}{}
+
+\begin{center}
+\footnotesize
+\begin{longtable}{@{}P{9mm}P{60mm}P{24mm}P{50mm}@{}}
+\toprule
+\hd{Step} & \hd{内容} & \hd{タグ} & \hd{いつ} \\
+\midrule
+\endhead
+\multicolumn{4}{@{}l@{}}{\textbf{前日までにやること}}\\
+P1 & 機材をそろえる & \tALL\ \tSI\ \tEMIT & 1 週間前 \\
+P2 & Mulka2 を入れて，読み取り機を試す & \tALL & 1 週間前 \\
+P3 & イベントを新規作成する & \tALL & 前日まで \\
+P4 & コースデータを取り込む & \tALL & コース確定後 \\
+P5 & クラスとスタート・フィニッシュ方式を決める & \tALL\ \tSI\ \tEMIT & \textbf{いちばん大事} \\
+P6 & 参加者データを作って取り込む & \tALL & 締切後 \\
+P7 & レンタルカードを割り当てる & \tALL\ \tSI\ \tEMIT & 前日まで \\
+P8 & 紙を 2 枚用意する & \tALL & 前日まで \\
+\midrule
+\multicolumn{4}{@{}l@{}}{\textbf{当日}}\\
+P9 & 立ち上げる & \tALL & 開始前 \\
+P10 & 時計を合わせる & \tALL\ \tSI & 開始前 \\
+P11 & 読み取り機につなぐ & \tALL & 開始前 \\
+P12 & ポ確カードを読む & \tALL\ \tSI\ \tSIAC\ \tEMIT & 開始前 \\
+P13 & 当日申込を入れる & \tALL & 受付中 \\
+P14 & カードを読む & \tALL\ \tSI\ \tEMIT\ \tSIAC & 競技中 \\
+P15 & ペナチェックをする & \tALL & 競技中 \\
+P16 & 読めないカード・未登録カードに対応する & \tALL\ \tSI\ \tEMIT & 競技中 \\
+P17 & 未帰還者を確認する & \tALL & 閉鎖前後 \\
+\midrule
+\multicolumn{4}{@{}l@{}}{\textbf{終わったあと}}\\
+P18 & 成績を確定させる & \tALL & 当日中 \\
+P19 & ラップと成績を公開する & \tALL & 当日〜翌日 \\
+P20 & 機材を片付けて，データを保存する & \tALL\ \tSI\ \tSIAC\ \tEMIT & 当日中 \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\begin{Note}[飛ばせる Step]
+\textbf{P7} はレンタルカードを使わない日（全員マイカード）なら不要です。
+\textbf{P19} も，その場で結果を見せて終わりにするなら省けます。
+それ以外は，人数が少なくても省かないほうが速く終わります。
+\end{Note}
+
+% =====================================================================
+\clearpage
+\section*{前日までにやること}
+\markboth{前日までにやること}{}
+
+% ---------------------------------------------------------------------
+\Step[\tALL\ \tSI\ \tEMIT]{機材をそろえる}
+
+\begin{Goal}
+当日に「これが無い」と言わなくて済むように，実物を並べて数える。
+\end{Goal}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{40mm}P{14mm}P{88mm}@{}}
+\toprule
+\hd{品目} & \hd{数} & \hd{注意} \\
+\midrule
+Windows PC & 1 & Mulka2 は Windows 用。\textbf{充電しておく}。
+  借りた PC ならログインパスワードを控えておく \\
+読み取り機 & \textbf{2} & \tSI\ メインステーション（Mini Reader）／
+  \tEMIT\ リーディングユニットまたは MTR。
+  \textbf{予備がないと，壊れた時点で練習会が止まります} \\
+\tEMIT\ 変換アダプタ & 1 & RS-232C→USB。\textbf{ドライバも入れておく} \\
+USB ケーブル & 予備込み & \textbf{断線が意外に多い}。予備を必ず持つ \\
+コントロール用の機材 & コース分 & 番号が地図と合っているかは P12 で確かめる \\
+クリア・チェック・スタート・フィニッシュ & 各 1 &
+  \tEMIT\ スタートユニットは必須（アクティベートに使う）。
+  \tSI\ クリアとチェックは別の機材 \\
+予備の機材 & 1〜2 & 当日朝に壊れているのが見つかったとき用 \\
+カード & 人数分＋予備 & \textbf{番号順に並べておく} \\
+\tSIAC\ SIAC TEST & 1 & タッチフリーの動作確認用。会場とスタート地区に置く \\
+全ポ図・コース図 & 1 部ずつ & ペナの説明に使う \\
+筆記用具・テープ・白紙 & & 控えを書くのに必ず要る \\
+電源・モバイルバッテリー & & 屋外なら発電機かポータブル電源 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Note}[プリンタは要りません]
+結果はあとからクラウドやラップセンターで公開できます（P19）。
+当日に必要な紙は\textbf{前日までに刷っておく}のが基本形です（P8）。
+その場で個人成績表を配ると決めている日だけ，プリンタを持ち込みます。
+\end{Note}
+
+\begin{Done}
+機材リストの全項目に，実物でチェックが入った。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}予備の読み取り機を借りず，本番機が壊れて練習会が止まる。\\
+\textbf{対処：}読み取り機は\textbf{2 台}借ります。\tEMIT\ EMIT なら MTR が代替になります
+（MTR は電源ボタンの長押しが必要）。借りられない日は，
+\textbf{カードを読めないまま先に帰す手順}（氏名とカード番号を控えて，
+あとで読む）を先に決めておきます。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{Mulka2 を入れて，読み取り機を試す}
+
+\begin{Goal}
+当日に使う PC で，カードが 1 枚読めることを確かめておく。
+\end{Goal}
+
+\begin{enumerate}
+\item Mulka2 をインストールします。\\
+      \url{https://mulka2.com/mulka2/ja/index.php/Mulka2}\ から【インストール】へ進みます。
+\item \textbf{インストーラを PC の中に保存}しておきます。
+      会場でインターネットにつながらないことがあり，
+      そこで入れ直しが必要になると手が止まります。
+\item \tSI\ SI を使う日は \textbf{SI Config+} も入れます（P10 の時計合わせで使います）。\\
+      \url{https://www.sportident.com/support/downloads}
+\item 読み取り機を USB につなぎ，\textbf{PC が認識するか}を見ます。
+      \tEMIT\ 変換アダプタを使う場合は，そのドライバも入れます。
+\item Mulka2 を起動し，カードを 1 枚読ませます（読み方は P11）。
+\end{enumerate}
+
+\begin{Done}
+当日使う PC で，読み取り機がつながり，カードが 1 枚読めた。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}当日はじめて読み取り機をつないだら，PC が認識しない。\\
+\textbf{対処：}多くは USB ドライバの問題です。当日に起きたら
+\textbf{(1) 別の USB ポート，(2) 別のケーブル，(3) ドライバ再インストール，
+(4) 予備機に交換}の順に試します。
+この Step を前日までにやっておけば，当日この事態になりません。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{イベントを新規作成する}
+
+\begin{Goal}
+その練習会の入れ物（イベント）を作り，データを置く場所を決める。
+\end{Goal}
+
+\begin{enumerate}
+\item Mulka2 →【イベントマネージャ】→\textbf{【イベント新規作成】}。\ver
+\item \textbf{イベント名と開催日}を入れます。
+      イベント名は\textbf{日付から始める}と，あとで探しやすくなります
+      （例：\texttt{20260510 - 〇〇練習会}）。
+\item 【OK】を押すと，イベントごとに\textbf{1 つのフォルダ}ができます。
+\end{enumerate}
+
+\mshot{eventmanager.png}{イベントマネージャ。下端の細長い枠に CSV をドロップする}{イベントデータの作成}
+
+\begin{Note}[イベントフォルダの性質]
+\begin{itemize}
+\item このフォルダを\textbf{zip で固めて渡せば，別の PC でそのまま開けます}。
+      これがバックアップの単位です（P20）。
+\item 当日の変更（カードを読んだ／欠席にした／カード番号を変えた）は，
+      すべて \texttt{Changes.dat} に\textbf{追記}されます。
+      つまり\textbf{当日の作業は元のデータを書き換えていません}。
+      おかしくなっても，たいてい元に戻せます。
+\end{itemize}
+\end{Note}
+
+\begin{Done}
+イベントマネージャにイベントが 1 つ並び，フォルダが作られている。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}イベントを作り直すたびに増えて，当日どれが本番か分からなくなる。\\
+\textbf{対処：}試したイベントは\textbf{その日のうちに消す}か，
+名前の先頭に \texttt{テスト} を付けます。当日の朝，名前を見て迷わない状態にしておきます。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{コースデータを取り込む}
+
+\begin{Goal}
+各コースについて「どのコントロールを，どの順で通れば正解か」を Mulka2 に入れる。
+\end{Goal}
+
+方法は 3 つあります。上から順に確実です。
+
+\subsection*{（A）OCAD の書き出しをもらう（いちばん確実）}
+
+\begin{enumerate}
+\item コース作成者に，OCAD からコース設定データをテキストで書き出してもらいます。
+      \textbf{\texttt{〜.CoursesV8.txt} というファイル}ができます。
+\item そのファイルを，イベントマネージャの\textbf{ドロップ枠}に入れます。
+\item \textbf{ファイル名の末尾は変えません。}
+      Mulka2 は末尾が \texttt{CoursesV8.txt} または \texttt{Courses.txt} のものを
+      OCAD のコーステキストだと判断しています。
+      名前を付けたいときは \texttt{〇〇練習会.CoursesV8.txt} のように\textbf{前に足します}。
+\end{enumerate}
+
+\subsection*{（B）表計算ソフトで \texttt{Course.csv} を作る}
+
+\begin{center}
+\small
+\begin{tabular}{@{}lllllllll@{}}
+\toprule
+コース & 距離 & 登距離 & コントロール数 & S & 1 & 2 & $\cdots$ & F \\
+\midrule
+A & 4.2 & 145 & 8 & & 31 & 32 & $\cdots$ & 100 \\
+B & 3.1 & 90  & 6 & & 31 & 45 & $\cdots$ & 100 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item CSV で保存してドロップします。
+\item \textbf{\texttt{35/36} のようにスラッシュで区切ると，どちらのユニットでも正解}になります
+      （ダブルコントロール）。
+\item 列数は\textbf{コースごとに変わります}（コントロール数に応じて S から F まで）。
+\end{itemize}
+
+そのまま使えるサンプル：\\
+\url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka/blob/main/sample/normal/Course.csv}
+
+\subsection*{（C）正解カードから読み込む}
+
+設置者に\textbf{回る順でパンチしてもらったカード}を読ませて，そのままコースデータにします。
+コース図が手元にない練習会で使えます。\textbf{読んだ順がそのまま正解になる}ので，
+回り方を間違えるとコースデータも間違います。
+
+\begin{Done}
+コース一覧に全コースが並び，各コースのコントロール番号が地図と一致している。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}コース図が差し替わったのに，Mulka2 のコースデータを更新し忘れる。\\
+\textbf{対処：}当日に気づいても直せます。メインウィンドウ →【入力/編集】→
+\textbf{【コース設定変更】}で直し，\textbf{再ペナチェック}を実行すれば，
+読み取り済みの記録も計算し直されます。
+コース図を差し替えたら，\textbf{その場で Mulka2 も直す}のが確実です。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step[\tALL\ \tSI\ \tEMIT]{クラスとスタート・フィニッシュ方式を決める}
+
+\begin{Goal}
+クラスとコースを対応づけ，\textbf{「いつから計って，いつまで計るか」}を確定させる。
+\end{Goal}
+
+\textbf{この Step が練習会でいちばん間違えやすいところです。}
+ここを間違えると，全員の記録が出ません。
+
+\begin{enumerate}
+\item \textbf{クラスとコースを対応づけ}ます。
+      練習会でクラスとコースが 1 対 1 なら，
+      \textbf{【クラス名でコースを作成する】}を押すと，クラス名と同じ名前のコースができます。
+\item 各コースの設定を開き，次の 2 つを確認します。\ver
+  \begin{itemize}
+  \item \textbf{リフトアップ／パンチングスタート ＝ する}
+  \item \textbf{パンチングフィニッシュ ＝ チェックを入れる}（番号欄は \tSI\ \texttt{F}）
+  \end{itemize}
+\item 【OK】で閉じ，\textbf{メインウィンドウを開いて}エラーが出ないことを確認します。
+\end{enumerate}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{30mm}P{50mm}P{58mm}@{}}
+\toprule
+ & \hd{\tSI\ SPORTident} & \hd{\tEMIT\ EMIT} \\
+\midrule
+計り始め & スタートのステーションを\textbf{差し込んだ}時刻 &
+  スタートユニットから\textbf{カードを離した}瞬間 \\
+呼び方 & パンチングスタート & リフトアップスタート \\
+計り終わり & フィニッシュのステーションをパンチした時刻 & 同左 \\
+時計はどこに & \textbf{ステーションの中} & \textbf{カードの中} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Note}[\tEMIT\ アクティベートを忘れない]
+E カードは\textbf{スタートユニットで起動（アクティベート）}してはじめて，
+カードの中の時計が 0 から動き出します。
+アクティベートしていないカードは記録が出ません（P16 の NO ACTIVATE）。
+\textbf{スタート地区にスタートユニットを必ず置きます。}
+\end{Note}
+
+\begin{Done}
+メインウィンドウが開き，コース一覧に全コースが並んでいる。
+各コースの設定が\textbf{パンチングスタート＝する／パンチングフィニッシュ＝あり}になっている。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}パンチングスタートを「しない」のままにしてしまう。\\
+\textbf{対処：}この設定を忘れると，\textbf{スタートをパンチしても採用されません}。
+スタートリストの時刻（＝空欄）が使われるので，記録が計算できません。
+当日に気づいても直せます。【入力/編集】→\textbf{【コース設定変更】}で設定し，
+再ペナチェックを実行すれば，読み取り済みの記録も計算し直されます。
+
+\textbf{保険}：スタートリストに\textbf{仮のスタート時刻を全員分入れておく}と，
+スタートを押し忘れた人にも記録が出ます。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{参加者データを作って取り込む}
+
+\begin{Goal}
+「カード番号 ↔ 氏名 ↔ クラス」の対応を Mulka2 に入れる。
+\end{Goal}
+
+\subsection*{\texttt{Startlist.csv} の形}
+
+\begin{center}
+\small
+\begin{tabular}{@{}llllll@{}}
+\toprule
+クラス & スタートナンバー & 氏名１ & 氏名2 & カード番号 & カード備考 \\
+\midrule
+A & 1 & 山田 太郎 & やまだ たろう & 8100001 & マイカード \\
+A & 2 & 鈴木 花子 & すずき はなこ & & レンタル \\
+B & 3 & 佐藤 次郎 & さとう じろう & 8100015 & マイカード \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item \textbf{スタート時刻の列は空でかまいません}（パンチングスタートなので）。
+\item \textbf{氏名2 はふりがな}です。呼び出しと救護用リストに使うので入れておきます。
+\item \textbf{カード備考に「レンタル」と書いておくと，当日の読み取り時に警告音を鳴らせます}。
+      回収漏れを防ぐのに，いちばん効きます。
+\item ナンバーは練習会では意味を持たせなくて構いません。\textbf{1 からの通し番号}で足ります。
+\item CSV で保存して，イベントマネージャの\textbf{ドロップ枠}に入れます。
+\end{itemize}
+
+そのまま使えるサンプル：\\
+\url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka/blob/main/sample/normal/Startlist.csv}
+
+\begin{J2M}[練習会モードで CSV を作る]
+申込データ（CSV／XLSX）があるなら，手で打ち直さずに変換できます。
+
+\begin{enumerate}
+\item メニューで\textbf{【新規作成】}→ Step 0 でエントリーリストをアップロード。
+\item 大会設定で\textbf{【練習会モード】にチェック}。
+      スタート時刻を割り当てず，\textbf{入力順のままクラスごとに}出力されます。
+\item ゼッケンが要らなければ\textbf{【ゼッケン番号を生成する】を外します}。
+      外すと，全出力からスタートナンバー列が消えます。
+\item Step 1 でクラスを確認したら，そのまま\textbf{【生成】}。
+      レーン割（Step 2）と制約設定（Step 3）は練習会モードでは出ません。
+\item Done 画面で ZIP を落とし，\texttt{Startlist.csv} を Mulka2 にドロップします。
+\end{enumerate}
+
+\shot[0.78]{joy2mulka/04_step0_outputmode.png}{大会設定。練習会モードとゼッケン生成の切り替え}
+\end{J2M}
+
+\subsection*{当日申込ぶんの空き枠を作っておく}
+
+練習会は当日申込が中心になります。
+\textbf{参加しそうな人数ぶん，名前を空にした行を作っておく}と，
+当日は名前を書き換えるだけで済みます。
+
+\begin{Done}
+イベントマネージャのエントリーリストに全員が並び，
+マイカードの人にはカード番号が入っている。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}クラス名の表記がコースと合っておらず，全員がミスパンチになる。\\
+\textbf{対処：}\texttt{Startlist.csv} のクラス名と，\texttt{Class.csv}／コース設定の
+クラス名は\textbf{1 文字でも違うと別物}です。
+全角と半角，大文字と小文字も区別されます。
+取り込んだあとに\textbf{メインウィンドウでクラス一覧を目で見て}，
+知らないクラスが増えていないか確かめます。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step[\tALL\ \tSI\ \tEMIT]{レンタルカードを割り当てる}
+
+\begin{Goal}
+マイカードを持っていない人に実物のカードを割り当て，
+「番号 ↔ 氏名」の対応を作る。
+\end{Goal}
+
+\begin{enumerate}
+\item イベントマネージャ →\textbf{【カード割り当て】}を開きます。\ver
+\item 読み取り機を USB につなぎ，機種と COM 番号を選んで【接続】。
+\item 次の 2 つを設定します。ここが時短の鍵です。
+  \begin{itemize}
+  \item \textbf{【読み取り時にカード備考を自動設定】に「レンタル」}と入力
+  \item \textbf{【読み取り時に次の空白行へ移動】にチェック}
+  \end{itemize}
+\item この状態でレンタルカードを順に読み取ると，
+      \textbf{カード番号が空欄の行に自動で番号が入り，備考が「レンタル」になります}。
+\item 割り当てが終わったら\textbf{カード番号順に並べて}おきます。
+\end{enumerate}
+
+\begin{Note}[借りる前に番号を聞いておく]
+レンタル元（クラブ・大学など）に，\textbf{貸し出すカードの番号一覧を先に送ってもらえないか}
+を聞いておくと，この Step がほぼ無くなります。
+番号が先に分かっていれば，\textbf{カードが届く前に割り当てを済ませられます}。
+依頼するときは\textbf{テキストか CSV}で。写真や PDF だと結局は手入力になります。
+\end{Note}
+
+\begin{Done}
+レンタル希望者全員にカード番号が入り，実物のカードが番号順に並んでいる。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}回収漏れが出る。\\
+\textbf{対処：}\textbf{番号順に並べて渡し，番号順に回収します。}
+練習会のカード紛失は，ほぼこれで防げます。
+当日申込用のカードは\textbf{番号帯を分けておく}
+（例：在庫の末尾 10 枚を当日枠にする）と，番号を見ただけで回収対象だと分かります。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{紙を 2 枚用意する}
+
+\begin{Goal}
+機械が止まっても運営が続けられるようにする。
+\end{Goal}
+
+練習会でも，この 2 枚だけは紙で用意します。
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{34mm}P{44mm}P{64mm}@{}}
+\toprule
+\hd{紙} & \hd{内容} & \hd{なぜ必要か} \\
+\midrule
+カードと氏名の対応表 & \textbf{カード番号順}に，氏名・クラス・コース
+  & カードが読めなくなったときに，誰のものか分かる \\
+救護用リスト & \textbf{ふりがな順}に，氏名・クラス・コース・カード番号
+  & \textbf{けが人が出たときに，どのコースを走っているかが分かる}。
+    練習会でも省略しない \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{Note}[なぜ並び順を変えて 2 枚刷るのか]
+山の中では携帯が通じないことがあり，当日は\textbf{紙だけで人を特定する}場面が出ます。
+このとき\textbf{手元にある情報が場面ごとに違います}。
+カードだけ拾ったならカード番号から，名前しか分からないならふりがなから引きます。
+\textbf{並び順の違う紙を用意しておくと，探す時間がまったく変わります。}
+\end{Note}
+
+\begin{J2M}[役職別リストをそのまま出す]
+生成した ZIP の \texttt{RoleStartlists\textbackslash{}} フォルダに，
+印刷できる形の紙が入っています。練習会では次の 2 枚を使います。
+
+\begin{center}
+\small
+\begin{tabular}{@{}>{\ttfamily}P{34mm}P{90mm}@{}}
+\toprule
+\rmfamily\hd{ファイル} & \hd{使いどころ} \\
+\midrule
+Rescue\_ByCard & \textbf{カードと氏名の対応表}として使う（カード番号順） \\
+Rescue\_ByKana & \textbf{救護用リスト}として使う（ふりがな順） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\texttt{.csv}（表計算ソフト用）と \texttt{.tex}（印刷用）の 2 つが出ます。
+\texttt{.tex} は \texttt{lualatex} でそのまま PDF になります。
+
+実物のサンプル：\\
+\url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka/tree/main/sample/role}
+\end{J2M}
+
+\begin{Note}[全ポ図とコース図も紙で]
+ペナが出たとき，\textbf{地図を指しながら説明}するのがいちばん速く，納得も得られます。
+画面を見せるより手間がかかりません。
+\end{Note}
+
+\begin{Done}
+2 枚が印刷でき，救護用リストを渡す相手が決まっている。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}当日申込が入ったぶんが紙に載っていない。\\
+\textbf{対処：}\textbf{当日申込は，受付が紙の余白に手書きで足します。}
+刷り直しは要りません。受付とあらかじめ決めておきます。
+\end{Fail}
+
+% =====================================================================
+\clearpage
+\section*{当日}
+\markboth{当日}{}
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm]
+  \draw[line width=1pt,rulec] (0,0)--(150,0);
+  \foreach \x/\t/\d in {
+     8/開始前/{P9 立ち上げ\\P10 時計\\P11 接続\\P12 ポ確},
+    58/受付〜競技中/{P13 当日申込\\P14 読み取り\\P15 ペナ\\P16 トラブル},
+   118/終わりごろ/{P17 未帰還\\P18 確定\\P19 公開\\P20 片付け}}{
+    \fill[boxln] (\x,0) circle (1.2);
+    \node[font=\sffamily\bfseries\scriptsize,above=2mm of {(\x,0)},anchor=south] {\t};
+    \node[font=\sffamily\tiny,below=2.5mm of {(\x,0)},anchor=north,align=center] {\d};
+  }
+\end{tikzpicture}
+\figcap{当日の流れ}
+\end{Fig}
+
+% ---------------------------------------------------------------------
+\Step{立ち上げる}
+
+\begin{Goal}
+計セン机を作り，Mulka2 が動く状態にする。
+\end{Goal}
+
+\begin{enumerate}
+\item PC を置いて\textbf{電源を確保}します。屋外なら発電機かポータブル電源をつなぎます。
+\item \textbf{読み取り機を先に USB につないでから}，Mulka2 を起動します。
+      順番が逆だと COM 番号が出てこないことがあります。
+\item Mulka2 →【イベントマネージャ】→ 今日のイベントを選んで
+      \textbf{【メインウィンドウ】}を開きます。
+\item 各パートに機材を渡します。
+  \begin{itemize}
+  \item スタートへ：クリア・チェック・スタート・予備カード
+        \tSIAC\ SIAC TEST
+  \item フィニッシュへ：フィニッシュの機材
+  \end{itemize}
+\end{enumerate}
+
+\begin{Done}
+メインウィンドウが開き，エントリーリストに全員が並んでいる。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}昨日と違うイベントを開いてしまい，参加者が入っていない。\\
+\textbf{対処：}\textbf{開いた直後に人数を数えます。}
+エントリーリストの件数が昨日の人数と合っているかを見れば，1 秒で気づけます。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step[\tALL\ \tSI]{時計を合わせる}
+
+\begin{Goal}
+計セン・スタート・フィニッシュが，同じ時刻で動いている状態にする。
+\end{Goal}
+
+\subsection*{(1) PC の時計}
+
+\begin{enumerate}
+\item \textbf{基準を決めます。}固定電話の時報またはアナログラジオの時報を使います。
+\item PC の時計を合わせます。
+\end{enumerate}
+
+\begin{Note}[電波時計・携帯の時報に注意]
+\begin{itemize}
+\item \textbf{電波時計}は，受信した瞬間から先は普通の時計と同じです。
+      倉庫に保管していたものは受信しておらず，ずれたままのことがあります。
+      \textbf{基準には使いません}。
+\item \textbf{携帯電話の時報}は，回線によって 0.3〜0.5 秒程度遅れることがあります。
+\end{itemize}
+\end{Note}
+
+\paragraph{「設定」から同期できないとき。}
+「設定」→「時刻と言語」→「日付と時刻」→\textbf{【今すぐ同期】}は，
+押しても失敗することがあります。
+既定の同期先（\texttt{time.windows.com}）につながらない，
+\texttt{Windows Time} サービスが止まっている，といった理由です。
+その場合は\textbf{管理者として実行}したコマンドプロンプトで，上から順に打ちます。
+
+\begin{center}
+\begin{tcolorbox}[colback=white,colframe=rulec,boxrule=0.4pt,arc=1pt,width=0.95\textwidth]
+\ttfamily\footnotesize
+net stop w32time\\
+net start w32time\\
+w32tm /config /manualpeerlist:"ntp.nict.jp" /syncfromflags:manual /update\\
+w32tm /resync /force\\
+w32tm /query /status
+\end{tcolorbox}
+\end{center}
+
+\begin{itemize}
+\item 3 行目で同期先を \texttt{ntp.nict.jp}（情報通信研究機構）に変えています。
+\item 4 行目の \texttt{/force} で，\textbf{前回からの間隔を無視して}同期します。
+      「今すぐ同期」が弾かれるのは，ここが効いていないためです。
+\item 合っているかは \url{https://www.nict.go.jp/JST/JST5.html} を開いて目で確かめます。
+      「合っています」「○秒 進んでいます」と出ます。
+      同ページが断っているとおり\textbf{回線の混雑で誤差が出る}ので，
+      \textbf{秒単位でずれていないことの確認}に使います。
+\end{itemize}
+
+\subsection*{(2) \tSI\ ステーションの時計}
+
+\textbf{スタートとフィニッシュのステーションは，当日朝に合わせます。}
+台ごとに時計がずれていると，どちらでパンチしたかで記録が変わります。
+
+\begin{enumerate}
+\item PC の時計を合わせる（前項）。
+\item SI Config+ で【時刻を確認】→【時刻をセット】。
+\item 設定後は Service/OFF カードでスタンバイに戻します
+      （すぐ設置するならカードでパンチして起動）。
+\end{enumerate}
+
+\subsection*{(3) \tEMIT\ EMIT の場合}
+
+ユニットの時計合わせは\textbf{不要}です。時計はカードの中にあります。
+ただし\textbf{読み取り PC の時計は合わせておきます}。
+
+\begin{Done}
+PC の時計と，\tSI\ スタート・フィニッシュのステーションが同じ時刻を指している。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}会場でインターネットにつながらず，時計が合わせられない。\\
+\textbf{対処：}\textbf{出発前に合わせておきます。}
+PC が 1 台の練習会では，絶対時刻が多少ずれていても
+\tSI\ ステーションと PC が同じ時刻なら記録は正しく出ます。
+問題になるのは「機材ごとに時刻が違う」ことのほうです。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{読み取り機につなぐ}
+
+\begin{Goal}
+カードを読める状態にして，読み取り画面を開いたままにする。
+\end{Goal}
+
+\begin{enumerate}
+\item メインウィンドウ →【EMIT/SI】→
+      \tEMIT\ 【E カード読み取り】／\tSI\ 【SI カード読み取り】。\ver
+\item モード\textbf{【競技カード読み取り】}を選びます。
+\item COM 番号を選んで【接続】。
+      \textbf{COM 番号は，選択肢の後ろに \texttt{USB} や \texttt{SPORT} が
+      付いているものを選びます。}
+\item カードを 1 枚読ませて，画面に反応が出ることを確かめます。
+\end{enumerate}
+
+\mshot[0.28]{comport.png}{COM 番号は \texttt{SPORT} や \texttt{USB} が付いているものを選ぶ}{e-card/SI-Card の読み取り}
+
+\begin{Note}[読み取り音を設定しておく]
+\textbf{レンタルカードのときだけ違う音を鳴らす}設定ができます。\ver
+カード備考に「レンタル」と入れておけば（P6），
+読んだ瞬間に音で分かるので，回収漏れがほぼ無くなります。
+\end{Note}
+
+\begin{Done}
+読み取り画面が開いたまま，カードが読める。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}読み取り画面を閉じてしまい，カードを読んでも何も起きない。\\
+\textbf{対処：}\textbf{この画面は開いたままにします。}
+別の作業（当日申込の入力など）をするときは，
+\textbf{読み取り係と入力係を分けます}。1 人でやる日は，
+入力のたびに読み取り画面に戻ることを習慣にします。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step[\tALL\ \tSI\ \tSIAC\ \tEMIT]{ポ確カードを読む}
+
+\begin{Goal}
+コントロールが正しい番号で置かれ，動いていることを確かめる。
+\end{Goal}
+
+\textbf{ここを飛ばすと，全員がミスパンチになる事故が起きます。}
+練習会でも省略しません。
+
+\begin{enumerate}
+\item 設置者に\textbf{専用のカード}を渡します。
+      \tEMIT\ 出発前にスタートユニットでアクティベートしてもらいます。
+\item 帰ってきたら，モードを\textbf{【試走カード読み取り】}にして読みます。
+\item \textbf{回ってきた本人と一緒に}，番号と順番が記憶どおりかを確認します。
+\end{enumerate}
+
+\begin{Note}[読み取り結果の見かた]
+\begin{itemize}
+\item \textbf{フィニッシュ不通過と出ても異常とは限りません。}
+      フィニッシュの機材をまだ置いていなければ，当然パンチできていません。
+\item ミスパンチが出たら，\textbf{「コースデータが違うのか，回り方が違ったのか」}を
+      先に切り分けます。決めずに直すと，正しいほうを壊します。
+\item 機材を交換したときは，【入力/編集】→\textbf{【コース設定変更】}で
+      番号を一括で置き換えます。
+\end{itemize}
+\end{Note}
+
+\begin{Note}[\tSIAC\ SIAC を使う日]
+SIAC はタッチフリーで動きますが，\textbf{ステーション側がタッチフリー用の設定に
+なっていないと反応しません}（SI Config+ の設定。本編 Step 8）。
+当日は\textbf{SIAC TEST に SIAC をかざして}，
+反応するかどうかを会場とスタート地区で確かめます。
+
+\begin{itemize}
+\item SIAC は\textbf{チェックで電源が入り，フィニッシュで切れます}。
+      チェックを飛ばすとタッチフリーが効きません。
+\item \textbf{反応しなくても，差し込んでパンチすれば競技できます。}
+      当日はこれで先に進めます。
+\end{itemize}
+\end{Note}
+
+\begin{Done}
+全コースについて，読み取り結果とコースデータが一致した。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}ポ確カードを読んだら，あるコントロールだけ番号が違った。\\
+\textbf{対処：}\textbf{現地の番号が正しい}と考えて，Mulka2 側を直すのが基本です
+（すでに設置されているため）。
+【入力/編集】→【コース設定変更】で番号を置き換え，
+\textbf{地図の番号と実物の番号が違うことを参加者に伝えます}。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{当日申込を入れる}
+
+\begin{Goal}
+走る人を全員 Mulka2 に入れる。
+\end{Goal}
+
+\begin{enumerate}
+\item メインウィンドウ →【入力/編集】→\textbf{【当日申込入力】}。\ver
+\item ナンバー・クラス・カード番号・氏名・\textbf{ふりがな}を入れます。
+\item 事前に空き枠を作ってある場合は（P6），\textbf{名前を書き換えるだけ}です。
+\item レンタルカードを渡した人は，\textbf{カード備考に「レンタル」}と入れます。
+\end{enumerate}
+
+\begin{Done}
+受付が受け取った申込の枚数と，入力した件数が一致している。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}入力が終わる前に，その人が帰ってくる。\\
+\textbf{対処：}読み取ると\textbf{「未登録カード」}と出ます。慌てる必要はありません。
+その場で\textbf{新しい参加者として氏名を入力}すれば，記録はそのまま使えます（P16）。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step[\tALL\ \tSI\ \tEMIT\ \tSIAC]{カードを読む}
+
+\begin{Goal}
+帰ってきた人のカードを読んで，記録を確定させる。
+\end{Goal}
+
+\begin{enumerate}
+\item 読み取り画面を開いたまま，帰ってきた順にカードを読みます。
+\item \tEMIT\ E カードは\textbf{読むとカードの時計が止まります}。
+      読む前に人を待たせません。
+\item \tSI\ SI はステーション側に時刻が入っているので，読む順番は問いません。
+\item 画面の結果を見て，次の 5 通りに振り分けます。
+\end{enumerate}
+
+\begin{Fig}
+\begin{tikzpicture}[x=1mm,y=1mm,every node/.style={font=\sffamily\scriptsize}]
+  \node[blkd,minimum width=28mm,minimum height=7mm] (r) at (0,0) {カードを読む};
+  \draw[draw=boxln,line width=0.5pt] (0,-3.5) -- (0,-9);
+  \draw[draw=boxln,line width=0.5pt] (-58,-9) -- (58,-9);
+  \foreach \x/\ttl/\sub in {
+    -58/{OK}/{そのまま通す},
+    -29/{DNF}/{そのまま通す},
+      0/{ペナ}/{P15 へ},
+     29/{未登録カード}/{P16 へ},
+     58/{読めない}/{P16 へ}}{
+    \node[blk,minimum width=27mm,minimum height=11mm,anchor=north,inner sep=2pt] at (\x,-16)
+      {\textbf{\ttl}\\[1pt]\tiny \sub};
+    \draw[ar] (\x,-9) -- (\x,-16);
+  }
+\end{tikzpicture}
+\figcap{読んだあとの分岐}
+\end{Fig}
+
+\begin{Note}[棄権した人のカードも必ず読む]
+途中で棄権して帰ってきた人のカードも\textbf{そのまま読みます}。
+読まないと\textbf{未帰還者として残り続け}，閉鎖前に探すことになります（P17）。
+\end{Note}
+
+\begin{Done}
+帰ってきた人の分がすべて読めており，
+画面の「読み取り済み」件数が，帰ってきた人数と合っている。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}読んだのに記録が出ない。\\
+\textbf{対処：}その人が\textbf{参加者データに入っていない}ことがほとんどです。
+当日申込の入力漏れか，クラス名の表記がコースと合っていないかを見ます（P6）。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{ペナチェックをする}
+
+\begin{Goal}
+ペナが出た人に，どこを通っていないかを説明して，判定を確定させる。
+\end{Goal}
+
+\begin{enumerate}
+\item \textbf{読み取り係とは別の人が対応}します。列を止めないためです。
+\item 【競技者情報】→\textbf{【カード詳細・対応】}で，通っていない番号を確認します。
+\item \textbf{全ポ図とコース図を指しながら}説明します。
+\item \tEMIT\ カードからバックアップラベルを外し，ペナレポートに貼って照合します。
+      レポートには\textbf{「正解なら穴がどこに開くか」}が印刷されています。
+\end{enumerate}
+
+\mshot[0.62]{penareport.png}{ペナレポートの例。数字が正解の穴の位置，黒丸が実際に開いている位置}{e-card/SI-Card の読み取り}
+
+\begin{Note}[判定に迷ったら]
+練習会では，記録より\textbf{本人が納得すること}のほうが大事です。
+\begin{itemize}
+\item \textbf{走ったコースと画面のコースが違っていないか}を先に確認します。
+      Mulka2 はどのコースを走ったか分からないとき，
+      \textbf{ペナルティがいちばん少ないコース}を選びます。
+      ほとんど通れていない場合，別のコースが選ばれていることがあります。
+\item バックアップで通過が確認できたら，
+      【記録変更・遅刻対応】→【手動変更】で失格を取り消せます。
+\end{itemize}
+\end{Note}
+
+\begin{Done}
+ペナが出た人全員に説明が終わり，判定が確定している。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}ペナの説明で列が止まり，読み取りが滞る。\\
+\textbf{対処：}\textbf{ペナの人は列から外して，別の場所で対応します。}
+読み取り係は次の人を読み続けます。
+1 人しかいない日は，\textbf{「あとで説明します」と伝えて先に読む}のが正解です。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step[\tALL\ \tSI\ \tEMIT]{読めないカード・未登録カードに対応する}
+
+\begin{Goal}
+機械で記録が取れなかった人にも，記録を残す。
+\end{Goal}
+
+\subsection*{カードが読めないとき}
+
+\begin{enumerate}
+\item まず\textbf{他のカードが読めるか}試します。
+      他も読めなければ読み取り機側の問題なので，予備機に替えます。
+\item そのカードだけ読めない場合は，カードの故障です。
+  \begin{itemize}
+  \item \tEMIT\ \textbf{バックアップラベル}，\tSI\ \textbf{地図のピンパンチ}で，
+        どこを通ったかを確認します。
+  \item フィニッシュ時刻を聞いて（フィニッシュ係の控え，またはその場の時計），
+        【競技者情報】→\textbf{【記録変更・遅刻対応】}→【手動変更】で入力します。
+  \end{itemize}
+\item \textbf{その場で紙に，氏名・カード番号・起きたことを書きます。}
+      記憶に頼ると翌日には消えています。
+\end{enumerate}
+
+\subsection*{未登録カードと出たとき}
+
+当日申込の入力漏れです。\textbf{その場で氏名を入力}すれば，記録はそのまま使えます。
+
+\begin{Note}[\tEMIT\ NO ACTIVATE と出たとき]
+アクティベートし忘れたか，\textbf{どこかのレッグで 2 時間以上かかってカードの時計が
+止まった}場合に出ます。
+\textbf{【バックアップラベル表示】}でカードデータ詳細を開き，
+通過記録が 1 番からフィニッシュまで並んでいれば，
+右上の\textbf{【ペナチェック結果を OK にする】}を押します。タイムは自動で計算されます。
+\end{Note}
+
+\mshot[0.62]{noactivate.png}{NO ACTIVATE のカードデータ詳細。通過記録が並んでいれば救える}{e-card/SI-Card の読み取り}
+
+\begin{Done}
+読めなかった人・未登録だった人について，記録が入るか，
+入らない理由が紙に書かれている。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}走ってきた人をその場で待たせ続けてしまう。\\
+\textbf{対処：}\textbf{カードと氏名を控えて，先に帰します。}
+その場で解決しようとしないこと。復元はあとからでもできます。
+連絡先を聞いておけば，結果は後日伝えられます。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{未帰還者を確認する}
+
+\begin{Goal}
+山に人が残っていないことを，データと実物の両方で確かめる。
+\end{Goal}
+
+\begin{enumerate}
+\item メインウィンドウ →【ツール】→\textbf{【未帰還者リスト】}。\ver
+\item \textbf{残っている人がいたら，本当に山にいるのかを確かめます。}
+      棄権して帰った人のカードも，\textbf{読み取らないと未帰還のまま残ります}。
+\item 出走しなかった人を欠席にします。
+      【入力】→\textbf{【欠席】}で番号を入れて Enter を繰り返すのが速いです。
+\item 未帰還が 0 にならないうちは，\textbf{撤収を始めません}。
+\end{enumerate}
+
+\begin{Note}[紙でも確かめる]
+対応表（P8）に，読み取り済みの人から印を付けていくと，
+\textbf{印の付いていない人がそのまま未帰還者}になります。
+PC が固まっても止まらないので，人数の多い日はこちらのほうが確実です。
+\end{Note}
+
+\begin{Done}
+未帰還者が 0 になった。
+0 にならない場合は，その人の所在を本人か仲間に確認できている。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}未帰還者が数人残ったまま，理由が分からない。\\
+\textbf{対処：}ほとんどは\textbf{「出走しなかった人」か「棄権して帰った人」}です。
+まず受付とスタート係に\textbf{出走したかどうか}を聞きます。
+出走していなければ欠席にします。出走していれば，
+\textbf{そこではじめて捜索の話}になります。順番を飛ばさないこと。
+\end{Fail}
+
+% =====================================================================
+\clearpage
+\section*{終わったあと}
+\markboth{終わったあと}{}
+
+% ---------------------------------------------------------------------
+\Step{成績を確定させる}
+
+\begin{Goal}
+全員の判定が決まった状態にして，記録を確定させる。
+\end{Goal}
+
+\begin{enumerate}
+\item 未帰還者が 0 であることを確認します（P17）。
+\item ペナ対応が全員終わっていることを確認します（P15）。
+\item メインウィンドウ →\textbf{【リザルト】}で一覧を出し，
+      \textbf{空欄や明らかにおかしい記録がないか}を目で見ます。
+\item コースデータや設定を直した場合は，\textbf{再ペナチェック}を実行します。
+      読み取り済みの記録も計算し直されます。
+\end{enumerate}
+
+\begin{Note}[順位が確定しないとき]
+\textbf{全員がフィニッシュするまで順位は確定しません。}
+未帰還や未処理の人が 1 人でも残っていると，そのクラスの順位は仮のままです。
+欠席処理（P17）を先に済ませます。
+\end{Note}
+
+\begin{Done}
+リザルトに全員が並び，空欄と「計算できません」が無い。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}「記録を計算できません」と出る人がいる。\\
+\textbf{対処：}\textbf{パンチングフィニッシュが設定されていない}ことが多いです（P5）。
+【入力/編集】→【コース設定変更】で設定し，再ペナチェックを実行します。
+スタート側なら，パンチングスタートが「しない」になっていないかを見ます。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step{ラップと成績を公開する}
+
+\begin{Goal}
+参加者が自分の記録とラップを見られるようにする。
+\end{Goal}
+
+\begin{enumerate}
+\item メインウィンドウ →\textbf{【ファイル出力】}から，ラップ解析用のファイルを出します。
+\item \textbf{ラップセンター}にアップロードします。\\
+      \url{https://mulka2.com/lapcenter/}
+\item 公開した URL を，参加者に伝わる場所（グループ・掲示板など）に貼ります。
+\end{enumerate}
+
+\begin{Note}[その場で見せるだけでもよい]
+人数が少ない練習会なら，\textbf{PC の画面を見せて終わり}でも足ります。
+紙に刷る必要はありません。
+ただし\textbf{データは必ず保存します}（P20）。
+「あの日の記録は？」とあとから聞かれます。
+\end{Note}
+
+\begin{Done}
+参加者が自分の記録を見られる状態になっている。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}会場で電波が入らず，公開できない。\\
+\textbf{対処：}\textbf{その場で公開しなくて構いません。}
+イベントフォルダを持ち帰って，家で出力・公開します。
+当日に決めておくのは「いつまでに公開するか」だけで足ります。
+\end{Fail}
+
+% ---------------------------------------------------------------------
+\Step[\tALL\ \tSI\ \tSIAC\ \tEMIT]{機材を片付けて，データを保存する}
+
+\begin{Goal}
+借りたものを全部返し，記録を残す。
+\end{Goal}
+
+\begin{enumerate}
+\item カードを回収し，\textbf{枚数を数えて}合わせます。
+      対応表（P8）と突き合わせると，誰のぶんが足りないか分かります。
+\item \tEMIT\ バックアップラベルは外して処分します。
+\item \tSI\ ステーションを\textbf{Service/OFF カードでスタンバイに戻します}。\\
+      \tSIAC\ \textbf{タッチフリー設定のものは電力消費が大きいので，最優先で戻します。}
+\item PC・ケーブル・読み取り機を回収します。\textbf{予備も忘れずに}。
+\item イベントデータのフォルダを\textbf{丸ごと zip にして保存}します。
+      置き場所は 2 か所（PC とクラウドなど）にすると安全です。
+\item 起きたこと・直したことを\textbf{短くて構わないので書き残します}。
+      次の練習会で同じことが起きます。
+\end{enumerate}
+
+\begin{Done}
+カードの枚数が合い，\tSI\ ステーションがスタンバイに戻り，
+イベントフォルダの zip が 1 か所以上に保存されている。
+\end{Done}
+
+\begin{Fail}
+\textbf{起きること：}ステーションをスタンバイに戻し忘れ，次回までに電池が切れる。\\
+\textbf{対処：}\textbf{撤収の最初にやります。}
+とくに \tSIAC\ タッチフリー設定のステーションは消費が大きく，
+放置すると次の大会で使えません。回収した順にその場で戻すのが確実です。
+\end{Fail}
+
+% =====================================================================
+\clearpage
+\section*{トラブル初動カード}
+\markboth{トラブル初動カード}{}
+
+机の上に置いておく 1 枚です。
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{44mm}P{104mm}@{}}
+\toprule
+\hd{起きたこと} & \hd{まずやること} \\
+\midrule
+カードが 1 枚だけ読めない
+  & バックアップ（\tEMIT\ ラベル／\tSI\ ピンパンチ）で通過を確認 →
+    フィニッシュ時刻を聞く →【記録変更・遅刻対応】→【手動変更】（P16） \\
+\midrule
+カードが 1 枚も読めない
+  & COM 番号を選び直す → ケーブルを替える → \textbf{予備の読み取り機に交換}（P11） \\
+\midrule
+「記録を計算できません」
+  & パンチングフィニッシュが未設定。
+    【入力/編集】→【コース設定変更】→ 再ペナチェック（P5・P18） \\
+\midrule
+全員がミスパンチになる
+  & クラスとコースの対応，またはコースの番号が違う。同じく【コース設定変更】（P4） \\
+\midrule
+スタートを押したのに反映されない
+  & パンチングスタートが「しない」になっている。【コース設定変更】で直す（P5） \\
+\midrule
+未登録カードと出る
+  & 当日申込の入力漏れ。その場で氏名を入力すればよい（P13・P16） \\
+\midrule
+\tEMIT\ NO ACTIVATE
+  & 【バックアップラベル表示】で通過記録を確認 →
+    問題なければ【ペナチェック結果を OK にする】（P16） \\
+\midrule
+\tSIAC\ タッチフリーで反応しない
+  & クリア→チェックで電源 ON。\textbf{差し込みパンチなら競技できます}（P12） \\
+\midrule
+棄権した人のカードが届いた
+  & \textbf{そのまま読み取ります}。読まないと未帰還者として残ります（P14） \\
+\midrule
+未帰還者が減らない
+  & 出走したかどうかを受付・スタートに確認 → 出走していなければ欠席処理（P17） \\
+\midrule
+PC が固まった
+  & \textbf{慌てて電源を切らない}。読み取り済みの記録は \texttt{Changes.dat} に
+    追記済みなので，再起動すれば残っています（P3） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{3mm}
+\begin{tcolorbox}[colback=goalbg,colframe=goalfr,boxrule=0.6pt,arc=2pt]
+{\sffamily\bfseries トラブル時の 3 原則}\par\vspace{1mm}
+\textbf{1.}　走ってきた人を待たせない（カードと氏名を控えて先に帰し，あとで連絡する）\par
+\textbf{2.}　その場では「記録が出る状態に戻す」ことだけを考える（原因追及は終わってから）\par
+\textbf{3.}　何が起きたかを紙に書いておく\par
+\end{tcolorbox}
+
+% =====================================================================
+\clearpage
+\section*{逆引き}
+\markboth{逆引き}{}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{74mm}P{74mm}@{}}
+\toprule
+\hd{やりたいこと} & \hd{どこを見るか} \\
+\midrule
+コースの番号を直したい & P4／P12（【コース設定変更】） \\
+スタート方式を直したい & P5（【コース設定変更】） \\
+当日来た人を追加したい & P13（【当日申込入力】） \\
+カード番号を変えたい & P7／P13（カード備考も直す） \\
+出走しなかった人を処理したい & P17（【入力】→【欠席】） \\
+失格を取り消したい & P15（【記録変更・遅刻対応】→【手動変更】） \\
+読めなかったカードを救いたい & P16（バックアップ → 手動変更） \\
+記録を計算し直したい & P18（再ペナチェック） \\
+結果を参加者に見せたい & P19（ラップセンター／画面） \\
+データを残したい & P20（イベントフォルダを zip） \\
+時計が合っているか見たい & P10（NICT のページ） \\
+サンプルの CSV が欲しい & P4／P6（リポジトリの \texttt{sample/}） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{3mm}
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{40mm}P{108mm}@{}}
+\toprule
+\hd{名前} & \hd{入手先} \\
+\midrule
+Mulka2 & \url{https://mulka2.com/mulka2/ja/index.php/Mulka2} \\
+ラップセンター & \url{https://mulka2.com/lapcenter/} \\
+\tSI\ \tSIAC\ SI Config+ & \url{https://www.sportident.com/support/downloads} \\
+JOY2Mulka & \url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka} \\
+日本標準時 & \url{https://www.nict.go.jp/JST/JST5.html} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+\clearpage
+\section*{チェックリスト}
+\markboth{チェックリスト}{}
+
+\subsection*{前日まで（P1〜P8）}
+
+\begin{list}{\ck}{\leftmargin=8mm\itemsep=3.5pt\parsep=0pt\topsep=2pt}
+\item Mulka2 をインストールし，インストーラを PC 内に保存した
+\item 読み取り機を PC につなぎ，カードを 1 枚読んだ（\textbf{予備も}）
+\item \tEMIT\ 変換アダプタのドライバを入れた
+\item イベントを作った（名前は日付から始めた）
+\item コースデータを入れた
+\item クラスとコースを対応づけた
+\item \textbf{パンチングスタート ＝ する}にした
+\item \textbf{パンチングフィニッシュ ＝ チェックを入れた}
+\item 参加者データを入れた（カード番号・ふりがな・カード備考）
+\item 当日申込用の空き枠を作った
+\item レンタルカードを割り当て，番号順に並べた
+\item カードと氏名の対応表（カード番号順）を印刷した
+\item 救護用リスト（ふりがな順）を印刷し，渡す相手を決めた
+\item 全ポ図・コース図を印刷した
+\item PC を充電した
+\end{list}
+
+\subsection*{当日：開始前（P9〜P12）}
+
+\begin{list}{\ck}{\leftmargin=8mm\itemsep=3.5pt\parsep=0pt\topsep=2pt}
+\item 読み取り機をつないでから Mulka2 を起動した
+\item 今日のイベントを開き，\textbf{人数が合っていることを確認した}
+\item \textbf{PC の時計を合わせた}（電波時計は使わない）
+\item \tSI\ スタート・フィニッシュのステーションの時計を合わせた
+\item 読み取り機に接続できた（COM 番号：\rule{16mm}{0.4pt}）
+\item スタートへ機材を渡した（クリア・チェック・スタート・予備カード）
+\item \tSIAC\ SIAC TEST を会場とスタート地区に置いた
+\item \textbf{ポ確カードを読み，本人と一緒に順番を確認した}
+\end{list}
+
+\subsection*{当日：競技中（P13〜P16）}
+
+\begin{list}{\ck}{\leftmargin=8mm\itemsep=3.5pt\parsep=0pt\topsep=2pt}
+\item 読み取り画面を開いたままにしている
+\item 当日申込を入力した（受付の枚数と件数が一致）
+\item ペナの人を列から外して対応している
+\item 読めなかったカードを紙に控えた
+\end{list}
+
+\subsection*{当日：終わりごろ（P17〜P20）}
+
+\begin{list}{\ck}{\leftmargin=8mm\itemsep=3.5pt\parsep=0pt\topsep=2pt}
+\item 棄権者のカードも読み取った
+\item \textbf{未帰還者が 0 になった}（残っていれば本人の所在を確認した）
+\item 未出走者を欠席にした
+\item リザルトに空欄と「計算できません」が無い
+\item 結果を共有した（またはいつ公開するか決めた）
+\item カードを回収し，\textbf{枚数が合った}
+\item \tEMIT\ バックアップラベルを処分した
+\item \tSI\ ステーションをスタンバイに戻した（\tSIAC\ を最優先）
+\item イベントデータを zip で保存した
+\item 起きたこと・直したことを書き残した
+\end{list}
+
+\vspace{6mm}
+\noindent\textcolor{rulec}{\rule{\textwidth}{0.4pt}}\par
+\vspace{2mm}
+\noindent{\sffamily\footnotesize
+本冊子に登場する人名・所属名・カード番号は，すべて架空のものです。\par
+画面上のメニュー名・ボタン名は，使用するソフトウェアのバージョンによって異なります。\par
+図のうち Mulka2 の画面キャプチャは，Mulka2 公式マニュアル
+（\url{https://mulka2.com/mulka2/ja/index.php/Mulka2}）から引用しました。\par
+JOY2Mulka の画面は，同ツールに同梱の匿名サンプルデータを読み込んだ状態のものです。\par
+それ以外の図は本冊子のために作成しました。}
+
+\end{document}

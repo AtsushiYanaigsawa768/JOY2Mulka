@@ -3,15 +3,14 @@ __pycache__/
 CLAUDE.md
 # 教材に貼り込む Mulka2 公式マニュアルの画面キャプチャ（第三者著作物）
 # 取得元と取得手順は docs/textbook/README.md を参照。再配布しないため追跡しない。
-docs/textbook/img/mulka2/
-docs/textbook/img/siconfig/
+docs/textbook/image/mulka2/
+docs/textbook/image/siconfig/
 
-# LaTeX の中間ファイル（PDF は成果物なので追跡する）
-docs/textbook/*.aux
-docs/textbook/*.log
-docs/textbook/*.out
-docs/textbook/*.toc
-docs/textbook/*.ltjruby
+# LaTeX の中間ファイル置き場（PDF は成果物なので追跡する）
+docs/textbook/tmp/*
+!docs/textbook/tmp/.gitkeep
+# luatexja-ruby はソースと同じ場所に .ltjruby を書き出す
+docs/textbook/tex/*.ltjruby
 
 # 作業用の一時ディレクトリ
 tmp_extract/
