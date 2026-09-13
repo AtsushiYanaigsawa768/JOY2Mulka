@@ -1,0 +1,90 @@
+% !TEX program = lualatex
+\documentclass[a4paper,10pt]{ltjsarticle}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{needspace}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\definecolor{rule}{gray}{0.35}
+\definecolor{band}{gray}{0.90}
+
+\geometry{top=20mm,bottom=20mm,left=18mm,right=18mm,headsep=6mm}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small サンプルオリエンテーリング大会}
+\fancyhead[R]{\small 救護}
+\fancyfoot[C]{\small \thepage}
+\setlength{\headheight}{14pt}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.25}
+\setlength{\LTpre}{2pt}
+\setlength{\LTpost}{10pt}
+
+% クラス見出し
+\newcommand{\classheading}[2]{%
+  \Needspace*{6\baselineskip}%
+  \par\vspace{3pt}%
+  \noindent{\large\bfseries #1}\hspace{0.6em}{\small #2}%
+  \par\vspace{1pt}%
+  \noindent\textcolor{rule}{\rule{\textwidth}{0.4pt}}%
+  \par\vspace{2pt}%
+}
+% レーン見出し
+\newcommand{\laneheading}[1]{%
+  \par\vspace{10pt}%
+  \noindent\textcolor{rule}{\rule{2.5mm}{3.4mm}}\hspace{0.5em}{\LARGE\bfseries #1}%
+  \par\vspace{4pt}%
+}
+
+\begin{document}
+\gtfamily\sffamily
+
+\begin{center}
+{\LARGE\bfseries SampleEvent}\\[4pt]
+{\large 救護用スタートリスト（カード番号順）}\\[2pt]
+{\small 拾得カードや読み取り記録から人を特定するときに引く。}
+\end{center}
+\vspace{4mm}
+
+\begin{longtable}{r>{\raggedright\arraybackslash}p{0.180\textwidth}>{\raggedright\arraybackslash}p{0.180\textwidth}>{\raggedright\arraybackslash}p{0.200\textwidth}lll}
+\specialrule{0.8pt}{0pt}{0pt}
+\textbf{ゼッケン} & \textbf{氏名} & \textbf{ふりがな} & \textbf{所属} & \textbf{クラス} & \textbf{カード} & \textbf{スタート} \\
+\midrule
+\endfirsthead
+\multicolumn{7}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\textbf{ゼッケン} & \textbf{氏名} & \textbf{ふりがな} & \textbf{所属} & \textbf{クラス} & \textbf{カード} & \textbf{スタート} \\
+\midrule
+\endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
+1101 & 山田 太郎 & やまだ たろう & テストクラブ & M21A & 8100001 & 11:00:00 \\
+1102 & 井上 拓也 & いのうえ たくや & サンプルOLC & M21A & 8100002 & 11:01:00 \\
+1104 & 渡辺 健太 & わたなべ けんた & テストクラブ & M21A & 8100004 & 11:03:00 \\
+1106 & 後藤 悠 & ごとう ゆう & サンプルOLC & M21A & 8100006 & 11:05:00 \\
+2201 & 鈴木 花子 & すずき はなこ & テストクラブ & W21A & 8100011 & 11:00:00 \\
+2203 & 小林 彩 & こばやし あや & デモOLK & W21A & 8100013 & 11:04:00 \\
+2205 & 斎藤 浩 & さいとう ひろし & 架空OLC & M20A & 8100015 & 11:08:00 \\
+3302 & 中村 学 & なかむら まなぶ & テストクラブ & MB & 8100021 & 11:02:00 \\
+9901 & 前走 太郎 & ぜんそう たろう & 運営 & M21A & 8199001 & 10:30:00 \\
+1103 & 森 大輔 & もり だいすけ & デモOLK & M21A & レンタル & 11:02:00 \\
+1105 & 林 誠 & はやし まこと & 架空OLC & M21A & レンタル & 11:04:00 \\
+2202 & 森 美咲 & もり みさき & 匿名走林会 & W21A & レンタル & 11:02:00 \\
+2204 & 加藤 健 & かとう けん & サンプルOLC & M20A & レンタル & 11:06:00 \\
+3301 & 佐藤 次郎 & さとう じろう & デモOLK & MB & レンタル & 11:00:00 \\
+3303 & 高橋 結衣 & たかはし ゆい & サンプルOLC & WB & レンタル & 11:04:00 \\
+3304 & 松本 香 & まつもと かおり & 匿名走林会 & WB & レンタル & 11:06:00 \\
+3305 & 清水 一郎 & しみず いちろう & - & N & レンタル & 11:08:00 \\
+3306 & 岡田 里奈 & おかだ りな & - & N & レンタル & 11:10:00 \\
+\end{longtable}
+
+\end{document}

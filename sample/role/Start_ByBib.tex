@@ -1,0 +1,90 @@
+% !TEX program = lualatex
+\documentclass[a4paper,10pt]{ltjsarticle}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{needspace}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\definecolor{rule}{gray}{0.35}
+\definecolor{band}{gray}{0.90}
+
+\geometry{top=20mm,bottom=20mm,left=18mm,right=18mm,headsep=6mm}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small サンプルオリエンテーリング大会}
+\fancyhead[R]{\small スタート}
+\fancyfoot[C]{\small \thepage}
+\setlength{\headheight}{14pt}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.25}
+\setlength{\LTpre}{2pt}
+\setlength{\LTpost}{10pt}
+
+% クラス見出し
+\newcommand{\classheading}[2]{%
+  \Needspace*{6\baselineskip}%
+  \par\vspace{3pt}%
+  \noindent{\large\bfseries #1}\hspace{0.6em}{\small #2}%
+  \par\vspace{1pt}%
+  \noindent\textcolor{rule}{\rule{\textwidth}{0.4pt}}%
+  \par\vspace{2pt}%
+}
+% レーン見出し
+\newcommand{\laneheading}[1]{%
+  \par\vspace{10pt}%
+  \noindent\textcolor{rule}{\rule{2.5mm}{3.4mm}}\hspace{0.5em}{\LARGE\bfseries #1}%
+  \par\vspace{4pt}%
+}
+
+\begin{document}
+\gtfamily\sffamily
+
+\begin{center}
+{\LARGE\bfseries SampleEvent}\\[4pt]
+{\large スタート用リスト（ゼッケン番号順）}\\[2pt]
+{\small 遅刻・枠違いの人をゼッケンから確認するための控え。}
+\end{center}
+\vspace{4mm}
+
+\begin{longtable}{lr>{\raggedright\arraybackslash}p{0.220\textwidth}>{\raggedright\arraybackslash}p{0.200\textwidth}ll}
+\specialrule{0.8pt}{0pt}{0pt}
+\textbf{時刻} & \textbf{ゼッケン} & \textbf{姓（かな）} & \textbf{氏名} & \textbf{クラス} & \textbf{カード} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{@{}l}{\small\itshape 続き}\\
+\specialrule{0.8pt}{0pt}{0pt}
+\textbf{時刻} & \textbf{ゼッケン} & \textbf{姓（かな）} & \textbf{氏名} & \textbf{クラス} & \textbf{カード} \\
+\midrule
+\endhead
+\specialrule{0.8pt}{0pt}{0pt}
+\endfoot
+\specialrule{0.8pt}{0pt}{0pt}
+\endlastfoot
+11:00:00 & 1101 & {\LARGE\bfseries やまだ} & 山田 太郎 & M21A & 8100001 \\
+11:01:00 & 1102 & {\LARGE\bfseries いのうえ} & 井上 拓也 & M21A & 8100002 \\
+11:02:00 & 1103 & {\LARGE\bfseries もり} & 森 大輔 & M21A & レンタル \\
+11:03:00 & 1104 & {\LARGE\bfseries わたなべ} & 渡辺 健太 & M21A & 8100004 \\
+11:04:00 & 1105 & {\LARGE\bfseries はやし} & 林 誠 & M21A & レンタル \\
+11:05:00 & 1106 & {\LARGE\bfseries ごとう} & 後藤 悠 & M21A & 8100006 \\
+11:00:00 & 2201 & {\LARGE\bfseries すずき} & 鈴木 花子 & W21A & 8100011 \\
+11:02:00 & 2202 & {\LARGE\bfseries もり} & 森 美咲 & W21A & レンタル \\
+11:04:00 & 2203 & {\LARGE\bfseries こばやし} & 小林 彩 & W21A & 8100013 \\
+11:06:00 & 2204 & {\LARGE\bfseries かとう} & 加藤 健 & M20A & レンタル \\
+11:08:00 & 2205 & {\LARGE\bfseries さいとう} & 斎藤 浩 & M20A & 8100015 \\
+11:00:00 & 3301 & {\LARGE\bfseries さとう} & 佐藤 次郎 & MB & レンタル \\
+11:02:00 & 3302 & {\LARGE\bfseries なかむら} & 中村 学 & MB & 8100021 \\
+11:04:00 & 3303 & {\LARGE\bfseries たかはし} & 高橋 結衣 & WB & レンタル \\
+11:06:00 & 3304 & {\LARGE\bfseries まつもと} & 松本 香 & WB & レンタル \\
+11:08:00 & 3305 & {\LARGE\bfseries しみず} & 清水 一郎 & N & レンタル \\
+11:10:00 & 3306 & {\LARGE\bfseries おかだ} & 岡田 里奈 & N & レンタル \\
+10:30:00 & 9901 & {\LARGE\bfseries ぜんそう} & 前走 太郎 & M21A & 8199001 \\
+\end{longtable}
+
+\end{document}
