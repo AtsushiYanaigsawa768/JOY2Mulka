@@ -175,7 +175,7 @@ USB ケーブル類 & 予備込み & \textbf{断線が意外に多い}。予備�
 \item 電波が届かず，\textbf{クラウド公開が当日できない}ことが分かっている。
 \end{itemize}
 
-\textbf{事前準備の印刷（スタートリスト・役職用リスト・チェックリスト）は，
+\textbf{事前準備の印刷（スタートリスト・役職用リスト）は，
 会場ではなく事前に済ませます}（Step 20）。当日必要な紙は前日までに刷り終えている，
 というのが基本形です。
 \end{Note}
@@ -466,6 +466,39 @@ C & 2.4 & 60  & 7  & & 34 & 35/36 & 33 & $\cdots$ & 100 \\
 
 \textbf{そのまま使えるサンプル}：\ \url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka/blob/main/sample/normal/Course.csv}
 
+\begin{Key}{CSV は UTF-8（BOM 付き）で保存する}
+\textbf{文字コードが違うと，Mulka2 は CSV を認識できません。}
+これは \texttt{Course.csv}・\texttt{Class.csv}・\texttt{Startlist.csv}・
+\tRELAY\ \texttt{RelayClass.csv}・\texttt{RelayTeam.csv} の\textbf{すべてに共通}します。
+
+現れ方は，クラス名やコース名が\textbf{文字化けする}，列がずれる，
+ドロップしても\textbf{何も起きない}，「該当するコースがありません」と言われる，などです。
+\textbf{中身は正しいのに読めない}ので，原因に気づきにくい失敗です。
+
+\begin{center}
+\small
+\begin{tabular}{@{}P{34mm}P{108mm}@{}}
+\toprule
+\hd{項目} & \hd{指定} \\
+\midrule
+文字コード & \textbf{UTF-8（BOM 付き）} \\
+改行 & \textbf{CRLF} \\
+区切り & コンマ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Excel で作る場合は【名前を付けて保存】→
+\textbf{【CSV UTF-8（コンマ区切り）(*.csv)】}を選びます。
+ただの【CSV（コンマ区切り）】は環境によって Shift\_JIS になるので使いません。
+テキストエディタで作る場合は，保存時に\textbf{「UTF-8（BOM 付き）」}を選びます。
+
+リポジトリの \texttt{sample/} に置いてある CSV は，
+\textbf{JOY2Mulka が出力するのと同じこの形式}で保存してあります。
+JOY2Mulka の出力はそのまま Mulka2 に取り込めているので，
+\textbf{サンプルをコピーして中身を差し替える}のが，いちばん確実で速い作り方です。
+\end{Key}
+
 \subsection*{（C）正解カードから読み込む}
 
 コースを設定する方法がもう 1 つあります。
@@ -482,6 +515,42 @@ C & 2.4 & 60  & 7  & & 34 & 35/36 & 33 & $\cdots$ & 100 \\
 手入力の打ち間違いが起きないのが利点です。
 \tSI\ パンチングフィニッシュにする場合は，
 \textbf{パンチングフィニッシュ欄で「はい」を選び，番号入力欄に \texttt{F}} と入れます。
+
+\subsection*{（D）イベントマネージャの画面で直接作る・直す}
+
+CSV を用意しなくても，\textbf{イベントマネージャの画面だけでコースを作れます}。
+コースが数本しかない練習会や，\textbf{当日に 1 本だけ直したいとき}はこちらが速いです。
+
+イベントマネージャの\textbf{上半分が【コースデータ】}です。\ver
+
+\begin{itemize}
+\item \textbf{【新規】}でコースを 1 本足し，\textbf{【削除】}で消し，
+      \textbf{【並び替え】}で順序を変えます。
+\item \textbf{一覧の行をダブルクリックすると詳細画面が開き}，
+      コース名・略称・方式・距離・登距離・\textbf{コントロールの並び}を直接編集できます。
+      画面にも「各行をダブルクリックをすると詳細表示，設定変更が出来ます」と書かれています。
+\item 右側の\textbf{【一括設定】}から，距離・登距離やコントロール設定を
+      \textbf{全コースにまとめて}入れられます。
+      コースが多いときは 1 本ずつ開くより速く，入れ忘れも起きません。
+\end{itemize}
+
+\begin{Note}[画面で直すか，ファイルで直すか]
+\begin{center}
+\small
+\begin{tabular}{@{}P{46mm}P{96mm}@{}}
+\toprule
+\hd{直す量} & \hd{向いている方法} \\
+\midrule
+コース 1〜2 本 & \textbf{画面でダブルクリックして直す}（この項） \\
+全コースに同じ設定 & 画面の\textbf{【一括設定】} \\
+何十行もの番号の付け替え & CSV を作り直してドロップ，または \texttt{.dat} を直接編集（Step 7） \\
+\bottomrule
+\end{tabular}
+\end{center}
+どの方法で直しても，\textbf{直したあとは再ペナチェック}を実行します（Step 29）。
+読み取り済みの記録も計算し直されます。
+\end{Note}
+
 
 \subsection*{取り込んだあとに直すところ}
 
@@ -545,9 +614,32 @@ MB   & C & 3 & 3:00:00 \\
       \textbf{入賞者リストの印刷}で使います。入れ忘れやすい項目です。
 \end{itemize}
 
-クラスごとの設定は，クラスリストの右にあるボタンから\textbf{一括入力}できます。\ver
-
 \textbf{そのまま使えるサンプル}：\ \url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka/blob/main/sample/normal/Class.csv}
+
+文字コードは\textbf{UTF-8（BOM 付き）}です。違うと Mulka2 が認識しません（Step 5 の囲み）。
+
+\paragraph{イベントマネージャの画面で直接作る・直す。}
+クラスも，CSV を用意せずに\textbf{画面だけで作れます}。
+イベントマネージャの\textbf{下半分が【クラスデータ】}です。\ver
+
+\begin{itemize}
+\item \textbf{【新規】}でクラスを足し，\textbf{【削除】}で消し，
+      \textbf{【並び替え】}で表示順を変えます。
+      \textbf{並び順はリザルトや印刷物の順序}になるので，ここで整えておきます。
+\item \textbf{行をダブルクリックすると詳細画面が開き}，
+      そのクラスのコース・競技時間・規定時間・フィニッシュ閉鎖時刻・入賞人数・
+      優勝設定を直接編集できます。
+\item 右側の\textbf{【一括設定】}から，時間制限・入賞人数・優勝設定などを
+      \textbf{全クラスにまとめて}入れられます。
+      \textbf{競技時間の入れ忘れは，ここでまとめて入れるのがいちばん確実}です。
+\item コースとクラスが 1 対 1 のときは，2 つのリストの間にある
+      \textbf{【クラス名でコースを作成する】}を押すと，
+      クラス名と同じ名前のコースがまとめて作られます。
+\end{itemize}
+
+\textbf{クラス数が多く，同じ直しを何十行も繰り返すとき}は，
+画面ではなく \texttt{Class.csv} を作り直してドロップするか，
+\texttt{Class.dat} を直接編集します（Step 7）。
 
 \begin{center}
 \small
@@ -678,8 +770,9 @@ SI はステーション側に時計があり，フィニッシュに\textbf{絶
 画面から入れるのが面倒な変更を，データファイルを直接書き換えて済ませる。
 \end{Goal}
 
-コースやクラスの情報は，イベントマネージャの画面から 1 つずつ入れられますが，
-\textbf{コース数が多いときや，同じ直しを何十行も繰り返すとき}は，
+コースやクラスの情報は，\textbf{イベントマネージャの画面からダブルクリックで
+直接編集できます}（Step 5・Step 6）。
+ただし\textbf{コース数・クラス数が多いときや，同じ直しを何十行も繰り返すとき}は，
 ファイルを直接書き換えたほうが速く，間違いも減ります。
 
 Mulka2 のデータは\textbf{すべてテキストファイル}なので，
@@ -1198,6 +1291,11 @@ CSV はすべて，この枠に入れて読ませます。
 
 \textbf{そのまま使えるサンプル}（ゼッケン番号の桁設計込み）：\\
 \url{https://github.com/AtsushiYanaigsawa768/JOY2Mulka/blob/main/sample/normal/Startlist.csv}
+
+文字コードは\textbf{UTF-8（BOM 付き）・改行 CRLF}です。
+表計算ソフトで作り直したときに\textbf{ここが変わって読めなくなる}ことがあるので，
+ドロップして反応がないときは，まず文字コードを疑います（Step 5 の囲み）。
+JOY2Mulka が出力する \texttt{Startlist.csv} は，はじめからこの形式です。
 
 \begin{J2M}[Step 0：読み込みと大会設定]
 \textbf{読み込み枠は 2 つあります。}
