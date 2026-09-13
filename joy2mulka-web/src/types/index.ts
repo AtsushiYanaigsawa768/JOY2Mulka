@@ -106,6 +106,17 @@ export interface GenerationResult {
   seed: number;
 }
 
+/** 役職用スタートリスト 1 種類分（役割ごとに複数種類を作る） */
+export interface RoleVariantFile {
+  id: string;
+  role: string;        // 救護 / スタート / フィニッシュ
+  title: string;       // 紙の表題
+  purpose: string;     // 何のための並びか
+  fileBase: string;    // 出力ファイル名の元
+  tex: string;
+  csv: string;
+}
+
 export interface OutputFiles {
   mulkaCsv: string;
   roleCsv: string;
@@ -114,6 +125,8 @@ export interface OutputFiles {
   publicDocx: Blob;
   roleDocx: Blob;
   classSummaryCsv: string;
+  /** 役職別スタートリスト（救護・スタート・フィニッシュ × 複数の並び順） */
+  roleVariants: RoleVariantFile[];
 }
 
 export type Step = 'menu' | 'step0' | 'step1' | 'step2' | 'step3' | 'step4' | 'done';
@@ -124,8 +137,26 @@ export type AppMode = 'create' | 'edit' | 'update';
 // Person position constraint for Step 2
 export interface PersonPositionConstraint {
   id: string;
-  personName: string;  // Name of the person (matched by name1 or name2)
+  /** 'person' = 個人を指定 / 'affiliation' = 所属を指定（その所属の全員が対象）。未指定は 'person' */
+  targetType?: 'person' | 'affiliation';
+  /** targetType が 'person' なら氏名（name1 / name2 で照合）、'affiliation' なら所属名 */
+  personName: string;
   position: 'early' | 'late';  // Early = first 20%, Late = last 20%
+}
+
+/**
+ * 「近め」制約: 指定した複数人を近い時間帯にまとめる。
+ * まとめても連続はさせず、最低 minGapMinutes 分は必ず空ける。
+ * 早め・遅めの制約と重複して設定できる（メンバーに早め／遅めが付いていれば、
+ * グループごと前半／後半に寄せる）。
+ */
+export interface ProximityGroupConstraint {
+  id: string;
+  label: string;
+  /** 対象者の氏名（name1 / name2 のどちらでも照合） */
+  members: string[];
+  /** メンバー同士の最小間隔（分）。連続配置は常に禁止 */
+  minGapMinutes: number;
 }
 
 // TeX template type
@@ -163,6 +194,8 @@ export interface GlobalSettings {
   interCourseGap: number;
   seed: number;
   personPositionConstraints: PersonPositionConstraint[];
+  /** 「近め」制約グループ */
+  proximityGroups: ProximityGroupConstraint[];
   texTemplate: TexTemplate;
   /** 練習会モード: スタート時刻を設定せず、入力順にクラスごとに出力する */
   practiceMode: boolean;

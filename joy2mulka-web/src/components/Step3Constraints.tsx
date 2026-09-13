@@ -11,7 +11,7 @@ import {
   lookupEntryJoaNumber,
 } from '../utils/rankingUtils';
 import { TEX_TEMPLATES } from '../utils/outputFormatter';
-import { Entry, TexTemplate, PersonPositionConstraint } from '../types';
+import { Entry, TexTemplate, PersonPositionConstraint, ProximityGroupConstraint } from '../types';
 
 export default function Step3Constraints() {
   const { state, dispatch, goToStep } = useApp();
@@ -22,7 +22,15 @@ export default function Step3Constraints() {
   const [personSearchQuery, setPersonSearchQuery] = useState('');
   const [showPersonSearchResults, setShowPersonSearchResults] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<'early' | 'late'>('early');
+  const [selectedTargetType, setSelectedTargetType] = useState<'person' | 'affiliation'>('person');
   const personSearchRef = useRef<HTMLDivElement>(null);
+
+  // 近め（proximity）グループの編集状態
+  const [proximityMemberQuery, setProximityMemberQuery] = useState('');
+  const [proximityDraftMembers, setProximityDraftMembers] = useState<string[]>([]);
+  const [proximityGapMinutes, setProximityGapMinutes] = useState(3);
+
+  const proximityGroups = state.globalSettings.proximityGroups || [];
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -47,10 +55,44 @@ export default function Step3Constraints() {
     }).slice(0, 10); // Limit to 10 results
   }, [personSearchQuery, state.entries]);
 
+  // 所属の一覧（所属ごとに早め・遅めを指定するため）
+  const allAffiliations = useMemo(() => {
+    const names = new Set<string>();
+    for (const entry of state.entries) {
+      const list = entry.affiliations && entry.affiliations.length > 0
+        ? entry.affiliations
+        : (entry.affiliation && entry.affiliation !== '-' ? [entry.affiliation] : []);
+      for (const aff of list) {
+        const name = aff.trim();
+        if (name) names.add(name);
+      }
+    }
+    return Array.from(names).sort();
+  }, [state.entries]);
+
+  // 所属の検索結果
+  const affiliationSearchResults = useMemo(() => {
+    if (!personSearchQuery.trim()) return [];
+    const query = personSearchQuery.toLowerCase();
+    return allAffiliations.filter((a) => a.toLowerCase().includes(query)).slice(0, 10);
+  }, [personSearchQuery, allAffiliations]);
+
+  // 所属に属する人数
+  const countInAffiliation = useCallback((affiliation: string) => {
+    const key = affiliation.replace(/\d+$/, '').trim().toLowerCase();
+    return state.entries.filter((e) => {
+      const list = e.affiliations && e.affiliations.length > 0
+        ? e.affiliations
+        : (e.affiliation ? [e.affiliation] : []);
+      return list.some((a) => a.replace(/\d+$/, '').trim().toLowerCase() === key);
+    }).length;
+  }, [state.entries]);
+
   // Add person position constraint
   const addPersonConstraint = useCallback((entry: Entry) => {
     const newConstraint: PersonPositionConstraint = {
       id: `ppc-${Date.now()}`,
+      targetType: 'person',
       personName: entry.name1,
       position: selectedPosition,
     };
@@ -66,6 +108,65 @@ export default function Step3Constraints() {
     setPersonSearchQuery('');
     setShowPersonSearchResults(false);
   }, [selectedPosition, state.globalSettings.personPositionConstraints, dispatch]);
+
+  // 所属まるごとに早め／遅めを設定する
+  const addAffiliationConstraint = useCallback((affiliation: string) => {
+    const newConstraint: PersonPositionConstraint = {
+      id: `ppc-${Date.now()}`,
+      targetType: 'affiliation',
+      personName: affiliation,
+      position: selectedPosition,
+    };
+    dispatch({
+      type: 'SET_GLOBAL_SETTINGS',
+      payload: {
+        personPositionConstraints: [
+          ...state.globalSettings.personPositionConstraints,
+          newConstraint,
+        ],
+      },
+    });
+    setPersonSearchQuery('');
+    setShowPersonSearchResults(false);
+  }, [selectedPosition, state.globalSettings.personPositionConstraints, dispatch]);
+
+  // 近めグループを追加
+  const addProximityGroup = useCallback(() => {
+    if (proximityDraftMembers.length < 2) return;
+    const newGroup: ProximityGroupConstraint = {
+      id: `pg-${Date.now()}`,
+      label: proximityDraftMembers.join('・'),
+      members: proximityDraftMembers,
+      minGapMinutes: proximityGapMinutes,
+    };
+    dispatch({
+      type: 'SET_GLOBAL_SETTINGS',
+      payload: { proximityGroups: [...proximityGroups, newGroup] },
+    });
+    setProximityDraftMembers([]);
+    setProximityMemberQuery('');
+  }, [proximityDraftMembers, proximityGapMinutes, proximityGroups, dispatch]);
+
+  const removeProximityGroup = useCallback((groupId: string) => {
+    dispatch({
+      type: 'SET_GLOBAL_SETTINGS',
+      payload: { proximityGroups: proximityGroups.filter((g) => g.id !== groupId) },
+    });
+  }, [proximityGroups, dispatch]);
+
+  // 近めグループの候補（入力中の検索）
+  const proximityCandidates = useMemo(() => {
+    if (!proximityMemberQuery.trim()) return [];
+    const query = proximityMemberQuery.toLowerCase();
+    return state.entries.filter((entry) => {
+      if (proximityDraftMembers.includes(entry.name1)) return false;
+      return (
+        entry.name1?.toLowerCase().includes(query) ||
+        entry.name2?.toLowerCase().includes(query) ||
+        entry.affiliation?.toLowerCase().includes(query)
+      );
+    }).slice(0, 8);
+  }, [proximityMemberQuery, proximityDraftMembers, state.entries]);
 
   // Remove person position constraint
   const removePersonConstraint = useCallback((constraintId: string) => {
@@ -595,15 +696,32 @@ export default function Step3Constraints() {
         {/* Person Position Constraints */}
         {!practiceMode && (
         <div className="border rounded-lg p-4">
-          <h3 className="font-medium mb-3">人物位置制約</h3>
+          <h3 className="font-medium mb-3">人物位置制約（早め・遅め）</h3>
           <p className="text-sm text-gray-600 mb-4">
-            特定の人物のスタート順序を「前半」または「後半」に配置します。
-            前半は先頭20%、後半は最後20%の位置に配置されます。
+            スタート順序を「前半」または「後半」に寄せます。
+            前半は先頭20%、後半は最後20%の位置です。
+            <strong>個人</strong>だけでなく<strong>所属ごと</strong>にも指定できます
+            （所属を指定すると、その所属の全員が対象になり、互いに連続しないように配置されます）。
           </p>
 
           {/* Add new constraint */}
           <div className="mb-4">
             <div className="flex gap-2 items-start">
+              {/* Target type selector */}
+              <div className="flex-shrink-0">
+                <select
+                  value={selectedTargetType}
+                  onChange={(e) => {
+                    setSelectedTargetType(e.target.value as 'person' | 'affiliation');
+                    setPersonSearchQuery('');
+                  }}
+                  className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="person">個人</option>
+                  <option value="affiliation">所属ごと</option>
+                </select>
+              </div>
+
               {/* Position selector */}
               <div className="flex-shrink-0">
                 <select
@@ -627,7 +745,19 @@ export default function Step3Constraints() {
                   }}
                   onFocus={() => setShowPersonSearchResults(true)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && personSearchResults.length > 0) {
+                    if (e.key !== 'Enter') return;
+                    if (selectedTargetType === 'affiliation') {
+                      if (affiliationSearchResults.length === 0) return;
+                      e.preventDefault();
+                      const first = affiliationSearchResults.find(
+                        (aff) => !state.globalSettings.personPositionConstraints.some(
+                          (c) => c.targetType === 'affiliation' && c.personName === aff
+                        )
+                      );
+                      if (first) addAffiliationConstraint(first);
+                      return;
+                    }
+                    if (personSearchResults.length > 0) {
                       e.preventDefault();
                       // Find first non-added entry
                       const firstAvailable = personSearchResults.find(
@@ -640,12 +770,43 @@ export default function Step3Constraints() {
                       }
                     }
                   }}
-                  placeholder="名前または所属で検索..."
+                  placeholder={selectedTargetType === 'affiliation' ? '所属名で検索...' : '名前または所属で検索...'}
                   className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
 
+                {/* 所属の検索結果 */}
+                {selectedTargetType === 'affiliation' && showPersonSearchResults && affiliationSearchResults.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                    {affiliationSearchResults.map((aff) => {
+                      const isAlreadyAdded = state.globalSettings.personPositionConstraints.some(
+                        (c) => c.targetType === 'affiliation' && c.personName === aff
+                      );
+                      return (
+                        <button
+                          key={aff}
+                          onClick={() => !isAlreadyAdded && addAffiliationConstraint(aff)}
+                          disabled={isAlreadyAdded}
+                          className={`w-full text-left px-3 py-2 text-sm border-b border-gray-100 last:border-b-0
+                            ${isAlreadyAdded
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'hover:bg-blue-50 cursor-pointer'
+                            }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">{aff}</span>
+                            <span className="text-xs text-gray-400">{countInAffiliation(aff)}名</span>
+                          </div>
+                          {isAlreadyAdded && (
+                            <span className="text-xs text-orange-500">追加済み</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
                 {/* Search results dropdown */}
-                {showPersonSearchResults && personSearchResults.length > 0 && (
+                {selectedTargetType === 'person' && showPersonSearchResults && personSearchResults.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
                     {personSearchResults.map((entry) => {
                       // Check if already added
@@ -684,15 +845,20 @@ export default function Step3Constraints() {
                 )}
 
                 {/* No results message */}
-                {showPersonSearchResults && personSearchQuery.trim() && personSearchResults.length === 0 && (
+                {showPersonSearchResults && personSearchQuery.trim() &&
+                  (selectedTargetType === 'affiliation'
+                    ? affiliationSearchResults.length === 0
+                    : personSearchResults.length === 0) && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-sm text-gray-500">
-                    該当する人物が見つかりません
+                    {selectedTargetType === 'affiliation' ? '該当する所属が見つかりません' : '該当する人物が見つかりません'}
                   </div>
                 )}
               </div>
             </div>
             <p className="text-xs text-gray-400 mt-1">
-              名前（漢字/かな）または所属で検索できます。Enterキーで最初の候補を追加します。
+              {selectedTargetType === 'affiliation'
+                ? '所属名で検索できます。Enterキーで最初の候補を追加します。'
+                : '名前（漢字/かな）または所属で検索できます。Enterキーで最初の候補を追加します。'}
             </p>
           </div>
 
@@ -723,8 +889,15 @@ export default function Step3Constraints() {
                         >
                           {constraint.position === 'early' ? '前半' : '後半'}
                         </span>
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700">
+                          {constraint.targetType === 'affiliation' ? '所属' : '個人'}
+                        </span>
                         <span className="font-medium">{constraint.personName}</span>
-                        {entry && (
+                        {constraint.targetType === 'affiliation' ? (
+                          <span className="text-xs text-gray-500">
+                            （{countInAffiliation(constraint.personName)}名）
+                          </span>
+                        ) : entry && (
                           <span className="text-xs text-gray-500">
                             ({entry.className} / {entry.affiliation || '-'})
                           </span>
@@ -746,6 +919,130 @@ export default function Step3Constraints() {
             <div className="text-sm text-gray-500 italic">
               人物位置制約は設定されていません
             </div>
+          )}
+        </div>
+        )}
+
+        {/* 近め（proximity）グループ */}
+        {!practiceMode && (
+        <div className="border rounded-lg p-4">
+          <h3 className="font-medium mb-3">近め（まとめて出走させる）</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            指定した人たちを近い時間帯にまとめます（送迎・撮影・チーム単位の応援などに使います）。
+            まとめても<strong>連続はしません</strong>。最低でも指定した分数だけ間隔を空けます。
+            早め・遅めの制約と<strong>重複して設定できます</strong>
+            （メンバーの誰かに早め／遅めが付いていれば、グループごと前半／後半に寄せます）。
+          </p>
+
+          {/* メンバーを選ぶ */}
+          <div className="mb-3">
+            <div className="flex gap-2 items-center mb-2">
+              <label className="text-sm text-gray-700">最小間隔</label>
+              <input
+                type="number"
+                min={1}
+                max={60}
+                value={proximityGapMinutes}
+                onChange={(e) => setProximityGapMinutes(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+              />
+              <span className="text-sm text-gray-700">分</span>
+              <span className="text-xs text-gray-400">
+                （この分数以内に 2 人が並ぶことはありません。スタート間隔より短い値を入れても、連続はしません）
+              </span>
+            </div>
+
+            <input
+              type="text"
+              value={proximityMemberQuery}
+              onChange={(e) => setProximityMemberQuery(e.target.value)}
+              placeholder="メンバーを名前または所属で検索して追加..."
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            {proximityCandidates.length > 0 && (
+              <div className="mt-1 border border-gray-200 rounded-lg divide-y max-h-48 overflow-y-auto">
+                {proximityCandidates.map((entry) => (
+                  <button
+                    key={entry.id}
+                    onClick={() => {
+                      setProximityDraftMembers([...proximityDraftMembers, entry.name1]);
+                      setProximityMemberQuery('');
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50"
+                  >
+                    <span className="font-medium">{entry.name1}</span>
+                    {entry.name2 && <span className="text-gray-500 ml-2">({entry.name2})</span>}
+                    <span className="text-xs text-gray-400 ml-2">
+                      {entry.className} / {entry.affiliation || '-'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 追加予定のメンバー */}
+          {proximityDraftMembers.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              {proximityDraftMembers.map((name) => (
+                <span
+                  key={name}
+                  className="inline-flex items-center gap-1 bg-blue-50 border border-blue-200 rounded px-2 py-0.5 text-sm"
+                >
+                  {name}
+                  <button
+                    onClick={() =>
+                      setProximityDraftMembers(proximityDraftMembers.filter((m) => m !== name))
+                    }
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ✕
+                  </button>
+                </span>
+              ))}
+              <button
+                onClick={addProximityGroup}
+                disabled={proximityDraftMembers.length < 2}
+                className={`px-3 py-1 rounded text-sm font-medium ${
+                  proximityDraftMembers.length >= 2
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                このグループを追加
+              </button>
+            </div>
+          )}
+
+          {/* 設定済みグループ */}
+          {proximityGroups.length > 0 ? (
+            <div className="space-y-1">
+              <h4 className="text-sm font-medium text-gray-700">設定済みの近めグループ:</h4>
+              {proximityGroups.map((group) => (
+                <div
+                  key={group.id}
+                  className="flex items-center justify-between p-2 rounded bg-blue-50 border border-blue-200"
+                >
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-200 text-blue-800">
+                      最低 {group.minGapMinutes} 分あける
+                    </span>
+                    <span className="text-sm font-medium">{group.members.join('・')}</span>
+                    <span className="text-xs text-gray-500">（{group.members.length}名）</span>
+                  </div>
+                  <button
+                    onClick={() => removeProximityGroup(group.id)}
+                    className="text-red-500 hover:text-red-700 p-1"
+                    title="削除"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-gray-500 italic">近めグループは設定されていません</div>
           )}
         </div>
         )}

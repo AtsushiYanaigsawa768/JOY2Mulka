@@ -1,4 +1,4 @@
-import { StartListEntry, GlobalSettings, OutputFiles, TexTemplate, TexTemplateInfo } from '../types';
+import { StartListEntry, GlobalSettings, OutputFiles, TexTemplate, TexTemplateInfo, RoleVariantFile } from '../types';
 import { generatePublicDocx, generateRoleDocx } from './docxFormatter';
 
 /**
@@ -670,6 +670,300 @@ export function generateRoleTex(
   return buildTex(startList, settings, { isRole: true });
 }
 
+/* ------------------------------------------------------------------ *
+ * 役職用スタートリスト（役割ごとに複数種類）
+ *
+ * 山の中では無線も携帯もつながらないことがあり、当日は紙だけで判断する。
+ * 役職によって「何から引くか」が違うので、役職ごとに紙を分ける。
+ * さらに同じ役職でも引くキーが変わることがあるため、1 役職につき
+ * 複数の並び順を出しておく。
+ * ------------------------------------------------------------------ */
+
+export type RoleName = '救護' | 'スタート' | 'フィニッシュ';
+
+export interface RoleListVariant {
+  id: string;
+  role: RoleName;
+  /** 出力ファイル名の元になる名前 */
+  fileBase: string;
+  /** 紙の表題 */
+  title: string;
+  /** 何のための並びかの説明 */
+  purpose: string;
+  sortBy: 'startNumber' | 'kana' | 'cardNumber' | 'startTime';
+  /** レーンごとに分けて出す */
+  groupByLane: boolean;
+}
+
+export const ROLE_LIST_VARIANTS: RoleListVariant[] = [
+  {
+    id: 'rescue-bib',
+    role: '救護',
+    fileBase: 'Rescue_ByBib',
+    title: '救護用スタートリスト（ゼッケン番号順）',
+    purpose: 'ゼッケン番号から引く。全クラス通し。',
+    sortBy: 'startNumber',
+    groupByLane: false,
+  },
+  {
+    id: 'rescue-kana',
+    role: '救護',
+    fileBase: 'Rescue_ByKana',
+    title: '救護用スタートリスト（ふりがな順）',
+    purpose: '名前しか分からないときに引く。全クラス通し。',
+    sortBy: 'kana',
+    groupByLane: false,
+  },
+  {
+    id: 'rescue-card',
+    role: '救護',
+    fileBase: 'Rescue_ByCard',
+    title: '救護用スタートリスト（カード番号順）',
+    purpose: '拾得カードや読み取り記録から人を特定するときに引く。',
+    sortBy: 'cardNumber',
+    groupByLane: false,
+  },
+  {
+    id: 'start-lane-time',
+    role: 'スタート',
+    fileBase: 'Start_ByLaneTime',
+    title: 'スタート用リスト（レーン別・時刻順）',
+    purpose: '枠に立った人を呼ぶための本番用。姓のふりがなを大きく出す。',
+    sortBy: 'startTime',
+    groupByLane: true,
+  },
+  {
+    id: 'start-bib',
+    role: 'スタート',
+    fileBase: 'Start_ByBib',
+    title: 'スタート用リスト（ゼッケン番号順）',
+    purpose: '遅刻・枠違いの人をゼッケンから確認するための控え。',
+    sortBy: 'startNumber',
+    groupByLane: false,
+  },
+  {
+    id: 'finish-bib',
+    role: 'フィニッシュ',
+    fileBase: 'Finish_ByBib',
+    title: 'フィニッシュ用リスト（ゼッケン番号順）',
+    purpose: '戻ってきた人のゼッケンを見て消し込む本番用。',
+    sortBy: 'startNumber',
+    groupByLane: false,
+  },
+  {
+    id: 'finish-time',
+    role: 'フィニッシュ',
+    fileBase: 'Finish_ByStartTime',
+    title: 'フィニッシュ用リスト（スタート時刻順）',
+    purpose: '未帰還者を早い順に洗い出すための控え。',
+    sortBy: 'startTime',
+    groupByLane: false,
+  },
+];
+
+/** ふりがなの姓（最初の空白まで）。空白が無ければ全体を返す */
+function kanaSurname(entry: StartListEntry): string {
+  const kana = entry.name2 || '';
+  const parts = kana.split(/[\s\u3000]+/).filter(Boolean);
+  return parts[0] || kana;
+}
+
+/** 1 列の定義 */
+interface RoleColumn {
+  header: string;
+  /** LaTeX の列指定。p{} を使うときは幅の割合を width に入れる */
+  align: 'l' | 'r' | 'p';
+  width?: number;
+  /** その列を大きく出す */
+  big?: boolean;
+  value: (entry: StartListEntry) => string;
+}
+
+function roleColumns(role: RoleName): RoleColumn[] {
+  const card = (e: StartListEntry) =>
+    e.isRental || !e.cardNumber ? 'レンタル' : e.cardNumber;
+
+  if (role === '救護') {
+    // どのキーからでも引けるよう、全項目を同じ大きさで載せる
+    return [
+      { header: 'ゼッケン', align: 'r', value: (e) => String(e.startNumber) },
+      { header: '氏名', align: 'p', width: 0.18, value: (e) => e.name1 },
+      { header: 'ふりがな', align: 'p', width: 0.18, value: (e) => e.name2 },
+      { header: '所属', align: 'p', width: 0.2, value: (e) => e.affiliation || '-' },
+      { header: 'クラス', align: 'l', value: (e) => e.className },
+      { header: 'カード', align: 'l', value: card },
+      { header: 'スタート', align: 'l', value: (e) => e.startTime },
+    ];
+  }
+
+  if (role === 'スタート') {
+    // 呼び出すのは「姓のふりがな」。そこだけ大きくする
+    return [
+      { header: '時刻', align: 'l', value: (e) => e.startTime },
+      { header: 'ゼッケン', align: 'r', value: (e) => String(e.startNumber) },
+      { header: '姓（かな）', align: 'p', width: 0.22, big: true, value: kanaSurname },
+      { header: '氏名', align: 'p', width: 0.2, value: (e) => e.name1 },
+      { header: 'クラス', align: 'l', value: (e) => e.className },
+      { header: 'カード', align: 'l', value: card },
+    ];
+  }
+
+  // フィニッシュ：見るのはゼッケン。消し込み欄を付ける
+  return [
+    { header: '帰還', align: 'l', value: () => '' },
+    { header: 'ゼッケン', align: 'r', big: true, value: (e) => String(e.startNumber) },
+    { header: '氏名', align: 'p', width: 0.22, value: (e) => e.name1 },
+    { header: 'クラス', align: 'l', value: (e) => e.className },
+    { header: 'カード', align: 'l', value: card },
+    { header: 'スタート', align: 'l', value: (e) => e.startTime },
+  ];
+}
+
+function sortForVariant(
+  startList: StartListEntry[],
+  variant: RoleListVariant
+): StartListEntry[] {
+  const list = [...startList];
+  switch (variant.sortBy) {
+    case 'startNumber':
+      return list.sort((a, b) => a.startNumber - b.startNumber);
+    case 'kana':
+      return list.sort((a, b) =>
+        (a.name2 || a.name1).localeCompare(b.name2 || b.name1, 'ja')
+      );
+    case 'cardNumber':
+      return list.sort((a, b) => {
+        const na = parseInt(a.cardNumber) || Number.MAX_SAFE_INTEGER;
+        const nb = parseInt(b.cardNumber) || Number.MAX_SAFE_INTEGER;
+        return na - nb || a.startNumber - b.startNumber;
+      });
+    case 'startTime':
+    default:
+      return list.sort(
+        (a, b) => a.startTime.localeCompare(b.startTime) || a.startNumber - b.startNumber
+      );
+  }
+}
+
+/** 役職用リスト 1 種類分の LaTeX */
+export function generateRoleVariantTex(
+  startList: StartListEntry[],
+  settings: GlobalSettings,
+  variant: RoleListVariant
+): string {
+  const spec = TEMPLATE_SPECS[resolveTemplate(settings.texTemplate)];
+  const columns = roleColumns(variant.role);
+
+  const colSpec = columns
+    .map((c) => {
+      if (c.align === 'p') {
+        return `>{\\raggedright\\arraybackslash}p{${(c.width || 0.2).toFixed(3)}\\textwidth}`;
+      }
+      return c.align;
+    })
+    .join('');
+
+  const headerCells = columns.map((c) => `\\textbf{${escapeLatex(c.header)}}`).join(' & ');
+
+  const cell = (c: RoleColumn, entry: StartListEntry): string => {
+    if (c.header === '帰還') return '\\framebox[4mm]{\\rule{0pt}{3.5mm}}';
+    const text = escapeLatex(c.value(entry));
+    return c.big ? `{\\LARGE\\bfseries ${text}}` : text;
+  };
+
+  const table = (rows: StartListEntry[]): string => {
+    let out = `\\begin{longtable}{${colSpec}}
+\\specialrule{${spec.rules.top}}{0pt}{0pt}
+${headerCells} \\\\
+\\midrule
+\\endfirsthead
+\\multicolumn{${columns.length}}{@{}l}{\\small\\itshape 続き}\\\\
+\\specialrule{${spec.rules.top}}{0pt}{0pt}
+${headerCells} \\\\
+\\midrule
+\\endhead
+\\specialrule{${spec.rules.bottom}}{0pt}{0pt}
+\\endfoot
+\\specialrule{${spec.rules.bottom}}{0pt}{0pt}
+\\endlastfoot
+`;
+    for (const entry of rows) {
+      out += columns.map((c) => cell(c, entry)).join(' & ') + ' \\\\\n';
+    }
+    out += '\\end{longtable}\n\n';
+    return out;
+  };
+
+  // 二段組は役職用リストには向かない（当日に指でたどるため）
+  const flatSpec = { ...spec, twoColumn: false };
+  let tex = buildPreamble(flatSpec, settings, escapeLatex(variant.role), false);
+  tex += `\n\\begin{document}\n${spec.bodyFont}\n\n`;
+  tex += `\\begin{center}
+{\\LARGE\\bfseries ${escapeLatex(settings.outputFolder || settings.competitionName)}}\\\\[4pt]
+{\\large ${escapeLatex(variant.title)}}\\\\[2pt]
+{\\small ${escapeLatex(variant.purpose)}}
+\\end{center}
+\\vspace{4mm}
+
+`;
+
+  const sorted = sortForVariant(startList, variant);
+
+  if (variant.groupByLane && !settings.practiceMode) {
+    const byLane = new Map<string, StartListEntry[]>();
+    for (const entry of sorted) {
+      const key = `${entry.startArea} - ${entry.lane}`;
+      if (!byLane.has(key)) byLane.set(key, []);
+      byLane.get(key)!.push(entry);
+    }
+    for (const key of sortLaneKeys(Array.from(byLane.keys()))) {
+      const laneName = key.includes(' - ') ? key.split(' - ')[1] : key;
+      tex += `\\laneheading{${escapeLatex(laneName)}}\n\n`;
+      tex += table(byLane.get(key)!);
+    }
+  } else {
+    tex += table(sorted);
+  }
+
+  tex += '\\end{document}\n';
+  return tex;
+}
+
+/** 役職用リスト 1 種類分の CSV（Excel でそのまま開ける） */
+export function generateRoleVariantCsv(
+  startList: StartListEntry[],
+  variant: RoleListVariant
+): string {
+  const columns = roleColumns(variant.role);
+  const quote = (v: string) => `"${v.replace(/"/g, '""')}"`;
+
+  const laneHeader = variant.groupByLane ? ['レーン'] : [];
+  const header = [...laneHeader, ...columns.map((c) => c.header)].map(quote).join(',');
+
+  const rows = sortForVariant(startList, variant).map((entry) => {
+    const laneCell = variant.groupByLane ? [entry.lane || ''] : [];
+    return [...laneCell, ...columns.map((c) => c.value(entry))].map(quote).join(',');
+  });
+
+  return '\uFEFF' + header + '\n' + rows.join('\n');
+}
+
+/** 役職用リストを全種類作る */
+export function generateRoleVariantFiles(
+  startList: StartListEntry[],
+  settings: GlobalSettings
+): RoleVariantFile[] {
+  return ROLE_LIST_VARIANTS.map((variant) => ({
+    id: variant.id,
+    role: variant.role,
+    title: variant.title,
+    purpose: variant.purpose,
+    fileBase: variant.fileBase,
+    tex: generateRoleVariantTex(startList, settings, variant),
+    csv: generateRoleVariantCsv(startList, variant),
+  }));
+}
+
 /**
  * Generate all output files (both TeX and DOCX for public + role startlists)
  */
@@ -690,5 +984,6 @@ export async function generateOutputFiles(
     publicDocx,
     roleDocx,
     classSummaryCsv: generateClassSummaryCsv(startList),
+    roleVariants: generateRoleVariantFiles(startList, settings),
   };
 }

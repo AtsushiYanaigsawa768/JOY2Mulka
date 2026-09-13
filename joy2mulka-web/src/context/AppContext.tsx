@@ -35,6 +35,7 @@ const initialState: AppState = {
     interCourseGap: 0,
     seed: 42,
     personPositionConstraints: [],
+    proximityGroups: [],
     texTemplate: 'standard',
     practiceMode: false,
     generateStartNumbers: true,

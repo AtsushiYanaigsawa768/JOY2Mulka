@@ -1,4 +1,4 @@
-import { Entry, Course, StartArea, Lane, StartListEntry, Constraints, Conflict, PersonPositionConstraint } from '../types';
+import { Entry, Course, StartArea, Lane, StartListEntry, Constraints, Conflict, PersonPositionConstraint, ProximityGroupConstraint } from '../types';
 
 /**
  * Create a seeded random number generator
@@ -243,77 +243,211 @@ export function shuffleAvoidingConsecutiveAffiliations(
 }
 
 /**
- * Apply person position constraints to ordered entries
- * - 'early' constraint: place in the first 20% of positions
- * - 'late' constraint: place in the last 20% of positions
+ * Does this entry match the target of a position constraint?
+ * - targetType 'person'      : 氏名（name1 / name2）で照合
+ * - targetType 'affiliation' : 所属で照合（所属の全員が対象になる）
+ */
+function matchesPositionTarget(entry: Entry, constraint: PersonPositionConstraint): boolean {
+  const target = constraint.personName;
+  if (!target) return false;
+
+  if (constraint.targetType === 'affiliation') {
+    const key = target.replace(/\d+$/, '').trim().toLowerCase();
+    if (!key) return false;
+    return getAffiliationsForCheck(entry).includes(key);
+  }
+
+  const norm = normalizeName(target);
+  return normalizeName(entry.name1) === norm || normalizeName(entry.name2) === norm;
+}
+
+/**
+ * Does this entry belong to a proximity group?
+ */
+function matchesProximityMember(entry: Entry, memberName: string): boolean {
+  const norm = normalizeName(memberName);
+  if (!norm) return false;
+  return normalizeName(entry.name1) === norm || normalizeName(entry.name2) === norm;
+}
+
+/**
+ * Apply position ("早め" / "遅め") and proximity ("近め") constraints to an
+ * already-ordered list of entries.
+ *
+ * The ordering produced by the shuffle is treated as the baseline: only the
+ * entries named by a constraint are moved, everyone else keeps their relative
+ * order and simply slides into the remaining slots.
+ *
+ * - 'early'  : 先頭 20% の範囲に寄せる
+ * - 'late'   : 末尾 20% の範囲に寄せる
+ * - 所属指定 : その所属の全員が対象。互いに連続しないよう間隔を空けて配置する
+ * - 近めグループ : メンバーを等間隔でまとめる。間隔は
+ *   max(2 枠, minGapMinutes ぶんの枠数) なので、連続することはなく、
+ *   指定した分数以内に 2 人が並ぶこともない
+ *
+ * 近めと早め／遅めは重複して指定できる。近めグループのメンバーに早め（遅め）が
+ * 付いていれば、グループごと前半（後半）に寄せる。
+ *
+ * @param entries          - 並び替え済みのエントリー
+ * @param constraints      - 早め／遅めの制約
+ * @param proximityGroups  - 近めグループ
+ * @param intervalMinutes  - スタート間隔（分）。近めの最小間隔を枠数に換算するのに使う
+ */
+export function applyOrderConstraints(
+  entries: Entry[],
+  constraints: PersonPositionConstraint[],
+  proximityGroups: ProximityGroupConstraint[] = [],
+  intervalMinutes: number = 1
+): Entry[] {
+  const total = entries.length;
+  if (total === 0) return entries;
+  if (constraints.length === 0 && proximityGroups.length === 0) return entries;
+
+  const interval = intervalMinutes > 0 ? intervalMinutes : 1;
+
+  // entry id -> 現在位置（近めグループの中心を決めるのに使う）
+  const currentIndex = new Map<string, number>();
+  entries.forEach((e, i) => currentIndex.set(e.id, i));
+
+  const slotOf = new Map<string, number>();   // entry id -> 確定した枠
+  const taken = new Set<number>();
+
+  const reserve = (entry: Entry, slot: number) => {
+    slotOf.set(entry.id, slot);
+    taken.add(slot);
+  };
+
+  /** desired にいちばん近い空き枠を返す */
+  const nearestFreeSlot = (desired: number): number => {
+    const base = Math.min(Math.max(desired, 0), total - 1);
+    for (let d = 0; d < total; d++) {
+      if (base - d >= 0 && !taken.has(base - d)) return base - d;
+      if (base + d < total && !taken.has(base + d)) return base + d;
+    }
+    return base;
+  };
+
+  /** n 人を gap 間隔で置ける先頭位置を、desired に近いところから探す */
+  const findAnchor = (n: number, gap: number, desired: number): number | null => {
+    const maxAnchor = total - 1 - (n - 1) * gap;
+    if (maxAnchor < 0) return null;
+    const base = Math.min(Math.max(desired, 0), maxAnchor);
+    for (let d = 0; d <= total; d++) {
+      for (const anchor of d === 0 ? [base] : [base - d, base + d]) {
+        if (anchor < 0 || anchor > maxAnchor) continue;
+        let ok = true;
+        for (let i = 0; i < n; i++) {
+          if (taken.has(anchor + i * gap)) { ok = false; break; }
+        }
+        if (ok) return anchor;
+      }
+    }
+    return null;
+  };
+
+  const positionOf = (entry: Entry): 'early' | 'late' | null => {
+    for (const c of constraints) {
+      if (matchesPositionTarget(entry, c)) return c.position;
+    }
+    return null;
+  };
+
+  // --- 1. 近めグループを先に確定させる（いちばん制約が強いため） ---
+  for (const group of proximityGroups) {
+    const members = entries.filter(
+      (e) => !slotOf.has(e.id) && group.members.some((m) => matchesProximityMember(e, m))
+    );
+    if (members.length < 2) continue;
+
+    // 出走順を安定させるため、もとの並び順のまま配置する
+    members.sort((a, b) => (currentIndex.get(a.id)! - currentIndex.get(b.id)!));
+
+    // 連続禁止（2 枠以上）かつ、指定分数ぶんは必ず空ける
+    const minGapSlots = Math.ceil((group.minGapMinutes || 0) / interval);
+    let gap = Math.max(2, minGapSlots);
+    // 人数が多すぎて収まらない場合は間隔を詰める（ただし連続はさせない）
+    while (gap > 2 && (members.length - 1) * gap > total - 1) gap--;
+
+    // グループの中心をどこに置くか
+    const memberPositions = members.map((m) => positionOf(m));
+    const span = (members.length - 1) * gap;
+    let desired: number;
+    if (memberPositions.includes('early')) {
+      desired = 0;
+    } else if (memberPositions.includes('late')) {
+      desired = total - 1 - span;
+    } else {
+      const median = members[Math.floor(members.length / 2)];
+      desired = currentIndex.get(median.id)! - Math.floor(span / 2);
+    }
+
+    const anchor = findAnchor(members.length, gap, desired);
+    if (anchor === null) {
+      // 収まらないときは 1 人ずつ近い空き枠に置く（連続だけは避ける）
+      let cursor = Math.max(desired, 0);
+      for (const m of members) {
+        const slot = nearestFreeSlot(cursor);
+        reserve(m, slot);
+        cursor = slot + gap;
+      }
+    } else {
+      members.forEach((m, i) => reserve(m, anchor + i * gap));
+    }
+  }
+
+  // --- 2. 早め／遅めを確定させる ---
+  const early: Entry[] = [];
+  const late: Entry[] = [];
+  for (const entry of entries) {
+    if (slotOf.has(entry.id)) continue;   // 近めグループで確定済み
+    const pos = positionOf(entry);
+    if (pos === 'early') early.push(entry);
+    else if (pos === 'late') late.push(entry);
+  }
+
+  // 基本は前後 20% に寄せる。ただし所属ごとの指定で人数が多いときは、
+  // 連続させないために必要なだけ範囲を広げる（2 枠おきに置ける幅を確保する）
+  const earlyBoundary = Math.min(
+    Math.max(Math.floor(total * 0.2), early.length * 2) - 1,
+    total - 1
+  );
+  const lateBoundary = Math.max(
+    total - Math.max(Math.floor(total * 0.2), late.length * 2),
+    0
+  );
+
+  early.forEach((entry, i) => {
+    reserve(entry, nearestFreeSlot(Math.min(i * 2, Math.max(earlyBoundary, 0))));
+  });
+  late.forEach((entry, i) => {
+    reserve(entry, nearestFreeSlot(Math.max(total - 1 - i * 2, lateBoundary)));
+  });
+
+  if (slotOf.size === 0) return entries;
+
+  // --- 3. 残りの人を、もとの順番のまま空き枠に流し込む ---
+  const placed: (Entry | null)[] = new Array(total).fill(null);
+  for (const entry of entries) {
+    const slot = slotOf.get(entry.id);
+    if (slot !== undefined) placed[slot] = entry;
+  }
+  const rest = entries.filter((e) => !slotOf.has(e.id));
+  let restIdx = 0;
+  for (let i = 0; i < total; i++) {
+    if (placed[i] === null) placed[i] = rest[restIdx++];
+  }
+
+  return placed.filter((e): e is Entry => e !== null);
+}
+
+/**
+ * 旧 API 互換のラッパー（早め／遅めのみ）
  */
 export function applyPersonPositionConstraints(
   entries: Entry[],
   constraints: PersonPositionConstraint[]
 ): Entry[] {
-  if (constraints.length === 0 || entries.length === 0) {
-    return entries;
-  }
-
-  const result = [...entries];
-  const totalEntries = result.length;
-
-  // Calculate position boundaries
-  const earlyBoundary = Math.floor(totalEntries * 0.2);
-  const lateBoundary = Math.floor(totalEntries * 0.8);
-
-  for (const constraint of constraints) {
-    // Find the entry by name
-    const entryIndex = result.findIndex(
-      (e) => e.name1 === constraint.personName || e.name2 === constraint.personName
-    );
-
-    if (entryIndex === -1) {
-      continue; // Entry not found in this course
-    }
-
-    const entry = result[entryIndex];
-
-    // Remove from current position
-    result.splice(entryIndex, 1);
-
-    if (constraint.position === 'early') {
-      // Place in the first 20%
-      const targetPos = Math.min(earlyBoundary, result.length);
-      // Find a valid position within the early range
-      let insertPos = 0;
-      for (let i = 0; i <= targetPos && i < result.length; i++) {
-        // Try to find a position that doesn't create consecutive conflicts
-        if (i === 0 || !hasAffiliationOverlapByEntry(result[i - 1], entry)) {
-          insertPos = i;
-          break;
-        }
-      }
-      result.splice(insertPos, 0, entry);
-    } else {
-      // Place in the last 20%
-      const targetStartPos = Math.max(lateBoundary - 1, 0);
-      // Find a valid position within the late range
-      let insertPos = result.length;
-      for (let i = result.length; i >= targetStartPos; i--) {
-        // Try to find a position that doesn't create consecutive conflicts
-        if (i === result.length || !hasAffiliationOverlapByEntry(entry, result[i])) {
-          insertPos = i;
-          break;
-        }
-      }
-      result.splice(insertPos, 0, entry);
-    }
-  }
-
-  return result;
-}
-
-/**
- * Check if two entries have overlapping affiliations (helper for constraints)
- */
-function hasAffiliationOverlapByEntry(entry1: Entry, entry2: Entry): boolean {
-  return hasAffiliationOverlap(entry1, entry2);
+  return applyOrderConstraints(entries, constraints, [], 1);
 }
 
 /**
@@ -334,40 +468,28 @@ function formatTime(minutes: number): string {
 }
 
 /**
- * Convert time (minutes since midnight) to time_code
- * Rule: time_code = hour * 100 + minute
- * Example: 11:22 → 11 * 100 + 22 = 1122
- */
-function timeToTimeCode(minutes: number): number {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return h * 100 + m;
-}
-
-/**
- * Calculate start number using formula:
- * start_no = time_code + base * (1 + globalLaneNumber)
- * where base = 10^(digits of time_code - 1)
+ * ゼッケン番号（スタートナンバー）の番号帯を求める。
  *
- * Example: 11:22, lane 1
- * - time_code = 1122
- * - digits = 4, base = 10^(4-1) = 1000
- * - start_no = 1122 + 1000 * (1 + 1) = 1122 + 2000 = 3122
+ * テキストブックの桁設計に合わせる:
  *
- * @param minutes - Start time in minutes since midnight
- * @param globalLaneNumber - Global lane number (1-indexed, across all start areas)
+ *   [コース／クラス群 1 桁][レーン 1 桁][レーン内の連番 2 桁]  = 4 桁
+ *
+ * 番号帯はレーンごとに与える。レーン設定に「開始ナンバー」があればそれを使い、
+ * 無ければ 1100, 1200, 1300 … と 100 番刻みで自動採番する。
+ *
+ * 同じレーン（＝同じコース）の出走者が 100 人以上いると連番が 2 桁に収まらないので、
+ * そのときは番号帯を 10 倍して連番を 3 桁にし、ゼッケンを 5 桁にする。
+ *
+ * @param lane - レーン設定
+ * @param globalLaneNumber - 全スタートエリアを通したレーン番号（1 始まり）
+ * @param wide - 連番を 3 桁にする（レーンの人数が 100 人以上）
  */
-function calculateStartNumber(minutes: number, globalLaneNumber: number): number {
-  const timeCode = timeToTimeCode(minutes);
-
-  // Calculate base: 10^(number of digits in timeCode - 1)
-  // timeCode ranges from 0 (00:00) to 2359 (23:59)
-  // For times like 00:05 (timeCode=5), we still use 4 digits for consistency
-  // Typical competition times: 0900-1500 → timeCode 900-1500 (3-4 digits)
-  const digits = timeCode === 0 ? 1 : Math.floor(Math.log10(timeCode)) + 1;
-  const base = Math.pow(10, digits - 1);
-
-  return timeCode + base * (1 + globalLaneNumber);
+function laneNumberBase(lane: Lane, globalLaneNumber: number, wide: boolean): number {
+  const base =
+    lane.startNumber && lane.startNumber > 0
+      ? lane.startNumber
+      : 1000 + globalLaneNumber * 100;
+  return wide ? base * 10 : base;
 }
 
 /**
@@ -380,6 +502,7 @@ function calculateStartNumber(minutes: number, globalLaneNumber: number): number
  * @param seed - Random seed for reproducibility
  * @param personPositionConstraints - Person position constraints (early/late)
  * @param globalLaneNumber - Global lane number (1-indexed, across all start areas)
+ * @param proximityGroups - Proximity ("近め") group constraints
  */
 export function generateStartListForLane(
   courses: Course[],
@@ -388,7 +511,8 @@ export function generateStartListForLane(
   affiliationSplit: boolean,
   seed: number,
   personPositionConstraints: PersonPositionConstraint[] = [],
-  globalLaneNumber: number = 1
+  globalLaneNumber: number = 1,
+  proximityGroups: ProximityGroupConstraint[] = []
 ): StartListEntry[] {
   const startList: StartListEntry[] = [];
   let currentTimeMinutes = parseTimeToMinutes(lane.startTime);
@@ -398,6 +522,11 @@ export function generateStartListForLane(
 
   // Sort courses by order
   const sortedCourses = [...courses].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  // ゼッケンの番号帯。レーンの出走者が 100 人以上なら連番を 3 桁（＝5 桁のゼッケン）にする
+  const laneTotal = sortedCourses.reduce((sum, c) => sum + c.entries.length, 0);
+  const numberBase = laneNumberBase(lane, globalLaneNumber, laneTotal >= 100);
+  let seqInLane = 0;
 
   for (let courseIdx = 0; courseIdx < sortedCourses.length; courseIdx++) {
     const course = sortedCourses[courseIdx];
@@ -411,17 +540,22 @@ export function generateStartListForLane(
       orderedEntries = shuffleArray(course.entries, rng);
     }
 
-    // Apply person position constraints
-    orderedEntries = applyPersonPositionConstraints(orderedEntries, personPositionConstraints);
+    // Apply position ("早め"/"遅め") and proximity ("近め") constraints
+    orderedEntries = applyOrderConstraints(
+      orderedEntries,
+      personPositionConstraints,
+      proximityGroups,
+      lane.interval
+    );
 
     // Generate start list entries
     for (let i = 0; i < orderedEntries.length; i++) {
       const entry = orderedEntries[i];
       const startTimeMinutes = currentTimeMinutes + i * lane.interval;
 
-      // Calculate start number using new formula:
-      // start_no = time_code + base * (1 + globalLaneNumber)
-      const startNumber = calculateStartNumber(startTimeMinutes, globalLaneNumber);
+      // ゼッケン番号 = レーンの番号帯 + レーン内の連番
+      seqInLane++;
+      const startNumber = numberBase + seqInLane;
 
       // Determine card note
       let cardNote = entry.cardNumber ? 'my card' : 'レンタル';
@@ -467,6 +601,7 @@ export function generateStartListForLane(
  * @param seed - Random seed for reproducibility
  * @param rankings - Rankings map (baseClass -> normalizedName -> rank)
  * @param personPositionConstraints - Person position constraints (early/late)
+ * @param proximityGroups - Proximity ("近め") group constraints
  */
 export function generateStartList(
   courses: Course[],
@@ -475,7 +610,8 @@ export function generateStartList(
   constraints: Constraints,
   seed: number,
   rankings: Map<string, Map<string, number>> = new Map(),
-  personPositionConstraints: PersonPositionConstraint[] = []
+  personPositionConstraints: PersonPositionConstraint[] = [],
+  proximityGroups: ProximityGroupConstraint[] = []
 ): StartListEntry[] {
   const startList: StartListEntry[] = [];
 
@@ -551,7 +687,8 @@ export function generateStartList(
         lane.affiliationSplit && constraints.avoidSameClubConsecutive,
         seed,
         personPositionConstraints,
-        globalLaneNumber
+        globalLaneNumber,
+        proximityGroups
       );
 
       startList.push(...laneStartList);

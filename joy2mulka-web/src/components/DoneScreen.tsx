@@ -1,8 +1,7 @@
 import { useApp } from '../context/AppContext';
-import { downloadOutputFile, downloadAllAsZip } from '../utils/fileDownloader';
-import { OutputFiles } from '../types';
+import { downloadOutputFile, downloadAllAsZip, downloadFile, SingleFileKey } from '../utils/fileDownloader';
 
-type FileKey = keyof OutputFiles;
+type FileKey = SingleFileKey;
 
 interface FileInfo {
   key: FileKey;
@@ -145,6 +144,61 @@ export default function DoneScreen() {
           ))}
         </div>
       </div>
+
+      {/* 役職別スタートリスト */}
+      {(state.outputFiles?.roleVariants?.length || 0) > 0 && (
+        <div className="mb-8">
+          <h3 className="font-medium mb-1">役職別スタートリスト</h3>
+          <p className="text-sm text-gray-500 mb-3">
+            当日は無線も携帯も使えないことがあるので、役職ごとに「探し方」の違う紙を用意します。
+            同じ役職でも引くキーが変わるため、役職ごとに複数の並び順を出しています。
+          </p>
+          <div className="space-y-2">
+            {state.outputFiles!.roleVariants.map((variant) => (
+              <div
+                key={variant.id}
+                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+              >
+                <div>
+                  <div className="font-medium">
+                    <span className="text-xs bg-gray-200 text-gray-700 rounded px-2 py-0.5 mr-2">
+                      {variant.role}
+                    </span>
+                    {variant.title}
+                  </div>
+                  <div className="text-sm text-gray-500">{variant.purpose}</div>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={() =>
+                      downloadFile(
+                        variant.tex,
+                        `${state.globalSettings.outputFolder}_${variant.fileBase}.tex`,
+                        'text/x-tex'
+                      )
+                    }
+                    className="px-3 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md text-sm"
+                  >
+                    .tex
+                  </button>
+                  <button
+                    onClick={() =>
+                      downloadFile(
+                        variant.csv,
+                        `${state.globalSettings.outputFolder}_${variant.fileBase}.csv`,
+                        'text/csv'
+                      )
+                    }
+                    className="px-3 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md text-sm"
+                  >
+                    .csv
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Output Preview */}
       <div className="mb-8">

@@ -37,7 +37,8 @@ export default function Step4Generate() {
             state.constraints,
             state.globalSettings.seed,
             state.rankings,
-            state.globalSettings.personPositionConstraints
+            state.globalSettings.personPositionConstraints,
+            state.globalSettings.proximityGroups || []
           );
       setProgress(60);
       await new Promise((r) => setTimeout(r, 100));

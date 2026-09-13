@@ -43,6 +43,15 @@ export async function downloadAllAsZip(
   folder.file('Public_Startlist.docx', files.publicDocx);
   folder.file('Role_Startlist.docx', files.roleDocx);
 
+  // 役職別スタートリスト（救護・スタート・フィニッシュ × 複数の並び順）
+  const roleFolder = folder.folder('RoleStartlists');
+  if (roleFolder) {
+    for (const variant of files.roleVariants || []) {
+      roleFolder.file(`${variant.fileBase}.tex`, variant.tex);
+      roleFolder.file(`${variant.fileBase}.csv`, variant.csv);
+    }
+  }
+
   // Generate ZIP
   const blob = await zip.generateAsync({ type: 'blob' });
   saveAs(blob, `${settings.outputFolder}.zip`);
@@ -51,13 +60,15 @@ export async function downloadAllAsZip(
 /**
  * Download individual output file
  */
+export type SingleFileKey = Exclude<keyof OutputFiles, 'roleVariants'>;
+
 export function downloadOutputFile(
-  fileType: keyof OutputFiles,
+  fileType: SingleFileKey,
   files: OutputFiles,
   settings: GlobalSettings
 ): void {
   const fileConfig: Record<
-    keyof OutputFiles,
+    SingleFileKey,
     { name: string; mime: string; binary?: boolean }
   > = {
     mulkaCsv: { name: 'Startlist.csv', mime: 'text/csv' },

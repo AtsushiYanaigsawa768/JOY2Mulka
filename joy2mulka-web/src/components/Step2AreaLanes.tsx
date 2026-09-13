@@ -34,6 +34,7 @@ function PersonPositionConstraintEditor() {
 
     const newConstraint: PersonPositionConstraint = {
       id: generateId(),
+      targetType: 'person',
       personName: selectedPerson,
       position: selectedPosition,
     };
